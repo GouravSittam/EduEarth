@@ -1,0 +1,549 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  phone         String?        @unique
+  name          String?
+  avatar        String?
+  dateOfBirth   DateTime?
+  isAdmin       Boolean        @default(false)
+  role          UserRole       @default(USER)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  institutions  Institution[]
+  notifications Notification[]
+  otp           otp?
+  refreshTokens RefreshToken[]
+  student       Student?
+  teacher       Teacher?
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id         String   @id @default(cuid())
+  userId     String
+  token      String   @unique
+  expiresAt  DateTime
+  clientInfo Json?
+  isRevoked  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, token])
+  @@map("refresh_tokens")
+}
+
+model otp {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  otp       String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("otps")
+}
+
+model Institution {
+  id           String          @id @default(cuid())
+  name         String
+  address      String?
+  type         InstitutionType
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  adminId      String
+  classes      Class[]
+  admin        User            @relation(fields: [adminId], references: [id])
+  leaderboards Leaderboard[]
+  students     Student[]
+  teachers     Teacher[]
+
+  @@map("institutions")
+}
+
+model Class {
+  id            String         @id @default(cuid())
+  name          String
+  institutionId String
+  subject       String
+  description   String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  institution   Institution    @relation(fields: [institutionId], references: [id])
+  leaderboards  Leaderboard[]
+  students      StudentClass[]
+  teachers      TeacherClass[]
+
+  @@map("classes")
+}
+
+model Teacher {
+  id            String         @id @default(cuid())
+  userId        String         @unique
+  institutionId String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  classes       TeacherClass[]
+  institution   Institution    @relation(fields: [institutionId], references: [id])
+  user          User           @relation(fields: [userId], references: [id])
+
+  @@map("teachers")
+}
+
+model Student {
+  id                      String                   @id @default(cuid())
+  userId                  String                   @unique
+  institutionId           String
+  ecoPoints               Int                      @default(0)
+  level                   Int                      @default(1)
+  streak                  Int                      @default(0)
+  lastActivityDate        DateTime?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  challengeParticipations ChallengeParticipation[]
+  ecoActivities           EcoActivity[]
+  completedLessons        LessonCompletion[]
+  quizAttempts            QuizAttempt[]
+  achievements            StudentAchievement[]
+  badges                  StudentBadge[]
+  classes                 StudentClass[]
+  institution             Institution              @relation(fields: [institutionId], references: [id])
+  user                    User                     @relation(fields: [userId], references: [id])
+
+  @@map("students")
+}
+
+model StudentClass {
+  id         String   @id @default(cuid())
+  studentId  String
+  classId    String
+  enrolledAt DateTime @default(now())
+  isActive   Boolean  @default(true)
+  class      Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, classId])
+  @@map("student_classes")
+}
+
+model TeacherClass {
+  id         String      @id @default(cuid())
+  teacherId  String
+  classId    String
+  assignedAt DateTime    @default(now())
+  isActive   Boolean     @default(true)
+  role       TeacherRole @default(PRIMARY)
+  class      Class       @relation(fields: [classId], references: [id], onDelete: Cascade)
+  teacher    Teacher     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, classId])
+  @@map("teacher_classes")
+}
+
+model Article {
+  id            String   @id @default(dbgenerated("uuid_generate_v4()"))
+  publishDate   DateTime
+  extractedDate DateTime
+  url           String   @unique
+  headline      String
+  body          String
+  section       String
+  source        String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  image_url     String?
+  ai_summary    String?
+
+  @@index([publishDate], map: "idx_articles_publish_date")
+  @@index([section], map: "idx_articles_section")
+  @@index([url], map: "idx_articles_url")
+  @@map("articles")
+}
+
+model LessonModule {
+  id          String          @id @default(cuid())
+  title       String
+  description String?
+  category    LessonCategory
+  difficulty  DifficultyLevel @default(BEGINNER)
+  order       Int
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  lessons     Lesson[]
+
+  @@map("lesson_modules")
+}
+
+model Lesson {
+  id            String             @id @default(cuid())
+  moduleId      String
+  title         String
+  content       String
+  videoUrl      String?
+  imageUrl      String?
+  estimatedTime Int
+  ecoPoints     Int                @default(10)
+  order         Int
+  isActive      Boolean            @default(true)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  completions   LessonCompletion[]
+  module        LessonModule       @relation(fields: [moduleId], references: [id])
+  quizzes       Quiz[]
+
+  @@map("lessons")
+}
+
+model LessonCompletion {
+  id          String   @id @default(cuid())
+  studentId   String
+  lessonId    String
+  completedAt DateTime @default(now())
+  timeSpent   Int?
+  lesson      Lesson   @relation(fields: [lessonId], references: [id])
+  student     Student  @relation(fields: [studentId], references: [id])
+
+  @@unique([studentId, lessonId])
+  @@map("lesson_completions")
+}
+
+model Quiz {
+  id           String         @id @default(cuid())
+  lessonId     String?
+  title        String
+  description  String?
+  timeLimit    Int?
+  passingScore Int            @default(70)
+  ecoPoints    Int            @default(20)
+  isActive     Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  attempts     QuizAttempt[]
+  questions    QuizQuestion[]
+  lesson       Lesson?        @relation(fields: [lessonId], references: [id])
+
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id            String       @id @default(cuid())
+  quizId        String
+  question      String
+  type          QuestionType @default(MULTIPLE_CHOICE)
+  options       Json?
+  correctAnswer String
+  explanation   String?
+  points        Int          @default(1)
+  order         Int
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  answers       QuizAnswer[]
+  quiz          Quiz         @relation(fields: [quizId], references: [id])
+
+  @@map("quiz_questions")
+}
+
+model QuizAttempt {
+  id          String       @id @default(cuid())
+  studentId   String
+  quizId      String
+  score       Int
+  totalPoints Int
+  isPassed    Boolean
+  timeSpent   Int?
+  completedAt DateTime     @default(now())
+  answers     QuizAnswer[]
+  quiz        Quiz         @relation(fields: [quizId], references: [id])
+  student     Student      @relation(fields: [studentId], references: [id])
+
+  @@map("quiz_attempts")
+}
+
+model QuizAnswer {
+  id           String       @id @default(cuid())
+  attemptId    String
+  questionId   String
+  answer       String
+  isCorrect    Boolean
+  pointsEarned Int          @default(0)
+  attempt      QuizAttempt  @relation(fields: [attemptId], references: [id])
+  question     QuizQuestion @relation(fields: [questionId], references: [id])
+
+  @@unique([attemptId, questionId])
+  @@map("quiz_answers")
+}
+
+model Challenge {
+  id             String                   @id @default(cuid())
+  title          String
+  description    String
+  instructions   String
+  category       ChallengeCategory
+  difficulty     DifficultyLevel          @default(BEGINNER)
+  type           ChallengeType            @default(INDIVIDUAL)
+  ecoPoints      Int                      @default(50)
+  startDate      DateTime
+  endDate        DateTime
+  isActive       Boolean                  @default(true)
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  participations ChallengeParticipation[]
+
+  @@map("challenges")
+}
+
+model ChallengeParticipation {
+  id           String              @id @default(cuid())
+  studentId    String
+  challengeId  String
+  status       ParticipationStatus @default(JOINED)
+  proof        String?
+  feedback     String?
+  pointsEarned Int                 @default(0)
+  completedAt  DateTime?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  challenge    Challenge           @relation(fields: [challengeId], references: [id])
+  student      Student             @relation(fields: [studentId], references: [id])
+
+  @@unique([studentId, challengeId])
+  @@map("challenge_participations")
+}
+
+model EcoActivity {
+  id           String       @id @default(cuid())
+  studentId    String
+  type         ActivityType
+  title        String
+  description  String?
+  location     String?
+  proof        String?
+  ecoPoints    Int          @default(10)
+  verifiedBy   String?
+  isVerified   Boolean      @default(false)
+  activityDate DateTime
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  student      Student      @relation(fields: [studentId], references: [id])
+
+  @@map("eco_activities")
+}
+
+model Badge {
+  id            String         @id @default(cuid())
+  name          String
+  description   String
+  iconUrl       String
+  category      BadgeCategory
+  criteria      Json
+  ecoPoints     Int            @default(0)
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  studentBadges StudentBadge[]
+
+  @@map("badges")
+}
+
+model StudentBadge {
+  id        String   @id @default(cuid())
+  studentId String
+  badgeId   String
+  earnedAt  DateTime @default(now())
+  badge     Badge    @relation(fields: [badgeId], references: [id])
+  student   Student  @relation(fields: [studentId], references: [id])
+
+  @@unique([studentId, badgeId])
+  @@map("student_badges")
+}
+
+model Achievement {
+  id                  String               @id @default(cuid())
+  name                String
+  description         String
+  iconUrl             String?
+  category            AchievementCategory
+  criteria            Json
+  ecoPoints           Int                  @default(25)
+  isActive            Boolean              @default(true)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  studentAchievements StudentAchievement[]
+
+  @@map("achievements")
+}
+
+model StudentAchievement {
+  id            String      @id @default(cuid())
+  studentId     String
+  achievementId String
+  unlockedAt    DateTime    @default(now())
+  progress      Json?
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+  student       Student     @relation(fields: [studentId], references: [id])
+
+  @@unique([studentId, achievementId])
+  @@map("student_achievements")
+}
+
+model Leaderboard {
+  id            String          @id @default(cuid())
+  institutionId String?
+  classId       String?
+  type          LeaderboardType
+  period        String
+  startDate     DateTime
+  endDate       DateTime
+  data          Json
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  class         Class?          @relation(fields: [classId], references: [id])
+  institution   Institution?    @relation(fields: [institutionId], references: [id])
+
+  @@map("leaderboards")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      NotificationType @default(INFO)
+  isRead    Boolean          @default(false)
+  data      Json?
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+enum UserRole {
+  TEACHER
+  PARENT
+  STUDENT
+  USER
+}
+
+enum InstitutionType {
+  SCHOOL
+  COLLEGE
+  UNIVERSITY
+}
+
+enum TeacherRole {
+  PRIMARY
+  ASSISTANT
+  SUBSTITUTE
+}
+
+enum LessonCategory {
+  CLIMATE_CHANGE
+  RENEWABLE_ENERGY
+  WASTE_MANAGEMENT
+  WATER_CONSERVATION
+  BIODIVERSITY
+  SUSTAINABLE_LIVING
+  GREEN_TECHNOLOGY
+  ENVIRONMENTAL_POLICY
+}
+
+enum DifficultyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  FILL_IN_BLANK
+  SHORT_ANSWER
+}
+
+enum ChallengeCategory {
+  TREE_PLANTING
+  WASTE_REDUCTION
+  ENERGY_SAVING
+  WATER_CONSERVATION
+  SUSTAINABLE_TRANSPORT
+  RECYCLING
+  AWARENESS_CAMPAIGN
+  GREEN_INNOVATION
+}
+
+enum ChallengeType {
+  INDIVIDUAL
+  GROUP
+  CLASS
+  SCHOOL
+}
+
+enum ParticipationStatus {
+  JOINED
+  IN_PROGRESS
+  COMPLETED
+  VERIFIED
+  REJECTED
+}
+
+enum ActivityType {
+  TREE_PLANTING
+  WASTE_SEGREGATION
+  RECYCLING
+  ENERGY_CONSERVATION
+  WATER_SAVING
+  COMPOSTING
+  AWARENESS_EVENT
+  GREEN_TRANSPORT
+  PLASTIC_CLEANUP
+  BIRD_WATCHING
+  GARDENING
+  OTHER
+}
+
+enum BadgeCategory {
+  LEARNER
+  CHALLENGER
+  ECO_WARRIOR
+  COMMUNITY_LEADER
+  INNOVATOR
+  SUSTAINABILITY_EXPERT
+}
+
+enum AchievementCategory {
+  LEARNING
+  PARTICIPATION
+  LEADERSHIP
+  CONSISTENCY
+  IMPACT
+  COLLABORATION
+}
+
+enum LeaderboardType {
+  ECO_POINTS
+  CHALLENGES_COMPLETED
+  LESSONS_COMPLETED
+  ACTIVITIES_LOGGED
+  STREAK
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ACHIEVEMENT
+  CHALLENGE
+  REMINDER
+}

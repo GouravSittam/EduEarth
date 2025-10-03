@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "6900:6900"
+    environment:
+      - NODE_ENV=production
+      - PORT=6900
+      # Add your environment variables here or use env_file
+      # DATABASE_URL=your_database_url
+      # JWT_SECRET=your_jwt_secret
+      # AWS_ACCESS_KEY_ID=your_aws_access_key
+      # AWS_SECRET_ACCESS_KEY=your_aws_secret
+      # GOOGLE_CLIENT_ID=your_google_client_id
+      # GOOGLE_CLIENT_SECRET=your_google_client_secret
+    # Uncomment if you want to use an env file
+    # env_file:
+    #   - .env.production
+    volumes:
+      # Mount uploads directory if you need persistent file storage
+      - uploads:/app/uploads
+    depends_on:
+      - db
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:6900/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Uncomment if you want to include a database in your compose
+  # db:
+  #   image: postgres:15-alpine
+  #   environment:
+  #     POSTGRES_DB: genai
+  #     POSTGRES_USER: your_username
+  #     POSTGRES_PASSWORD: your_password
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   restart: unless-stopped
+
+volumes:
+  uploads:
+  # postgres_data:

@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-press-start), system-ui, sans-serif;
+}
+
+/* Custom Scrollbar Styling */
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e293b; /* slate-800 */
+  border-radius: 10px;
+  border: 2px solid #0f172a; /* slate-900 */
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    45deg,
+    #fbbf24,
+    #f59e0b
+  ); /* yellow-400 to amber-500 */
+  border-radius: 10px;
+  border: 2px solid #1e293b; /* slate-800 */
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    45deg,
+    #f59e0b,
+    #d97706
+  ); /* amber-500 to amber-600 */
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+::-webkit-scrollbar-corner {
+  background: #1e293b; /* slate-800 */
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #fbbf24 #1e293b; /* yellow-400 thumb, slate-800 track */
+}
+
+/* Gaming-style glow effect for scrollbar */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #fbbf24, #f59e0b);
+  border-radius: 10px;
+  border: 2px solid #1e293b;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3), 0 0 10px rgba(251, 191, 36, 0.4); /* yellow glow */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #f59e0b, #d97706);
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5), 0 0 15px rgba(251, 191, 36, 0.6); /* stronger yellow glow on hover */
+}
+
+/* Line clamp utilities for text truncation */
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
