@@ -115,11 +115,11 @@ export default function ExploreModule() {
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="flex items-center justify-center pt-12 pb-2 relative"
+          className="flex items-center justify-center pt-8 sm:pt-10 md:pt-12 pb-2 relative px-4"
         >
           <motion.h1
             whileHover={{ scale: 1.05 }}
-            className="bg-yellow-400 px-8 py-3 rounded text-3xl text-black font-bold tracking-widest"
+            className="bg-yellow-400 px-4 py-2 sm:px-6 sm:py-3 md:px-8 rounded text-lg sm:text-xl md:text-2xl lg:text-3xl text-black font-bold tracking-widest text-center"
             style={{ fontFamily: "monospace" }}
           >
             Explore Modules
@@ -132,7 +132,7 @@ export default function ExploreModule() {
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="flex flex-wrap items-center justify-center gap-2 bg-yellow-400 px-8 py-4 rounded-lg mx-auto w-fit mt-8 mb-8 z-2"
+          className="flex flex-wrap items-center justify-center gap-1 sm:gap-2 bg-yellow-400 px-4 sm:px-6 md:px-8 py-3 sm:py-4 rounded-lg mx-auto w-fit mt-6 sm:mt-8 mb-6 sm:mb-8 z-2"
         >
           {categories.map((cat, index) => (
             <motion.button
@@ -149,7 +149,7 @@ export default function ExploreModule() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setActiveCategory(cat)}
-              className={`px-6 py-2 rounded-full font-bold text-lg transition ${
+              className={`px-3 py-1.5 sm:px-4 sm:py-2 md:px-6 rounded-full font-bold text-xs sm:text-sm md:text-base lg:text-lg transition ${
                 activeCategory === cat
                   ? "bg-black text-yellow-400"
                   : "bg-yellow-400 text-black"
@@ -189,7 +189,7 @@ export default function ExploreModule() {
           </motion.button>
 
           {/* Cards Row */}
-          <motion.div className="flex pb-40 flex-row gap-8 px-8 w-full justify-center transition-all duration-700 ease-in-out min-h-[400px]">
+          <motion.div className="flex pb-20 sm:pb-32 md:pb-40 flex-row gap-4 sm:gap-6 md:gap-8 px-4 sm:px-6 md:px-8 w-full justify-center transition-all duration-700 ease-in-out min-h-[300px] sm:min-h-[350px] md:min-h-[400px]">
             <AnimatePresence mode="wait">
               {visibleModules.map((mod, idx) => (
                 <motion.div
@@ -208,24 +208,24 @@ export default function ExploreModule() {
                     scale: 1.03,
                     transition: { duration: 0.3 },
                   }}
-                  className="w-80 min-w-80 text-black rounded-3xl overflow-hidden bg-yellow-400 shadow-lg flex flex-col flex-shrink-0"
+                  className="w-64 sm:w-72 md:w-80 min-w-64 sm:min-w-72 md:min-w-80 text-black rounded-2xl sm:rounded-3xl overflow-hidden bg-yellow-400 shadow-lg flex flex-col flex-shrink-0"
                 >
                   <motion.img
                     whileHover={{ scale: 1.1 }}
                     transition={{ duration: 0.4 }}
                     src={mod.image}
                     alt={mod.title}
-                    className="w-full h-40 object-cover"
+                    className="w-full h-32 sm:h-36 md:h-40 object-cover"
                   />
                   <div
-                    className="p-6 flex flex-col justify-between h-full"
+                    className="p-4 sm:p-5 md:p-6 flex flex-col justify-between h-full"
                     style={{ fontFamily: "monospace" }}
                   >
                     <motion.h2
                       initial={{ y: 20, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ duration: 0.4, delay: 0.2 + idx * 0.1 }}
-                      className="text-xl font-bold mb-2 tracking-widest"
+                      className="text-base sm:text-lg md:text-xl font-bold mb-1 sm:mb-2 tracking-widest"
                       style={{ fontFamily: "poppines" }}
                     >
                       {mod.title}
@@ -234,7 +234,7 @@ export default function ExploreModule() {
                       initial={{ y: 20, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ duration: 0.4, delay: 0.3 + idx * 0.1 }}
-                      className="mb-4 text-black text-base"
+                      className="mb-3 sm:mb-4 text-black text-sm sm:text-base"
                     >
                       {mod.description}
                     </motion.p>
@@ -242,7 +242,7 @@ export default function ExploreModule() {
                       initial={{ y: 20, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ duration: 0.4, delay: 0.4 + idx * 0.1 }}
-                      className="mb-4 text-xs text-black space-y-1"
+                      className="mb-3 sm:mb-4 text-xs text-black space-y-1"
                     >
                       <div>🕒 Duration - {mod.duration}</div>
                       <div>📚 Chapters - {mod.chapters}</div>
@@ -257,7 +257,7 @@ export default function ExploreModule() {
                         backgroundColor: "#1a1a1a",
                       }}
                       whileTap={{ scale: 0.95 }}
-                      className="bg-black text-yellow-400 px-5 py-2 rounded-full font-bold text-base flex items-center gap-2 w-fit"
+                      className="bg-black text-yellow-400 px-3 py-1.5 sm:px-4 sm:py-2 md:px-5 rounded-full font-bold text-xs sm:text-sm md:text-base flex items-center gap-1 sm:gap-2 w-fit"
                       style={{ fontFamily: "monospace" }}
                     >
                       Start Module

@@ -42,7 +42,7 @@ export default function Hero() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 1 }}
-      className="relative flex h-screen w-full flex-col items-center justify-center bg-cover bg-center px-4 text-center md:px-6"
+      className="relative flex min-h-screen w-full flex-col items-center justify-center bg-cover bg-center px-4 py-20 sm:py-24 md:py-32 text-center sm:px-6"
       style={{
         fontFamily: '"Press Start 2P", system-ui, sans-serif',
         backgroundImage: "url('/herobackground.jpg')",
@@ -53,7 +53,7 @@ export default function Hero() {
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.3 }}
-        className="relative z-10"
+        className="relative z-10 w-full max-w-6xl"
       >
         {/* Heading box */}
         <motion.div
@@ -66,14 +66,14 @@ export default function Hero() {
             stiffness: 100,
           }}
           whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
-          className="mb-10 inline-flex max-w-[950px] items-center justify-center rounded-4xl border border-black bg-yellow-300 px-2 py-2 shadow-[0_6px_0_#000] md:px-4 md:py-6"
+          className="mb-6 sm:mb-8 md:mb-10 inline-flex max-w-[95%] sm:max-w-[90%] md:max-w-[950px] items-center justify-center rounded-2xl sm:rounded-3xl md:rounded-4xl border border-black bg-yellow-300 px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-6 shadow-[0_4px_0_#000] sm:shadow-[0_6px_0_#000]"
           style={{ fontFamily: '"Press Start 2P", system-ui, sans-serif' }}
         >
           <motion.h1
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="text-base leading-snug text-black md:text-xl lg:text-3xl"
+            className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl leading-tight sm:leading-snug text-black text-center"
           >
             Learn. Play. Save the Planet.
           </motion.h1>
@@ -84,13 +84,14 @@ export default function Hero() {
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.9 }}
-          className="mx-auto mb-10 max-w-2xl text-xs leading-relaxed text-white/95 md:text-sm lg:mb-20"
+          className="mx-auto mb-8 sm:mb-10 md:mb-12 lg:mb-20 max-w-xs sm:max-w-lg md:max-w-2xl text-xs sm:text-sm md:text-base leading-relaxed text-white/95"
         >
           A Gamified platform that turns environmental education into fun
           challenges
         </motion.p>
 
-        <div className="flex flex-row items-center justify-center gap-6">
+        {/* Buttons Container */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full">
           <motion.button
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -106,18 +107,19 @@ export default function Hero() {
               transition: { duration: 0.1 },
             }}
             onClick={() => router.push("/games")}
-            className="inline-flex items-center gap-4 rounded-full border-4 border-black bg-yellow-300 px-8 py-4 text-black shadow-[0_6px_0_#000] transition-transform hover:-translate-y-0.5 active:translate-y-0"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 sm:gap-4 rounded-full border-2 sm:border-4 border-black bg-yellow-300 px-4 py-3 sm:px-6 sm:py-4 md:px-8 md:py-4 text-black shadow-[0_4px_0_#000] sm:shadow-[0_6px_0_#000] transition-transform hover:-translate-y-0.5 active:translate-y-0"
             style={{ fontFamily: '"Press Start 2P", system-ui, sans-serif' }}
           >
-            <span className="text-sm md:text-base">Play Games</span>
+            <span className="text-xs sm:text-sm md:text-base">Play Games</span>
             <motion.span
               animate={{ x: [0, 5, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="inline-flex h-7 w-7 items-center justify-center rounded-full"
+              className="inline-flex h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 items-center justify-center rounded-full"
             >
-              <BsController className="size-30" />
+              <BsController className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
             </motion.span>
           </motion.button>
+          
           {/* Dashboard Button (Role-Based) */}
           <motion.button
             initial={{ y: 30, opacity: 0 }}
@@ -134,10 +136,10 @@ export default function Hero() {
               transition: { duration: 0.1 },
             }}
             onClick={handleDashboardRedirect}
-            className="inline-flex items-center gap-4 rounded-full border-4 border-black bg-yellow-300 px-8 py-4 text-black shadow-[0_6px_0_#000] transition-transform hover:-translate-y-0.5 active:translate-y-0"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 sm:gap-4 rounded-full border-2 sm:border-4 border-black bg-yellow-300 px-4 py-3 sm:px-6 sm:py-4 md:px-8 md:py-4 text-black shadow-[0_4px_0_#000] sm:shadow-[0_6px_0_#000] transition-transform hover:-translate-y-0.5 active:translate-y-0"
             style={{ fontFamily: '"Press Start 2P", system-ui, sans-serif' }}
           >
-            <span className="text-sm md:text-base">
+            <span className="text-xs sm:text-sm md:text-base text-center">
               {user?.role === "teacher"
                 ? "Teacher Dashboard"
                 : user?.role === "student"
@@ -147,9 +149,9 @@ export default function Hero() {
             <motion.span
               animate={{ x: [0, 5, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="inline-flex h-7 w-7 items-center justify-center rounded-full"
+              className="inline-flex h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 items-center justify-center rounded-full"
             >
-              <Users2Icon className="size-30" />
+              <Users2Icon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
             </motion.span>
           </motion.button>
         </div>

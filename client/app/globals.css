@@ -23,6 +23,59 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-press-start), system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Responsive utilities */
+.container-responsive {
+  @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.text-responsive {
+  @apply text-sm sm:text-base md:text-lg lg:text-xl;
+}
+
+.heading-responsive {
+  @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl;
+}
+
+.button-responsive {
+  @apply px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-3 text-sm sm:text-base;
+}
+
+.card-responsive {
+  @apply w-full sm:w-auto min-w-0 sm:min-w-[280px] md:min-w-[320px];
+}
+
+/* Mobile-first responsive breakpoints */
+@media (max-width: 640px) {
+  .mobile-hidden {
+    display: none !important;
+  }
+  
+  .mobile-full {
+    width: 100% !important;
+  }
+  
+  .mobile-stack {
+    flex-direction: column !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .tablet-hidden {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .desktop-only {
+    display: block !important;
+  }
+  
+  .mobile-only {
+    display: none !important;
+  }
 }
 
 /* Custom Scrollbar Styling */

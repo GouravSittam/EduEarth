@@ -2,15 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Search, Bell, MessageCircle, User, Home, Grid, FileText, Flag, Trophy, Settings, Award, Star, Shield, Calendar, Play } from "lucide-react";
+import { Search, Bell, MessageCircle, User, Home, Grid, FileText, Flag, Trophy, Settings, Award, Star, Shield, Calendar, Play, Menu } from "lucide-react";
 import React, { useState } from "react";
 
 export default function DashboardPage() {
-  type Tab = 'Overview' | 'Modules' | 'Assignments' | 'Missions' | 'LeaderBoard' | 'Messages' | 'Certificates' | 'Settings';
+  type Tab = 'Overview' | 'Modules' | 'Assignments' | 'Missions' | 'LeaderBoard' | 'Messages' | 'Certificates' | 'Settings' | 'mobile-menu';
   const [activeTab, setActiveTab] = useState<Tab>('Overview');
 
   return (
-    <div className="min-h-screen flex relative text-gray-800" >
+    <div className="min-h-screen flex flex-col lg:flex-row relative text-gray-800" >
       <div
   className="absolute inset-0 bg-cover bg-center z-0"
   style={{
@@ -23,9 +23,18 @@ export default function DashboardPage() {
 {/* Dark Overlay for Readability */}
 <div className="absolute inset-0 bg-black/60 z-10"></div>
 
+      {/* Mobile Menu Button */}
+      <button 
+        className="lg:hidden fixed top-4 left-4 z-30 bg-green-900/90 text-white p-2 rounded-md"
+        onClick={() => setActiveTab(activeTab === 'mobile-menu' ? 'Overview' : 'mobile-menu')}
+      >
+        <Menu size={24} />
+      </button>
 
       {/* Sidebar */}
-      <aside className="w-72 bg-green-900/80 text-white px-4 py-6 flex-shrink-0 relative z-20">
+      <aside className={`w-full lg:w-72 bg-green-900/80 text-white px-4 py-6 flex-shrink-0 relative z-20 transition-transform duration-300 ${
+        activeTab === 'mobile-menu' ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
+      }`}>
         <div className="text-l font-semibold mb-6">Menu</div>
         <nav className="space-y-2">
           <NavItem icon={<Home size={18} />} label="Overview" activeTab={activeTab} onClick={() => setActiveTab('Overview')} />
@@ -39,53 +48,53 @@ export default function DashboardPage() {
       {/* Main Column */}
       <div className="flex-1 flex flex-col relative z-20">
         {/* Header */}
-        <header className="w-full bg-gradient-to-r from-blue-600/80 to-blue-400/80 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-green-400 flex items-center justify-center shadow">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <header className="w-full bg-gradient-to-r from-blue-600/80 to-blue-400/80 px-3 py-3 sm:px-4 sm:py-4 md:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-green-400 flex items-center justify-center shadow">
+              <svg width="16" height="16" className="sm:w-[18px] sm:h-[18px]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 2L15 8H9L12 2Z" fill="white" />
                 <path d="M12 22C16.4183 22 20 18.4183 20 14C20 9.58172 16.4183 6 12 6C7.58172 6 4 9.58172 4 14C4 18.4183 7.58172 22 12 22Z" fill="white" opacity="0.12" />
               </svg>
             </div>
-            <div className="text-white font-bold text-lg">ECO Play</div>
+            <div className="text-white font-bold text-sm sm:text-lg">ECO Play</div>
           </div>
 
-          <div className="flex-1 mx-6">
-            <h1 className="text-white text-2xl font-bold text-center">Dashboard</h1>
+          <div className="flex-1 mx-2 sm:mx-4 md:mx-6">
+            <h1 className="text-white text-lg sm:text-xl md:text-2xl font-bold text-center">Dashboard</h1>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="relative w-[420px] max-w-xs">
-              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400"><Search size={16} /></div>
-              <input placeholder="Search Across Modules, Assignments, Missions, etc..." className="w-full pl-10 pr-4 py-2 rounded-full bg-white/90 placeholder-gray-500 focus:outline-none" />
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+            <div className="relative w-full sm:w-64 md:w-80 lg:w-[420px] max-w-xs">
+              <div className="absolute inset-y-0 left-2 sm:left-3 flex items-center pointer-events-none text-gray-400"><Search size={14} className="sm:w-4 sm:h-4" /></div>
+              <input placeholder="Search..." className="w-full pl-8 sm:pl-10 pr-3 sm:pr-4 py-1.5 sm:py-2 rounded-full bg-white/90 placeholder-gray-500 focus:outline-none text-xs sm:text-sm" />
             </div>
 
-            <button className="relative bg-transparent p-2 rounded-full text-white hover:opacity-90">
-              <Bell size={18} />
+            <button className="relative bg-transparent p-1.5 sm:p-2 rounded-full text-white hover:opacity-90">
+              <Bell size={16} className="sm:w-[18px] sm:h-[18px]" />
               <span className="absolute -top-1 -right-1 bg-yellow-400 text-xs text-black rounded-full px-1">3</span>
             </button>
 
-            <button className="bg-transparent p-2 rounded-full text-white">
-              <MessageCircle size={18} />
+            <button className="bg-transparent p-1.5 sm:p-2 rounded-full text-white">
+              <MessageCircle size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
 
-            <div className="w-9 h-9 rounded-full overflow-hidden">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full overflow-hidden">
               <Image src="/avatar.png" alt="avatar" width={36} height={36} className="object-cover" />
             </div>
           </div>
         </header>
 
         {/* Content area */}
-        <div className="flex-1 p-6 ">
-          <div className="max-w-7xl mx-auto grid grid-cols-12 gap-6">
+        <div className="flex-1 p-3 sm:p-4 md:p-6">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
             {/* Conditional layout: Overview (main + stats) or Modules (full-width main) */}
             {activeTab === 'Overview' ? (
               <>
-                <main className="col-span-8">
+                <main className="lg:col-span-8">
                   <OverviewContent />
                 </main>
 
-                <aside className="col-span-4 space-y-4 sticky top-6">
+                <aside className="lg:col-span-4 space-y-3 sm:space-y-4 sticky top-6">
                   {/* Student Profile Card */}
                   <div className="bg-gradient-to-br from-orange-500 to-red-400 rounded-xl p-4 text-white shadow">
                     <div className="flex items-center gap-3">
@@ -146,16 +155,16 @@ export default function DashboardPage() {
                 </aside>
               </>
             ) : activeTab === 'Modules' ? (
-              <main className="col-span-12">
+              <main className="lg:col-span-12">
                 <ModulesContent />
               </main>
             ) : activeTab === 'Assignments' ? (
               <>
-                <main className="col-span-8">
+                <main className="lg:col-span-8">
                   <AssignmentsContent />
                 </main>
 
-                <aside className="col-span-4 space-y-4 sticky top-6">
+                <aside className="lg:col-span-4 space-y-3 sm:space-y-4 sticky top-6">
                   {/* reuse right-hand stats panel from Overview */}
                   <div className="bg-gradient-to-br from-orange-500 to-red-400 rounded-xl p-4 text-white shadow">
                     <div className="flex items-center gap-3">
@@ -214,11 +223,11 @@ export default function DashboardPage() {
               </>
             ) : activeTab === 'Missions' ? (
               <>
-                <main className="col-span-8">
+                <main className="lg:col-span-8">
                   <MissionsContent />
                 </main>
 
-                <aside className="col-span-4 space-y-4 sticky top-6">
+                <aside className="lg:col-span-4 space-y-3 sm:space-y-4 sticky top-6">
                   {/* right-hand stats reused */}
                   <div className="bg-gradient-to-br from-orange-500 to-red-400 rounded-xl p-4 text-white shadow">
                     <div className="flex items-center gap-3">
@@ -234,22 +243,22 @@ export default function DashboardPage() {
                 </aside>
               </>
             ) : activeTab === 'LeaderBoard' ? (
-              <main className="col-span-12">
+              <main className="lg:col-span-12">
                 <LeaderboardContent />
               </main>
             ) : activeTab === 'Messages' ? (
-              <main className="col-span-12">
+              <main className="lg:col-span-12">
                 <MessagesContent />
               </main>
             ) : (
               // default fallback: overview with small notice
               <>
-                <main className="col-span-8">
+                <main className="lg:col-span-8">
                   <OverviewContent />
                   <div className="mt-6 text-sm text-gray-500">This section is coming soon for &quot;{activeTab}&quot;.</div>
                 </main>
 
-                <aside className="col-span-4 space-y-4 sticky top-6">
+                <aside className="lg:col-span-4 space-y-3 sm:space-y-4 sticky top-6">
                   {/* reuse right-hand stats panel from Overview */}
                   <div className="bg-gradient-to-br from-orange-500 to-red-400 rounded-xl p-4 text-white shadow">
                     <div className="flex items-center gap-3">
@@ -335,11 +344,11 @@ function OverviewContent() {
   return (
     <>
       {/* Continue Learning */}
-      <section className="mb-6">
-        <h2 className="text-2xl font-bold text-white">Continue Learning</h2>
-        <p className="text-l text-gray-600 mb-4 text-white" style={{fontFamily : "poppine"}}>Pick up where you left off</p>
+      <section className="mb-4 sm:mb-6">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white">Continue Learning</h2>
+        <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4 text-white" style={{fontFamily : "poppine"}}>Pick up where you left off</p>
 
-        <div className="flex gap-4 overflow-x-auto pb-2 text-l" style={{fontFamily : "poppine"}}>
+        <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 text-sm sm:text-base" style={{fontFamily : "poppine"}}>
           <LearningCard image="/forest.png" title="Solar System Adventure" progress={40} lessons={[1,2,3,4,5]} timeLeft="0:50 mins left" />
           <LearningCard title="Ocean Ecology" progress={65} lessons={[1,2,3,4]} timeLeft="1:10 hrs left" />
         </div>
@@ -347,10 +356,10 @@ function OverviewContent() {
 
       {/* Recommended Modules */}
       <section>
-        <h2 className="text-2xl font-bold text-gray-900 text-white">Recommended Modules</h2>
-        <div className="text-l text-gray-600 mb-4 text-white"  style={{fontFamily : "poppine"}}>Modules picked for you</div>
+        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 text-white">Recommended Modules</h2>
+        <div className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4 text-white"  style={{fontFamily : "poppine"}}>Modules picked for you</div>
 
-        <div className="flex gap-4 overflow-x-auto pb-2" style={{fontFamily : "poppine"}}>
+        <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2" style={{fontFamily : "poppine"}}>
           <RecommendedCard image="/forest.png" title="Forest and Rain" author="Dr. Ayesha" duration="2h 30m (10 Levels)" reward="+500 XP" rating={4.8} players={320} />
           <RecommendedCard image="/study.jpg" title="Wetlands Wonders" author="Dr. Kumar" duration="1h 20m (6 Levels)" reward="+250 XP" rating={4.6} players={120} />
         </div>
@@ -390,22 +399,22 @@ function ModulesContent() {
 
 function LearningCard({ image, title, progress, lessons, timeLeft }: { image?: string; title: string; progress: number; lessons: number[]; timeLeft: string }) {
   return (
-    <div className="min-w-[320px] bg-purple-600 text-white rounded-xl p-0 flex flex-col shadow-lg overflow-hidden">
+    <div className="min-w-[280px] sm:min-w-[300px] md:min-w-[320px] bg-purple-600 text-white rounded-lg sm:rounded-xl p-0 flex flex-col shadow-lg overflow-hidden">
       {image && (
-        <div className="relative h-28 w-full">
+        <div className="relative h-20 sm:h-24 md:h-28 w-full">
           <Image src={image} alt={title} fill className="object-cover" />
         </div>
       )}
-      <div className="p-4 flex flex-col">
-        <div className="font-semibold text-lg mb-2">{title}</div>
-        <div className="text-xs mb-3">{lessons.length}/5 lessons</div>
-        <div className="w-full bg-white/30 rounded-full h-3 overflow-hidden mb-2">
+      <div className="p-3 sm:p-4 flex flex-col">
+        <div className="font-semibold text-sm sm:text-base md:text-lg mb-1 sm:mb-2">{title}</div>
+        <div className="text-xs mb-2 sm:mb-3">{lessons.length}/5 lessons</div>
+        <div className="w-full bg-white/30 rounded-full h-2 sm:h-3 overflow-hidden mb-1 sm:mb-2">
           <div className="h-full bg-white" style={{ width: `${progress}%` }} />
         </div>
-        <div className="text-xs opacity-90 mb-4">{timeLeft} • Keep going to Unlock Solar Badge</div>
+        <div className="text-xs opacity-90 mb-3 sm:mb-4">{timeLeft} • Keep going to Unlock Solar Badge</div>
         <div className="mt-auto">
-          <button className="w-full py-2 rounded-md bg-yellow-400 text-black font-semibold flex items-center justify-center gap-2">
-            <Play size={14} /> Continue Module
+          <button className="w-full py-1.5 sm:py-2 rounded-md bg-yellow-400 text-black font-semibold flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm">
+            <Play size={12} className="sm:w-3.5 sm:h-3.5" /> Continue Module
           </button>
         </div>
       </div>
@@ -416,25 +425,25 @@ function LearningCard({ image, title, progress, lessons, timeLeft }: { image?: s
 function RecommendedCard({ image, title, author, duration, reward, rating, players }: { image?: string; title: string; author: string; duration: string; reward: string; rating: number; players: number }) {
   const imgSrc = image ?? '/images/foliage.jpg';
   return (
-    <div className="min-w-[380px] bg-white rounded-xl shadow p-0 overflow-hidden">
-      <div className="relative h-44">
+    <div className="min-w-[300px] sm:min-w-[350px] md:min-w-[380px] bg-white rounded-lg sm:rounded-xl shadow p-0 overflow-hidden">
+      <div className="relative h-32 sm:h-36 md:h-44">
         <Image src={imgSrc} alt={title} fill className="object-cover" />
-        <div className="absolute top-3 left-3 bg-black/60 text-white text-xs px-2 py-1 rounded">7:09</div>
-        <div className="absolute top-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded">30:00</div>
+        <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-black/60 text-white text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">7:09</div>
+        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-black/60 text-white text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">30:00</div>
       </div>
-      <div className="p-4">
-        <div className="font-semibold text-lg">{title}</div>
-        <div className="text-sm text-gray-500">By - {author}</div>
-        <div className="text-sm text-gray-600 mt-2">Duration: {duration}</div>
-        <div className="text-sm text-gray-600">Reward: {reward}</div>
+      <div className="p-3 sm:p-4">
+        <div className="font-semibold text-sm sm:text-base md:text-lg">{title}</div>
+        <div className="text-xs sm:text-sm text-gray-500">By - {author}</div>
+        <div className="text-xs sm:text-sm text-gray-600 mt-1 sm:mt-2">Duration: {duration}</div>
+        <div className="text-xs sm:text-sm text-gray-600">Reward: {reward}</div>
 
-        <div className="flex items-center justify-between mt-3">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1 text-yellow-400 font-semibold">★ Unlock Forest Explorer</div>
-            <div className="text-sm text-gray-500">{rating} ({players} players)</div>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-2 sm:mt-3 gap-2 sm:gap-0">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-3">
+            <div className="flex items-center gap-1 text-yellow-400 font-semibold text-xs sm:text-sm">★ Unlock Forest Explorer</div>
+            <div className="text-xs sm:text-sm text-gray-500">{rating} ({players} players)</div>
           </div>
            <Link href="/course-detail" >
-              <button className="bg-yellow-400 text-black px-4 py-2 rounded-md font-semibold">
+              <button className="bg-yellow-400 text-black px-3 py-1.5 sm:px-4 sm:py-2 rounded-md font-semibold text-xs sm:text-sm">
                 Start Now
               </button>
           </Link>      

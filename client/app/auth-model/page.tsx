@@ -58,7 +58,7 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-green-50 p-4"
+    <div className="min-h-screen flex items-center justify-center bg-green-50 p-3 sm:p-4"
      style={{
         fontFamily: '"Press Start 2P", system-ui, sans-serif',
         backgroundImage: "url('/herobackground.jpg')",
@@ -69,12 +69,12 @@ export default function AuthPage() {
 
       <div className="absolute inset-0 bg-black/50"></div>
 
-      <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 z-1">
+      <div className="bg-white rounded-lg sm:rounded-xl shadow-lg w-full max-w-sm sm:max-w-md p-4 sm:p-6 z-1">
         {/* Tab Switcher */}
-        <div className="flex mb-6 border-b">
+        <div className="flex mb-4 sm:mb-6 border-b">
           <button
             onClick={() => setActiveTab("signin")}
-            className={`flex-1 py-2 font-semibold ${
+            className={`flex-1 py-2 font-semibold text-sm sm:text-base ${
               activeTab === "signin"
                 ? "border-b-2 border-yellow-500 text-yellow-500"
                 : "text-gray-500"
@@ -84,7 +84,7 @@ export default function AuthPage() {
           </button>
           <button
             onClick={() => setActiveTab("signup")}
-            className={`flex-1 py-2 font-semibold ${
+            className={`flex-1 py-2 font-semibold text-sm sm:text-base ${
               activeTab === "signup"
                 ? "border-b-2 border-yellow-500 text-yellow-500"
                 : "text-gray-500"
@@ -96,7 +96,7 @@ export default function AuthPage() {
 
         {/* Sign In Form */}
         {activeTab === "signin" && (
-          <form onSubmit={handleSignIn} className="flex flex-col gap-4">
+          <form onSubmit={handleSignIn} className="flex flex-col gap-3 sm:gap-4">
             <input
               type="email"
               placeholder="Email"
@@ -104,7 +104,7 @@ export default function AuthPage() {
               onChange={(e) =>
                 setSignInData({ ...signInData, email: e.target.value })
               }
-              className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="px-3 py-2 sm:px-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base"
             />
             <input
               type="password"
@@ -113,11 +113,11 @@ export default function AuthPage() {
               onChange={(e) =>
                 setSignInData({ ...signInData, password: e.target.value })
               }
-              className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="px-3 py-2 sm:px-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base"
             />
             <button
               type="submit"
-              className="bg-yellow-400 text-black px-4 py-2 rounded-md font-semibold hover:bg-yellow-500 transition"
+              className="bg-yellow-400 text-black px-3 py-2 sm:px-4 rounded-md font-semibold hover:bg-yellow-500 transition text-sm sm:text-base"
             >
               Sign In
             </button>
@@ -126,7 +126,7 @@ export default function AuthPage() {
 
         {/* Sign Up Form */}
         {activeTab === "signup" && (
-          <form onSubmit={handleSignUp} className="flex flex-col gap-4">
+          <form onSubmit={handleSignUp} className="flex flex-col gap-3 sm:gap-4">
             <input
               type="text"
               placeholder="Full Name"
@@ -134,7 +134,7 @@ export default function AuthPage() {
               onChange={(e) =>
                 setSignUpData({ ...signUpData, fullName: e.target.value })
               }
-              className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="px-3 py-2 sm:px-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base"
             />
             <input
               type="email"
@@ -143,7 +143,7 @@ export default function AuthPage() {
               onChange={(e) =>
                 setSignUpData({ ...signUpData, email: e.target.value })
               }
-              className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="px-3 py-2 sm:px-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base"
             />
             <input
               type="password"
@@ -152,10 +152,10 @@ export default function AuthPage() {
               onChange={(e) =>
                 setSignUpData({ ...signUpData, password: e.target.value })
               }
-              className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="px-3 py-2 sm:px-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base"
             />
             <div className="flex flex-col">
-              <label htmlFor="role" className="text-gray-700 mb-1">
+              <label htmlFor="role" className="text-gray-700 mb-1 text-sm sm:text-base">
                 I am a:
               </label>
               <select
@@ -164,7 +164,7 @@ export default function AuthPage() {
                 onChange={(e) =>
                   setSignUpData({ ...signUpData, role: e.target.value })
                 }
-                className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
+                className="px-3 py-2 sm:px-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base"
               >
                 <option value="student">Student</option>
                 <option value="teacher">Teacher</option>
@@ -172,7 +172,7 @@ export default function AuthPage() {
             </div>
             <button
               type="submit"
-              className="bg-yellow-400 text-black px-4 py-2 rounded-md font-semibold hover:bg-yellow-500 transition"
+              className="bg-yellow-400 text-black px-3 py-2 sm:px-4 rounded-md font-semibold hover:bg-yellow-500 transition text-sm sm:text-base"
             >
               Sign Up
             </button>

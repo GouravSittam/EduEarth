@@ -100,8 +100,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${pressStart.variable} antialiased min-h-dvh h-full`}>
-        {children}
+      <body className={`${pressStart.variable} antialiased min-h-dvh h-full overflow-x-hidden`}>
+        <div className="min-h-screen w-full">
+          {children}
+        </div>
       </body>
     </html>
   );
