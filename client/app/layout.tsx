@@ -12,11 +12,11 @@ const pressStart = Press_Start_2P({
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: {
-      default: "ECO Play - Gamified Environmental Education",
-      template: "%s | ECO Play",
+      default: "EduEarth - Gamified Environmental Education",
+      template: "%s | EduEarth",
     },
     description:
-      "Join the environmental revolution through interactive games! Learn about sustainability, climate action, and eco-friendly practices while having fun with ECO Play's engaging educational platform.",
+      "Join the environmental revolution through interactive games! Learn about sustainability, climate action, and eco-friendly practices while having fun with EduEarth's engaging educational platform.",
     keywords: [
       "environmental education",
       "sustainability games",
@@ -27,9 +27,9 @@ export async function generateMetadata(): Promise<Metadata> {
       "interactive learning",
       "educational games",
     ],
-    authors: [{ name: "ECO Play Team" }],
-    creator: "ECO Play",
-    publisher: "ECO Play",
+    authors: [{ name: "EduEarth Team" }],
+    creator: "EduEarth",
+    publisher: "EduEarth",
     robots: {
       index: true,
       follow: true,
@@ -43,38 +43,38 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     icons: {
       icon: [
-        { url: "/eco-play-logo.png", sizes: "32x32", type: "image/png" },
-        { url: "/eco-play-logo.png", sizes: "16x16", type: "image/png" },
+        { url: "/eduearth-logo.png", sizes: "32x32", type: "image/png" },
+        { url: "/eduearth-logo.png", sizes: "16x16", type: "image/png" },
       ],
       apple: [
-        { url: "/eco-play-logo.png", sizes: "180x180", type: "image/png" },
+        { url: "/eduearth-logo.png", sizes: "180x180", type: "image/png" },
       ],
     },
     manifest: "/site.webmanifest",
     openGraph: {
       type: "website",
       locale: "en_US",
-      url: "https://eco-play-sih.vercel.app",
-      title: "ECO Play - Gamified Environmental Education",
+      url: "https://eduearth-sih.vercel.app",
+      title: "EduEarth - Gamified Environmental Education",
       description:
         "Join the environmental revolution through interactive games! Learn about sustainability, climate action, and eco-friendly practices.",
-      siteName: "ECO Play",
+      siteName: "EduEarth",
       images: [
         {
-          url: "/eco-play-og-image.png",
+          url: "/eduearth-og-image.png",
           width: 1200,
           height: 630,
-          alt: "ECO Play - Environmental Education Games",
+          alt: "EduEarth - Environmental Education Games",
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: "ECO Play - Gamified Environmental Education",
+      title: "EduEarth - Gamified Environmental Education",
       description:
         "Learn about sustainability through interactive games and join the environmental revolution!",
-      images: ["/eco-play-twitter-image.png"],
-      creator: "@ecoplay",
+      images: ["/eduearth-twitter-image.png"],
+      creator: "@eduearth",
     },
     viewport: {
       width: "device-width",
@@ -88,7 +88,7 @@ export async function generateMetadata(): Promise<Metadata> {
     category: "education",
     classification: "Educational Games",
     alternates: {
-      canonical: "https://eco-play-sih.vercel.app",
+      canonical: "https://eduearth-sih.vercel.app",
     },
   };
 }
@@ -100,10 +100,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${pressStart.variable} antialiased min-h-dvh h-full overflow-x-hidden`}>
-        <div className="min-h-screen w-full">
-          {children}
-        </div>
+      <body
+        className={`${pressStart.variable} antialiased min-h-dvh h-full overflow-x-hidden`}
+      >
+        <div className="min-h-screen w-full">{children}</div>
       </body>
     </html>
   );
