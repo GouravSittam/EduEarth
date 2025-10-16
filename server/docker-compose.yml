@@ -6,10 +6,10 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "6900:6900"
+      - "6969:6969"
     environment:
       - NODE_ENV=production
-      - PORT=6900
+      - PORT=6969
       # Add your environment variables here or use env_file
       # DATABASE_URL=your_database_url
       # JWT_SECRET=your_jwt_secret
@@ -32,7 +32,7 @@ services:
           "CMD",
           "node",
           "-e",
-          "require('http').get('http://localhost:6900/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })",
+          "require('http').get('http://localhost:6969/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })",
         ]
       interval: 30s
       timeout: 10s

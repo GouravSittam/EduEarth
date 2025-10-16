@@ -1,6 +1,6 @@
 # Institution API Endpoints
 
-Base URL: `http://localhost:6900`
+Base URL: `http://localhost:6969`
 
 ## 🏫 Institution Management API
 
@@ -235,4 +235,4 @@ You can test these endpoints using:
 - **curl** commands
 - **Frontend applications**
 
-The server is running at: `http://localhost:6900` 🚀
+The server is running at: `http://localhost:6969` 🚀

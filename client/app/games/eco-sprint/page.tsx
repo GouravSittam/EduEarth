@@ -29,7 +29,7 @@ type AnswerResult = {
 };
 
 const SOCKET_URL =
-  process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:6900";
+  process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:6969";
 
 export default function GamePage() {
   const [stage, setStage] = useState<
