@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import ElectricBorder from "./ElectricBorder";
 
 export default function WhyThisPlatform() {
   const cardVariants = {
@@ -68,15 +69,16 @@ export default function WhyThisPlatform() {
         className="flex flex-col sm:flex-col md:flex-row gap-4 sm:gap-6 md:gap-8 w-full max-w-6xl justify-center px-4"
       >
         {/* Card 1 */}
-        <motion.div
-          variants={cardVariants}
-          whileHover={{
-            y: -10,
-            scale: 1.05,
-            transition: { duration: 0.3 },
-          }}
-          className="flex flex-col bg-yellow-400 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 w-full md:w-1/3 h-80 sm:h-96"
-        >
+        <ElectricBorder color="#FFD400" speed={1.2} chaos={1.1} thickness={2} className="rounded-xl sm:rounded-2xl w-full md:w-1/3">
+          <motion.div
+            variants={cardVariants}
+            whileHover={{
+              y: -10,
+              scale: 1.05,
+              transition: { duration: 0.3 },
+            }}
+            className="flex flex-col bg-yellow-400 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 h-80 sm:h-96"
+          >
           <motion.div
             initial={{ scale: 0 }}
             whileInView={{ scale: 1 }}
@@ -128,18 +130,20 @@ export default function WhyThisPlatform() {
               </motion.span>
             ))}
           </motion.div>
-        </motion.div>
+          </motion.div>
+        </ElectricBorder>
 
         {/* Card 2 */}
-        <motion.div
-          variants={cardVariants}
-          whileHover={{
-            y: -10,
-            scale: 1.05,
-            transition: { duration: 0.3 },
-          }}
-          className="flex flex-col bg-yellow-400 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 w-full md:w-1/3 h-80 sm:h-96"
-        >
+        <ElectricBorder color="#FFD400" speed={1.2} chaos={1.1} thickness={2} className="rounded-xl sm:rounded-2xl w-full md:w-1/3">
+          <motion.div
+            variants={cardVariants}
+            whileHover={{
+              y: -10,
+              scale: 1.05,
+              transition: { duration: 0.3 },
+            }}
+            className="flex flex-col bg-yellow-400 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 h-80 sm:h-96"
+          >
           <motion.div
             initial={{ scale: 0 }}
             whileInView={{ scale: 1 }}
@@ -189,18 +193,20 @@ export default function WhyThisPlatform() {
               </motion.span>
             ))}
           </motion.div>
-        </motion.div>
+          </motion.div>
+        </ElectricBorder>
 
         {/* Card 3 */}
-        <motion.div
-          variants={cardVariants}
-          whileHover={{
-            y: -10,
-            scale: 1.05,
-            transition: { duration: 0.3 },
-          }}
-          className="flex flex-col bg-yellow-400 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 w-full md:w-1/3 h-80 sm:h-96"
-        >
+        <ElectricBorder color="#FFD400" speed={1.2} chaos={1.1} thickness={2} className="rounded-xl sm:rounded-2xl w-full md:w-1/3">
+          <motion.div
+            variants={cardVariants}
+            whileHover={{
+              y: -10,
+              scale: 1.05,
+              transition: { duration: 0.3 },
+            }}
+            className="flex flex-col bg-yellow-400 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 h-80 sm:h-96"
+          >
           <motion.div
             initial={{ scale: 0 }}
             whileInView={{ scale: 1 }}
@@ -250,7 +256,8 @@ export default function WhyThisPlatform() {
               </motion.span>
             ))}
           </motion.div>
-        </motion.div>
+          </motion.div>
+        </ElectricBorder>
       </motion.div>
     </motion.div>
   );

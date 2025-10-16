@@ -1,4 +1,5 @@
 import React from "react";
+import ElectricBorder from "./ElectricBorder";
 import { JSX } from "react";
 
 export default function EducationLanding(): JSX.Element {
@@ -20,8 +21,9 @@ className="relative pt-30 flex h-200px w-full flex-col items-center justify-cent
 
         {/* Cards row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card 1 */}
-          <article className="bg-yellow-300 rounded-2xl border-2 border-black p-6 flex flex-col items-center text-center shadow-lg">
+        {/* Card 1 */}
+        <ElectricBorder color="#FFD400" speed={1.2} chaos={1.1} thickness={2} className="rounded-2xl">
+        <article className="bg-yellow-300 rounded-2xl border-2 border-black p-6 flex flex-col items-center text-center shadow-lg">
             <div className="w-28 h-28 rounded-full bg-white flex items-center justify-center overflow-hidden border-2 border-black mb-4">
               {/* Stylized black & white profile (young man with headphones) - inline SVG */}
               <svg viewBox="0 0 120 120" width="90" height="90" aria-hidden="true">
@@ -53,9 +55,11 @@ className="relative pt-30 flex h-200px w-full flex-col items-center justify-cent
               <span className="text-sm font-semibold" style={{ fontFamily: "poppines" }}>Get Started as a Teacher</span>
             </button>
           </article>
+        </ElectricBorder>
 
-          {/* Card 2 */}
-          <article className="bg-yellow-300 rounded-2xl border-2 border-black p-6 flex flex-col items-center text-center shadow-lg">
+        {/* Card 2 */}
+        <ElectricBorder color="#FFD400" speed={1.2} chaos={1.1} thickness={2} className="rounded-2xl">
+        <article className="bg-yellow-300 rounded-2xl border-2 border-black p-6 flex flex-col items-center text-center shadow-lg">
             <div className="w-28 h-28 rounded-full bg-white flex items-center justify-center overflow-hidden border-2 border-black mb-4">
               {/* reuse SVG avatar */}
               <svg viewBox="0 0 120 120" width="90" height="90" aria-hidden="true">
@@ -83,9 +87,11 @@ className="relative pt-30 flex h-200px w-full flex-col items-center justify-cent
               <span className="text-sm font-semibold" style={{ fontFamily: "poppines" }}>Join as a Parent</span>
             </button>
           </article>
+        </ElectricBorder>
 
-          {/* Card 3 */}
-          <article className="bg-yellow-300 rounded-2xl border-2 border-black p-6 flex flex-col items-center text-center shadow-lg">
+        {/* Card 3 */}
+        <ElectricBorder color="#FFD400" speed={1.2} chaos={1.1} thickness={2} className="rounded-2xl">
+        <article className="bg-yellow-300 rounded-2xl border-2 border-black p-6 flex flex-col items-center text-center shadow-lg">
             <div className="w-28 h-28 rounded-full bg-white flex items-center justify-center overflow-hidden border-2 border-black mb-4">
               {/* reuse SVG avatar */}
               <svg viewBox="0 0 120 120" width="90" height="90" aria-hidden="true">
@@ -115,6 +121,7 @@ className="relative pt-30 flex h-200px w-full flex-col items-center justify-cent
               <span className="text-sm font-semibold" style={{ fontFamily: "poppines" }}>Download a Sample Certificate</span>
             </button>
           </article>
+        </ElectricBorder>
         </div>
       </div>
     </div>

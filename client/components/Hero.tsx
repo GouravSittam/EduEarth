@@ -7,6 +7,7 @@ import BotComponent from "./bot";
 import { BsController } from "react-icons/bs";
 import { Users2Icon } from "lucide-react";
 import Link from "next/link";
+import GlitchText from "./GlitchText";
 
 export default function Hero() {
   const [user, setUser] = useState<any>(null);
@@ -69,14 +70,16 @@ export default function Hero() {
           className="mb-6 sm:mb-8 md:mb-10 inline-flex max-w-[95%] sm:max-w-[90%] md:max-w-[950px] items-center justify-center rounded-2xl sm:rounded-3xl md:rounded-4xl border border-black bg-yellow-300 px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-6 shadow-[0_4px_0_#000] sm:shadow-[0_6px_0_#000]"
           style={{ fontFamily: '"Press Start 2P", system-ui, sans-serif' }}
         >
-          <motion.h1
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl leading-tight sm:leading-snug text-black text-center"
+            className="w-full flex items-center justify-center"
           >
-            Learn. Play. Save the Planet.
-          </motion.h1>
+            <GlitchText className="text-black !text-[clamp(1rem,4vw,2rem)]">
+              Learn. Play. Save the Planet.
+            </GlitchText>
+          </motion.div>
         </motion.div>
 
         {/* Subheading */}

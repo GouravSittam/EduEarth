@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
+import ElectricBorder from "./ElectricBorder";
 
 const categories = [
   "All",
@@ -192,6 +194,14 @@ export default function ExploreModule() {
           <motion.div className="flex pb-20 sm:pb-32 md:pb-40 flex-row gap-4 sm:gap-6 md:gap-8 px-4 sm:px-6 md:px-8 w-full justify-center transition-all duration-700 ease-in-out min-h-[300px] sm:min-h-[350px] md:min-h-[400px]">
             <AnimatePresence mode="wait">
               {visibleModules.map((mod, idx) => (
+                <ElectricBorder
+                  key={`${activeCategory}-${page}-${idx}`}
+                  color="#FFD400"
+                  speed={1.2}
+                  chaos={1.1}
+                  thickness={2}
+                  className="rounded-2xl sm:rounded-3xl w-64 sm:w-72 md:w-80 min-w-64 sm:min-w-72 md:min-w-80 flex-shrink-0"
+                >
                 <motion.div
                   key={`${activeCategory}-${page}-${idx}`}
                   initial={{ opacity: 0, x: 50, scale: 0.9 }}
@@ -208,15 +218,18 @@ export default function ExploreModule() {
                     scale: 1.03,
                     transition: { duration: 0.3 },
                   }}
-                  className="w-64 sm:w-72 md:w-80 min-w-64 sm:min-w-72 md:min-w-80 text-black rounded-2xl sm:rounded-3xl overflow-hidden bg-yellow-400 shadow-lg flex flex-col flex-shrink-0"
+                  className="text-black rounded-2xl sm:rounded-3xl overflow-hidden bg-yellow-400 shadow-lg flex flex-col"
                 >
-                  <motion.img
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ duration: 0.4 }}
-                    src={mod.image}
-                    alt={mod.title}
-                    className="w-full h-32 sm:h-36 md:h-40 object-cover"
-                  />
+                  <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.4 }} className="w-full h-32 sm:h-36 md:h-40 relative">
+                    <Image
+                      src={mod.image}
+                      alt={mod.title}
+                      fill
+                      priority={false}
+                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 25vw"
+                      className="object-cover"
+                    />
+                  </motion.div>
                   <div
                     className="p-4 sm:p-5 md:p-6 flex flex-col justify-between h-full"
                     style={{ fontFamily: "monospace" }}
@@ -274,6 +287,7 @@ export default function ExploreModule() {
                     </motion.button>
                   </div>
                 </motion.div>
+                </ElectricBorder>
               ))}
             </AnimatePresence>
           </motion.div>

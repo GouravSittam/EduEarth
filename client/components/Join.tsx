@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import ElectricBorder from "./ElectricBorder";
 
 export default function SparklyGrowthPage() {
   return (
@@ -25,28 +26,34 @@ export default function SparklyGrowthPage() {
       {/* Cards */}
       <div className="mt-12 flex flex-col md:flex-row gap-6 text-xl" style={{ fontFamily: "poppines" }}  >
         {/* Card 1 */}
-        <div className="flex items-center bg-white text-xl rounded-2xl shadow-md px-6 py-4 w-72" >
+        <ElectricBorder color="#8B5CF6" speed={1.2} chaos={1.1} thickness={2} className="rounded-2xl w-72">
+        <div className="flex items-center bg-white text-xl rounded-2xl shadow-md px-6 py-4">
           <div>
             <p className="text-xl font-bold text-gray-800">2.5M+</p>
             <p className="text-gray-500 text-sm">Engaged Learners</p>
           </div>
         </div>
+        </ElectricBorder>
 
         {/* Card 2 */}
-        <div className="flex items-center bg-white rounded-2xl shadow-md px-6 py-4 w-72">
+        <ElectricBorder color="#8B5CF6" speed={1.2} chaos={1.1} thickness={2} className="rounded-2xl w-72">
+        <div className="flex items-center bg-white rounded-2xl shadow-md px-6 py-4">
           <div>
             <p className="text-xl font-bold text-gray-800">5K+</p>
             <p className="text-gray-500 text-sm">Courses Available</p>
           </div>
         </div>
+        </ElectricBorder>
 
         {/* Card 3 */}
-        <div className="flex items-center bg-white rounded-2xl shadow-md px-6 py-4 w-72">
+        <ElectricBorder color="#8B5CF6" speed={1.2} chaos={1.1} thickness={2} className="rounded-2xl w-72">
+        <div className="flex items-center bg-white rounded-2xl shadow-md px-6 py-4">
           <div>
             <p className="text-xl font-bold text-gray-800">800+</p>
             <p className="text-gray-500 text-sm">Expert Mentors</p>
           </div>
         </div>
+        </ElectricBorder>
       </div>
 
       {/* Button */}
