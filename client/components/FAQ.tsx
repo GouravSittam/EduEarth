@@ -58,14 +58,13 @@ export default function FAQPage() {
           Frequently Asked Question
         </motion.h1>
 
-        {/* Paragraph */}
+      {/* Paragraph */}
         <motion.p
           initial={{ y: 20, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="text-black text-center max-w-2xl mb-10 text-xl"
-          style={{ fontFamily: "poppines" }}
+        className="text-black text-center max-w-2xl mb-10 text-xl"
         >
           As we couldn't find anything on the market that checked those boxes,
           we decided to build our own recruiting software. Our tool is easy to
@@ -80,7 +79,6 @@ export default function FAQPage() {
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: 0.8 }}
         className="relative text-xl z-10 w-full max-w-3xl space-y-6"
-        style={{ fontFamily: "poppines" }}
       >
         {faqs.map((faq, index) => (
           <motion.div

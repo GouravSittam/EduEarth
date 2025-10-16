@@ -44,7 +44,7 @@ export default function HowItWorks() {
       whileInView={{ opacity: 1 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.8 }}
-      className="min-h-screen relative overflow-hidden bg-gradient-to-b from-green-400 to-blue-500"
+      className="min-h-screen relative overflow-hidden bg-gradient-to-b from-green-400 to-blue-500 px-4 sm:px-6"
     >
       {/* Fixed Header */}
       <motion.h1
@@ -67,7 +67,7 @@ export default function HowItWorks() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -300 }}
             transition={{ duration: 0.5, ease: "easeInOut" }}
-            className="min-w-full flex flex-col items-center justify-center pt-32 rounded-lg text-black space-y-6"
+            className="min-w-full flex flex-col items-center justify-center pt-28 sm:pt-32 rounded-lg text-black space-y-6"
           >
             <motion.img
               initial={{ scale: 0, rotate: -180 }}
@@ -85,7 +85,7 @@ export default function HowItWorks() {
               }}
               src={slides[current].image}
               alt={slides[current].altText}
-              className="w-60 h-60 mb-0"
+              className="w-44 h-44 sm:w-60 sm:h-60 mb-0"
             />
             <motion.div
               initial={{ y: 50, opacity: 0 }}
@@ -95,13 +95,13 @@ export default function HowItWorks() {
                 scale: 1.02,
                 boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
               }}
-              className="w-full max-w-xl bg-yellow-400 border-2 border-black p-8 shadow-lg text-black space-y-4 font-mono"
+              className="w-full max-w-xl bg-yellow-400 border-2 border-black p-5 sm:p-8 shadow-lg text-black space-y-4"
             >
               <motion.h2
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
-                className="text-2xl font-bold"
+                className="text-xl sm:text-2xl font-bold"
               >
                 {slides[current].title}
               </motion.h2>

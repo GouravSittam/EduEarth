@@ -8,7 +8,7 @@ export default function SparklyGrowthPage() {
   return (
     <div className="pb-30 bg-white flex flex-col items-center border-t-8 border-blue-200">
       {/* Tag */}
-      <div className="mt-12 bg-purple-100 text-purple-700 px-4 py-1 rounded-full text-sm font-medium" style={{ fontFamily: "poppines" }}>
+      <div className="mt-12 bg-purple-100 text-purple-700 px-4 py-1 rounded-full text-sm font-medium">
         Sparkly Growth
       </div>
 
@@ -18,13 +18,13 @@ export default function SparklyGrowthPage() {
       </h1>
 
       {/* Paragraph */}
-      <p className="mt-4 text-gray-500 text-center text-xl max-w-2xl" style={{ fontFamily: "poppines" }}>
+      <p className="mt-4 text-gray-500 text-center text-xl max-w-2xl">
         Sparkly connects you with millions of learners and expert mentors,
         providing the guidance and resources needed to excel in your journey
       </p>
 
       {/* Cards */}
-      <div className="mt-12 flex flex-col md:flex-row gap-6 text-xl" style={{ fontFamily: "poppines" }}  >
+      <div className="mt-12 flex flex-col md:flex-row gap-6 text-xl"  >
         {/* Card 1 */}
         <ElectricBorder color="#8B5CF6" speed={1.2} chaos={1.1} thickness={2} className="rounded-2xl w-72">
         <div className="flex items-center bg-white text-xl rounded-2xl shadow-md px-6 py-4">

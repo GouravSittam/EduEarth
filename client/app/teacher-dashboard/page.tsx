@@ -19,7 +19,7 @@ export default function TeacherDashboard() {
   const [activeSection, setActiveSection] = useState<string>("dashboard");
 
   return (
-    <div className="flex h-screen" style={{ fontFamily: "poppines",}}>
+    <div className="flex h-screen">
       {/* Sidebar */}
       <aside className="w-64 bg-blue-900 text-white flex flex-col justify-between fixed h-screen p-4">
         <div>

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 
 interface NewsCardData {
   id: number;
@@ -22,7 +23,7 @@ const newsData: NewsCardData[] = [
 
 const TrendingNewsCarousel: React.FC = () => {
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-b from-green-400 to-blue-500 flex flex-col items-center">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-b from-green-400 to-blue-500 flex flex-col items-center px-4 sm:px-6">
       <style>
         {`
           @keyframes scrollLeft {
@@ -32,31 +33,32 @@ const TrendingNewsCarousel: React.FC = () => {
         `}
       </style>
 
-      <h2 className="absolute top-6 left-1/2 transform -translate-x-1/2 text-black font-bold text-xl bg-yellow-400 px-4 py-2 rounded z-0">
+      <h2 className="absolute top-6 left-1/2 -translate-x-1/2 text-black font-bold text-base sm:text-xl bg-yellow-400 px-3 sm:px-4 py-2 rounded z-0">
         Trending News
       </h2>
 
-      <div className="overflow-hidden w-500 mt-28">
+      <div className="overflow-hidden w-full mt-28">
         <div
-          className="flex w-[200%] animate-[scrollLeft_40s_linear_infinite] hover:pause p-10"
+          className="flex w-[200%] animate-[scrollLeft_40s_linear_infinite] hover:pause p-4 sm:p-6 md:p-10"
           style={{ animationPlayState: "running" }}
         >
           {[...newsData, ...newsData].map((card) => (
             <div
               key={card.id + "-" + Math.random()}
-              className="flex-0 w-90 h-120 border-2 border-purple-600 rounded-xl p-4 m-2 shadow-md 
-                         flex flex-col items-center text-center transform transition-transform duration-300 
-                         hover:scale-105"
+              className="flex-0 w-[220px] sm:w-[260px] md:w-[300px] h-[260px] sm:h-[300px] md:h-[340px] border-2 border-purple-600 rounded-xl p-4 m-2 shadow-md 
+                         flex flex-col items-center text-center transform transition-transform duration-300 hover:scale-105 bg-white/80"
             >
-              <div className="w-50 h-50 overflow-hidden mb-3">
-                <img
+              <div className="w-full h-28 sm:h-32 md:h-36 relative overflow-hidden mb-3 rounded-lg">
+                <Image
                   src={card.image}
                   alt={card.title}
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 640px) 220px, (max-width: 768px) 260px, 300px"
+                  className="object-cover"
                 />
               </div>
-              <h3 className="text-lg font-semibold mb-2">{card.title}</h3>
-              <p className="text-sm text-gray-600">{card.summary}</p>
+              <h3 className="text-base sm:text-lg font-semibold mb-2">{card.title}</h3>
+              <p className="text-xs sm:text-sm text-gray-600">{card.summary}</p>
             </div>
           ))}
         </div>

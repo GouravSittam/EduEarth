@@ -44,15 +44,13 @@ className="relative pt-30 flex h-200px w-full flex-col items-center justify-cent
             </div>
 
             <h2 className="text-black font-bold text-lg md:text-xl mb-2">Teacher Dashboard</h2>
-            <p className="text-black text-xl mb-6" 
-                              style={{ fontFamily: "poppines" }}
->Auto-generate PPTs, quizzes, and lesson aids instantly. Track student scores &amp; streaks in real-time.</p>
+            <p className="text-black text-xl mb-6">Auto-generate PPTs, quizzes, and lesson aids instantly. Track student scores &amp; streaks in real-time.</p>
 
             <button className="mt-auto inline-flex items-center gap-3 bg-black text-white px-4 py-2 rounded-lg border-2 border-black hover:opacity-95">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path d="M5 3v18l15-9L5 3z" fill="#fff" />
               </svg>
-              <span className="text-sm font-semibold" style={{ fontFamily: "poppines" }}>Get Started as a Teacher</span>
+              <span className="text-sm font-semibold">Get Started as a Teacher</span>
             </button>
           </article>
         </ElectricBorder>
@@ -78,13 +76,13 @@ className="relative pt-30 flex h-200px w-full flex-col items-center justify-cent
             </div>
 
             <h2 className="text-black font-bold text-lg md:text-xl mb-2">Parent Insights</h2>
-            <p className="text-black text-xl mb-6" style={{ fontFamily: "poppines" }}>See your child's learning progress &amp; eco-habits. Celebrate streaks, view certificates, and reward eco-actions.</p>
+            <p className="text-black text-xl mb-6">See your child's learning progress &amp; eco-habits. Celebrate streaks, view certificates, and reward eco-actions.</p>
 
             <button className="mt-auto inline-flex items-center gap-3 bg-black text-white px-4 py-2 rounded-lg border-2 border-black hover:opacity-95">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path d="M5 3v18l15-9L5 3z" fill="#fff" />
               </svg>
-              <span className="text-sm font-semibold" style={{ fontFamily: "poppines" }}>Join as a Parent</span>
+              <span className="text-sm font-semibold">Join as a Parent</span>
             </button>
           </article>
         </ElectricBorder>
@@ -110,7 +108,7 @@ className="relative pt-30 flex h-200px w-full flex-col items-center justify-cent
             </div>
 
             <h2 className="text-black font-bold text-lg md:text-xl mb-2">Rewards &amp; Certificates</h2>
-            <p className="text-black text-xl mb-6" style={{ fontFamily: "poppines" }}>Students earn verified eco-certificates. Printable badges for school portfolios &amp; family pride.</p>
+            <p className="text-black text-xl mb-6">Students earn verified eco-certificates. Printable badges for school portfolios &amp; family pride.</p>
 
             <button className="mt-auto inline-flex items-center gap-3 bg-black text-white px-4 py-2 rounded-lg border-2 border-black hover:opacity-95">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -118,7 +116,7 @@ className="relative pt-30 flex h-200px w-full flex-col items-center justify-cent
                 <path d="M8 12l4 4 4-4" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M5 20h14" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              <span className="text-sm font-semibold" style={{ fontFamily: "poppines" }}>Download a Sample Certificate</span>
+              <span className="text-sm font-semibold">Download a Sample Certificate</span>
             </button>
           </article>
         </ElectricBorder>

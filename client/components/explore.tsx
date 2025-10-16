@@ -122,7 +122,7 @@ export default function ExploreModule() {
           <motion.h1
             whileHover={{ scale: 1.05 }}
             className="bg-yellow-400 px-4 py-2 sm:px-6 sm:py-3 md:px-8 rounded text-lg sm:text-xl md:text-2xl lg:text-3xl text-black font-bold tracking-widest text-center"
-            style={{ fontFamily: "monospace" }}
+            
           >
             Explore Modules
           </motion.h1>
@@ -156,7 +156,7 @@ export default function ExploreModule() {
                   ? "bg-black text-yellow-400"
                   : "bg-yellow-400 text-black"
               }`}
-              style={{ fontFamily: "monospace" }}
+              
             >
               {cat}
             </motion.button>
@@ -232,14 +232,13 @@ export default function ExploreModule() {
                   </motion.div>
                   <div
                     className="p-4 sm:p-5 md:p-6 flex flex-col justify-between h-full"
-                    style={{ fontFamily: "monospace" }}
                   >
                     <motion.h2
                       initial={{ y: 20, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ duration: 0.4, delay: 0.2 + idx * 0.1 }}
                       className="text-base sm:text-lg md:text-xl font-bold mb-1 sm:mb-2 tracking-widest"
-                      style={{ fontFamily: "poppines" }}
+                      
                     >
                       {mod.title}
                     </motion.h2>
@@ -271,7 +270,6 @@ export default function ExploreModule() {
                       }}
                       whileTap={{ scale: 0.95 }}
                       className="bg-black text-yellow-400 px-3 py-1.5 sm:px-4 sm:py-2 md:px-5 rounded-full font-bold text-xs sm:text-sm md:text-base flex items-center gap-1 sm:gap-2 w-fit"
-                      style={{ fontFamily: "monospace" }}
                     >
                       Start Module
                       <motion.span

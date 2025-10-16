@@ -87,14 +87,14 @@ export default function Hero() {
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.9 }}
-          className="mx-auto mb-8 sm:mb-10 md:mb-12 lg:mb-20 max-w-xs sm:max-w-lg md:max-w-2xl text-xs sm:text-sm md:text-base leading-relaxed text-white/95"
+          className="mx-auto mb-8 sm:mb-10 md:mb-12 lg:mb-20 max-w-xs sm:max-w-lg md:max-w-2xl text-[10px] xs:text-xs sm:text-sm md:text-base leading-relaxed text-white/95"
         >
           A Gamified platform that turns environmental education into fun
           challenges
         </motion.p>
 
         {/* Buttons Container */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 w-full">
           <motion.button
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
