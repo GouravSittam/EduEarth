@@ -43,12 +43,12 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     icons: {
       icon: [
-        { url: "/eduearth-logo.png", sizes: "32x32", type: "image/png" },
-        { url: "/eduearth-logo.png", sizes: "16x16", type: "image/png" },
+        { url: "/icon.svg", type: "image/svg+xml" },
+        { url: "/earth.png", sizes: "32x32", type: "image/png" },
+        { url: "/earth.png", sizes: "16x16", type: "image/png" },
       ],
-      apple: [
-        { url: "/eduearth-logo.png", sizes: "180x180", type: "image/png" },
-      ],
+      apple: [{ url: "/earth.png", sizes: "180x180", type: "image/png" }],
+      shortcut: [{ url: "/earth.png" }],
     },
     manifest: "/site.webmanifest",
     openGraph: {
@@ -101,6 +101,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <meta name="theme-color" content="#22c55e" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="EduEarth" />
+      </head>
       <body
         className={`${pressStart.variable} antialiased min-h-dvh h-full overflow-x-hidden`}
       >

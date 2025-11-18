@@ -1,22 +1,44 @@
 {
-  "name": "EduEarth",
+  "name": "EduEarth - Environmental Education Games",
   "short_name": "EduEarth",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
+  "background_color": "#ffffff",
   "theme_color": "#22c55e",
-  "description": "Gamified environmental education platform with interactive modules and eco challenges.",
+  "description": "Transform environmental education through immersive games, interactive modules, and real-time multiplayer challenges. Learn sustainability while having fun!",
+  "categories": ["education", "games", "lifestyle"],
   "icons": [
     {
       "src": "/earth.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     },
     {
       "src": "/earth.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/earth.png",
+      "type": "image/png",
+      "sizes": "144x144"
+    },
+    {
+      "src": "/earth.png",
+      "type": "image/png",
+      "sizes": "96x96"
+    },
+    {
+      "src": "/earth.png",
+      "type": "image/png",
+      "sizes": "72x72"
+    },
+    {
+      "src": "/earth.png",
+      "type": "image/png",
+      "sizes": "48x48"
     }
   ]
 }
-
