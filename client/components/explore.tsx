@@ -18,7 +18,7 @@ const categories = [
 ];
 
 // Transform modulesData to match the component's expected format
-const modules = modulesData.map(mod => ({
+const modules = modulesData.map((mod) => ({
   title: mod.title,
   description: mod.description,
   duration: mod.duration,
@@ -376,49 +376,53 @@ export default function ExploreModule() {
 
         {/* Header */}
         <motion.div
-          initial={{ y: -30, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
+          initial={{ y: -40, opacity: 0, scale: 0.9 }}
+          whileInView={{ y: 0, opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="flex items-center justify-center pt-8 sm:pt-10 md:pt-12 pb-2 relative px-4"
+          transition={{
+            duration: 0.7,
+            delay: 0.2,
+            type: "spring",
+            stiffness: 100,
+          }}
+          className="flex items-center justify-center pt-8 sm:pt-10 md:pt-12 pb-2 relative px-4 z-10"
         >
           <motion.h1
-            whileHover={{ scale: 1.05 }}
-            className="bg-yellow-400 px-4 py-2 sm:px-6 sm:py-3 md:px-8 rounded text-lg sm:text-xl md:text-2xl lg:text-3xl text-black font-bold tracking-widest text-center"
-
+            whileHover={{ scale: 1.05, rotate: [-1, 1, -1, 0] }}
+            className="bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-400 px-6 py-3 sm:px-8 sm:py-4 md:px-10 md:py-5 rounded-2xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] text-lg sm:text-xl md:text-2xl lg:text-3xl text-black font-bold tracking-widest text-center transition-all duration-300 cursor-pointer"
           >
-            Explore Modules
+            🎓 Explore Modules
           </motion.h1>
         </motion.div>
 
         {/* Category Tabs */}
         <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
+          initial={{ y: 30, opacity: 0, scale: 0.95 }}
+          whileInView={{ y: 0, opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="flex flex-wrap items-center justify-center gap-1 sm:gap-2 bg-yellow-400 px-4 sm:px-6 md:px-8 py-3 sm:py-4 rounded-lg mx-auto w-fit mt-6 sm:mt-8 mb-6 sm:mb-8 z-2"
+          transition={{ duration: 0.7, delay: 0.4, type: "spring" }}
+          className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 bg-gradient-to-br from-white to-yellow-100 border-4 border-black px-4 sm:px-6 md:px-8 py-4 sm:py-5 rounded-2xl mx-auto w-fit mt-6 sm:mt-8 mb-8 sm:mb-10 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] z-10"
         >
           {categories.map((cat, index) => (
             <motion.button
               key={cat}
-              initial={{ scale: 0 }}
-              whileInView={{ scale: 1 }}
+              initial={{ scale: 0, rotate: -180 }}
+              whileInView={{ scale: 1, rotate: 0 }}
               viewport={{ once: true }}
               transition={{
-                duration: 0.3,
-                delay: 0.6 + index * 0.1,
+                duration: 0.4,
+                delay: 0.6 + index * 0.08,
                 type: "spring" as const,
                 stiffness: 200,
               }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.1, y: -3 }}
+              whileTap={{ scale: 0.9 }}
               onClick={() => setActiveCategory(cat)}
-              className={`px-3 py-1.5 sm:px-4 sm:py-2 md:px-6 rounded-full font-bold text-xs sm:text-sm md:text-base lg:text-lg transition ${activeCategory === cat
-                ? "bg-black text-yellow-400"
-                : "bg-yellow-400 text-black"
-                }`}
-
+              className={`px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 rounded-xl font-bold text-xs sm:text-sm md:text-base transition-all duration-300 cursor-pointer ${
+                activeCategory === cat
+                  ? "bg-gradient-to-r from-black to-gray-800 text-yellow-400 border-3 border-yellow-400 shadow-[4px_4px_0px_0px_rgba(251,191,36,0.5)]"
+                  : "bg-white text-black border-2 border-black hover:bg-yellow-50 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)]"
+              }`}
             >
               {cat}
             </motion.button>
@@ -435,20 +439,21 @@ export default function ExploreModule() {
         >
           {/* Prev Arrow */}
           <motion.button
-            initial={{ x: -30, opacity: 0 }}
-            whileInView={{ x: 0, opacity: 1 }}
+            initial={{ x: -50, opacity: 0, rotate: -180 }}
+            whileInView={{ x: 0, opacity: 1, rotate: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 1 }}
-            whileHover={{ scale: 1.1 }}
+            transition={{ duration: 0.6, delay: 1, type: "spring" }}
+            whileHover={{ scale: 1.15, x: -5, rotate: -15 }}
             whileTap={{ scale: 0.9 }}
             onClick={handlePrev}
             disabled={page === 0}
-            className={`absolute left-0 z-10 top-1/2 -translate-y-1/2 bg-yellow-400 text-black rounded-full p-3 shadow-lg font-bold text-2xl transition ${page === 0
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-yellow-300"
-              }`}
+            className={`absolute left-2 sm:left-4 z-20 top-1/2 -translate-y-1/2 bg-gradient-to-r from-yellow-300 to-yellow-400 text-black rounded-full p-4 sm:p-5 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] font-bold text-2xl sm:text-3xl transition-all duration-300 ${
+              page === 0
+                ? "opacity-30 cursor-not-allowed"
+                : "hover:from-yellow-400 hover:to-yellow-500 cursor-pointer"
+            }`}
           >
-            &#8592;
+            ◀
           </motion.button>
 
           {/* Cards Row */}
@@ -465,23 +470,33 @@ export default function ExploreModule() {
                 >
                   <motion.div
                     key={`${activeCategory}-${page}-${idx}`}
-                    initial={{ opacity: 0, x: 50, scale: 0.9 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    exit={{ opacity: 0, x: -50, scale: 0.9 }}
+                    initial={{ opacity: 0, x: 50, scale: 0.9, rotateY: 45 }}
+                    animate={{ opacity: 1, x: 0, scale: 1, rotateY: 0 }}
+                    exit={{ opacity: 0, x: -50, scale: 0.9, rotateY: -45 }}
                     transition={{
-                      duration: 0.5,
-                      delay: idx * 0.1,
+                      duration: 0.6,
+                      delay: idx * 0.12,
                       type: "spring" as const,
                       stiffness: 100,
                     }}
                     whileHover={{
-                      y: -10,
-                      scale: 1.03,
+                      y: -12,
+                      scale: 1.04,
+                      rotate: 1,
                       transition: { duration: 0.3 },
                     }}
-                    className="text-black rounded-2xl sm:rounded-3xl overflow-hidden bg-yellow-400 shadow-lg flex flex-col"
+                    className="text-black rounded-2xl sm:rounded-3xl overflow-hidden bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-400 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] flex flex-col transition-all duration-300 relative"
                   >
-                    <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.4 }} className="w-full h-32 sm:h-36 md:h-40 relative">
+                    {/* Decorative corners */}
+                    <div className="absolute top-2 left-2 w-2.5 h-2.5 bg-black rounded-full z-10" />
+                    <div className="absolute top-2 right-2 w-2.5 h-2.5 bg-black rounded-full z-10" />
+                    <div className="absolute bottom-2 left-2 w-2.5 h-2.5 bg-black rounded-full z-10" />
+                    <div className="absolute bottom-2 right-2 w-2.5 h-2.5 bg-black rounded-full z-10" />
+                    <motion.div
+                      whileHover={{ scale: 1.08 }}
+                      transition={{ duration: 0.4 }}
+                      className="w-full h-32 sm:h-36 md:h-40 relative border-b-4 border-black overflow-hidden"
+                    >
                       <Image
                         src={mod.image}
                         alt={mod.title}
@@ -490,16 +505,15 @@ export default function ExploreModule() {
                         sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 25vw"
                         className="object-cover"
                       />
+                      {/* Image overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                     </motion.div>
-                    <div
-                      className="p-4 sm:p-5 md:p-6 flex flex-col justify-between h-full"
-                    >
+                    <div className="p-4 sm:p-5 md:p-6 flex flex-col justify-between h-full">
                       <motion.h2
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ duration: 0.4, delay: 0.2 + idx * 0.1 }}
-                        className="text-base sm:text-lg md:text-xl font-bold mb-1 sm:mb-2 tracking-widest"
-
+                        className="text-base sm:text-lg md:text-xl font-extrabold mb-2 sm:mb-3 tracking-wide drop-shadow-[2px_2px_0px_rgba(255,255,255,0.5)]"
                       >
                         {mod.title}
                       </motion.h2>
@@ -507,7 +521,7 @@ export default function ExploreModule() {
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ duration: 0.4, delay: 0.3 + idx * 0.1 }}
-                        className="mb-3 sm:mb-4 text-black text-sm sm:text-base"
+                        className="mb-4 text-black/90 text-sm sm:text-base leading-relaxed font-sans font-semibold"
                       >
                         {mod.description}
                       </motion.p>
@@ -515,28 +529,47 @@ export default function ExploreModule() {
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ duration: 0.4, delay: 0.4 + idx * 0.1 }}
-                        className="mb-3 sm:mb-4 text-xs text-black space-y-1"
+                        className="mb-4 space-y-2"
                       >
-                        <div>🕒 Duration - {mod.duration}</div>
-                        <div>📚 Chapters - {mod.chapters}</div>
-                        <div>🎯 Missions - {mod.missions}</div>
+                        <div className="flex items-center gap-2 bg-white/50 backdrop-blur-sm px-3 py-1.5 rounded-lg border-2 border-black/20 text-xs sm:text-sm font-bold">
+                          <span className="text-base">🕒</span>
+                          <span>{mod.duration}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <div className="flex items-center gap-2 bg-white/50 backdrop-blur-sm px-3 py-1.5 rounded-lg border-2 border-black/20 text-xs sm:text-sm font-bold flex-1">
+                            <span className="text-base">📚</span>
+                            <span>{mod.chapters} Ch</span>
+                          </div>
+                          <div className="flex items-center gap-2 bg-white/50 backdrop-blur-sm px-3 py-1.5 rounded-lg border-2 border-black/20 text-xs sm:text-sm font-bold flex-1">
+                            <span className="text-base">🎯</span>
+                            <span>{mod.missions} M</span>
+                          </div>
+                        </div>
                       </motion.div>
                       <motion.button
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ duration: 0.4, delay: 0.5 + idx * 0.1 }}
+                        initial={{ y: 20, opacity: 0, scale: 0.9 }}
+                        animate={{ y: 0, opacity: 1, scale: 1 }}
+                        transition={{
+                          duration: 0.5,
+                          delay: 0.5 + idx * 0.1,
+                          type: "spring",
+                        }}
                         whileHover={{
-                          scale: 1.05,
-                          backgroundColor: "#1a1a1a",
+                          scale: 1.08,
+                          y: -3,
+                          boxShadow: "6px 6px 0px 0px rgba(0,0,0,1)",
                         }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => {
-                          const moduleSlug = mod.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                          const moduleSlug = mod.title
+                            .toLowerCase()
+                            .replace(/\s+/g, "-")
+                            .replace(/[^a-z0-9-]/g, "");
                           window.location.href = `/modules/${moduleSlug}`;
                         }}
-                        className="bg-black text-yellow-400 px-3 py-1.5 sm:px-4 sm:py-2 md:px-5 rounded-full font-bold text-xs sm:text-sm md:text-base flex items-center gap-1 sm:gap-2 w-fit"
+                        className="bg-gradient-to-r from-black to-gray-800 text-yellow-400 px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl font-bold text-xs sm:text-sm md:text-base flex items-center gap-2 w-fit border-3 border-yellow-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] transition-all duration-300 cursor-pointer group"
                       >
-                        Start Module
+                        <span>Start Module</span>
                         <motion.span
                           animate={{ x: [0, 5, 0] }}
                           transition={{
@@ -544,8 +577,9 @@ export default function ExploreModule() {
                             repeat: Infinity,
                             ease: "easeInOut",
                           }}
+                          className="text-base"
                         >
-                          &#9654;
+                          ▶
                         </motion.span>
                       </motion.button>
                     </div>
@@ -557,23 +591,24 @@ export default function ExploreModule() {
 
           {/* Next Arrow */}
           <motion.button
-            initial={{ x: 30, opacity: 0 }}
-            whileInView={{ x: 0, opacity: 1 }}
+            initial={{ x: 50, opacity: 0, rotate: 180 }}
+            whileInView={{ x: 0, opacity: 1, rotate: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 1 }}
-            whileHover={{ scale: 1.1 }}
+            transition={{ duration: 0.6, delay: 1, type: "spring" }}
+            whileHover={{ scale: 1.15, x: 5, rotate: 15 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleNext}
             disabled={page >= totalPages - 1}
-            className={`absolute right-0 z-10 top-1/2 -translate-y-1/2 bg-yellow-400 text-black rounded-full p-3 shadow-lg font-bold text-2xl transition ${page >= totalPages - 1
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-yellow-300"
-              }`}
+            className={`absolute right-2 sm:right-4 z-20 top-1/2 -translate-y-1/2 bg-gradient-to-r from-yellow-300 to-yellow-400 text-black rounded-full p-4 sm:p-5 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] font-bold text-2xl sm:text-3xl transition-all duration-300 ${
+              page >= totalPages - 1
+                ? "opacity-30 cursor-not-allowed"
+                : "hover:from-yellow-400 hover:to-yellow-500 cursor-pointer"
+            }`}
           >
-            &#8594;
+            ▶
           </motion.button>
         </motion.div>
-      </div >
-    </motion.section >
+      </div>
+    </motion.section>
   );
 }
