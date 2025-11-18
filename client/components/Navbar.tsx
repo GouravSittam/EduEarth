@@ -63,7 +63,7 @@ export default function Navbar() {
                     fontFamily: '"Press Start 2P", system-ui, sans-serif',
                   }}
                 >
-                  ECO Play
+                  EDU EARTH
                 </motion.div>
                 <div className="text-xs sm:text-xs text-green-100/90 hidden sm:block">
                   Gamified environmental education

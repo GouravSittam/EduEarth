@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Press_Start_2P } from "next/font/google";
 import "./globals.css";
 
@@ -76,11 +76,6 @@ export async function generateMetadata(): Promise<Metadata> {
       images: ["/eduearth-twitter-image.png"],
       creator: "@eduearth",
     },
-    viewport: {
-      width: "device-width",
-      initialScale: 1,
-      maximumScale: 1,
-    },
     verification: {
       google: "your-google-verification-code",
       yandex: "your-yandex-verification-code",
@@ -92,6 +87,12 @@ export async function generateMetadata(): Promise<Metadata> {
     },
   };
 }
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export default function RootLayout({
   children,

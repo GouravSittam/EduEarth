@@ -1,0 +1,22 @@
+{
+  "name": "EduEarth",
+  "short_name": "EduEarth",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#22c55e",
+  "description": "Gamified environmental education platform with interactive modules and eco challenges.",
+  "icons": [
+    {
+      "src": "/earth.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "/earth.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ]
+}
+
