@@ -101,7 +101,7 @@ export default function Navbar() {
                 initial={{ x: 20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
-                className="hidden items-center gap-2 lg:gap-3 xl:flex"
+                className="hidden items-center gap-2 lg:gap-3 lg:flex"
               >
                 {navItems.map((item, index) => (
                   <motion.li
@@ -143,7 +143,7 @@ export default function Navbar() {
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={toggleMobileMenu}
-                className="xl:hidden p-2.5 text-white bg-yellow-400/20 rounded-xl border-2 border-yellow-400 hover:bg-yellow-400 hover:text-black transition-all duration-300 cursor-pointer"
+                className="lg:hidden p-2.5 text-white bg-yellow-400/20 rounded-xl border-2 border-yellow-400 hover:bg-yellow-400 hover:text-black transition-all duration-300 cursor-pointer"
               >
                 {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </motion.button>
@@ -158,7 +158,7 @@ export default function Navbar() {
                   type: "spring",
                   stiffness: 200,
                 }}
-                className="hidden xl:block"
+                className="hidden lg:block"
               >
                 <UserButton />
               </motion.div>
@@ -173,7 +173,7 @@ export default function Navbar() {
                 animate={{ opacity: 1, height: "auto", y: 0 }}
                 exit={{ opacity: 0, height: 0, y: -20 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="xl:hidden border-t-2 border-yellow-400/30 bg-gradient-to-b from-black/50 to-black/70 backdrop-blur-lg overflow-hidden rounded-b-2xl"
+                className="lg:hidden border-t-2 border-yellow-400/30 bg-gradient-to-b from-black/50 to-black/70 backdrop-blur-lg overflow-hidden rounded-b-2xl"
               >
                 <div className="px-4 py-5 space-y-2">
                   {navItems.map((item, index) => (
@@ -210,7 +210,7 @@ export default function Navbar() {
                     }}
                     className="pt-4 border-t-2 border-yellow-400/30 mt-2"
                   >
-                    <UserButton />
+                    <UserButton mobile={true} />
                   </motion.div>
                 </div>
               </motion.div>
