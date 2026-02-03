@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function HowItWorks() {
@@ -125,16 +126,23 @@ export default function HowItWorks() {
                 transition={{ duration: 2, repeat: Infinity }}
                 className="absolute inset-0 rounded-3xl"
               />
-              <motion.img
+              <motion.div
                 whileHover={{
                   scale: 1.15,
                   rotate: [0, -5, 5, 0],
                   transition: { duration: 0.5 },
                 }}
-                src={slides[current].image}
-                alt={slides[current].altText}
                 className="w-44 h-44 sm:w-60 sm:h-60 relative z-10 drop-shadow-2xl cursor-pointer"
-              />
+              >
+                <Image
+                  src={slides[current].image}
+                  alt={slides[current].altText}
+                  fill
+                  sizes="(max-width: 640px) 176px, 240px"
+                  style={{ objectFit: "contain" }}
+                  priority
+                />
+              </motion.div>
             </motion.div>
 
             {/* Content Card with Enhanced Styling */}
@@ -234,8 +242,8 @@ export default function HowItWorks() {
           >
             <div
               className={`w-full h-full rounded-full border-3 border-black transition-all duration-300 ${index === current
-                  ? "bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-                  : "bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                ? "bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                : "bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                 }`}
             />
             {index === current && (

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Press_Start_2P } from "next/font/google";
 import "./globals.css";
+import SmoothScrolling from "@/components/SmoothScrolling";
 
 // Load Press Start 2P font
 const pressStart = Press_Start_2P({
@@ -110,7 +111,9 @@ export default function RootLayout({
       <body
         className={`${pressStart.variable} antialiased min-h-dvh h-full overflow-x-hidden`}
       >
-        <div className="min-h-screen w-full">{children}</div>
+        <SmoothScrolling>
+          <div className="min-h-screen w-full">{children}</div>
+        </SmoothScrolling>
       </body>
     </html>
   );
