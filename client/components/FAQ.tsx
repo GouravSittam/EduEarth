@@ -151,11 +151,10 @@ export default function FAQPage() {
                 scale: 1.02,
                 y: -2,
               }}
-              className={`bg-white border-4 border-black rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 overflow-hidden ${
-                open === faq.id
+              className={`bg-white border-4 border-black rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 overflow-hidden ${open === faq.id
                   ? "bg-gradient-to-br from-white to-yellow-50"
                   : ""
-              }`}
+                }`}
             >
               <div
                 className="flex items-center justify-between cursor-pointer p-5 sm:p-6"

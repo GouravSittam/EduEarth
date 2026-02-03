@@ -81,13 +81,12 @@ export default function Hero() {
           }}
           className="absolute w-16 h-16 rounded-full"
           style={{
-            background: `radial-gradient(circle, ${
-              [
+            background: `radial-gradient(circle, ${[
                 "rgba(251,191,36,0.4)",
                 "rgba(34,197,94,0.4)",
                 "rgba(59,130,246,0.4)",
               ][i % 3]
-            }, transparent)`,
+              }, transparent)`,
             left: `${15 + i * 15}%`,
             top: `${20 + (i % 3) * 20}%`,
             filter: "blur(20px)",
@@ -259,8 +258,8 @@ export default function Hero() {
               {user?.role === "teacher"
                 ? "Teacher Dashboard"
                 : user?.role === "student"
-                ? "Student Dashboard"
-                : "Go to Dashboard"}
+                  ? "Student Dashboard"
+                  : "Go to Dashboard"}
             </span>
             <motion.span
               animate={{ x: [0, 5, 0], scale: [1, 1.1, 1] }}

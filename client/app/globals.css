@@ -31,63 +31,83 @@ body {
   0% {
     clip-path: inset(20% 0 50% 0);
   }
+
   5% {
     clip-path: inset(10% 0 60% 0);
   }
+
   10% {
     clip-path: inset(15% 0 55% 0);
   }
+
   15% {
     clip-path: inset(25% 0 35% 0);
   }
+
   20% {
     clip-path: inset(30% 0 40% 0);
   }
+
   25% {
     clip-path: inset(40% 0 20% 0);
   }
+
   30% {
     clip-path: inset(10% 0 60% 0);
   }
+
   35% {
     clip-path: inset(15% 0 55% 0);
   }
+
   40% {
     clip-path: inset(25% 0 35% 0);
   }
+
   45% {
     clip-path: inset(30% 0 40% 0);
   }
+
   50% {
     clip-path: inset(20% 0 50% 0);
   }
+
   55% {
     clip-path: inset(10% 0 60% 0);
   }
+
   60% {
     clip-path: inset(15% 0 55% 0);
   }
+
   65% {
     clip-path: inset(25% 0 35% 0);
   }
+
   70% {
     clip-path: inset(30% 0 40% 0);
   }
+
   75% {
     clip-path: inset(40% 0 20% 0);
   }
+
   80% {
     clip-path: inset(20% 0 50% 0);
   }
+
   85% {
     clip-path: inset(10% 0 60% 0);
   }
+
   90% {
     clip-path: inset(15% 0 55% 0);
   }
+
   95% {
     clip-path: inset(25% 0 35% 0);
   }
+
   100% {
     clip-path: inset(30% 0 40% 0);
   }
@@ -161,39 +181,42 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #1e293b; /* slate-800 */
+  background: #1e293b;
+  /* slate-800 */
   border-radius: 10px;
-  border: 2px solid #0f172a; /* slate-900 */
+  border: 2px solid #0f172a;
+  /* slate-900 */
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(
-    45deg,
-    #fbbf24,
-    #f59e0b
-  ); /* yellow-400 to amber-500 */
+  background: linear-gradient(45deg,
+      #fbbf24,
+      #f59e0b);
+  /* yellow-400 to amber-500 */
   border-radius: 10px;
-  border: 2px solid #1e293b; /* slate-800 */
+  border: 2px solid #1e293b;
+  /* slate-800 */
   box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(
-    45deg,
-    #f59e0b,
-    #d97706
-  ); /* amber-500 to amber-600 */
+  background: linear-gradient(45deg,
+      #f59e0b,
+      #d97706);
+  /* amber-500 to amber-600 */
   box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
 }
 
 ::-webkit-scrollbar-corner {
-  background: #1e293b; /* slate-800 */
+  background: #1e293b;
+  /* slate-800 */
 }
 
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #fbbf24 #1e293b; /* yellow-400 thumb, slate-800 track */
+  scrollbar-color: #fbbf24 #1e293b;
+  /* yellow-400 thumb, slate-800 track */
 }
 
 /* Gaming-style glow effect for scrollbar */
@@ -201,12 +224,14 @@ body {
   background: linear-gradient(45deg, #fbbf24, #f59e0b);
   border-radius: 10px;
   border: 2px solid #1e293b;
-  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3), 0 0 10px rgba(251, 191, 36, 0.4); /* yellow glow */
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3), 0 0 10px rgba(251, 191, 36, 0.4);
+  /* yellow glow */
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(45deg, #f59e0b, #d97706);
-  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5), 0 0 15px rgba(251, 191, 36, 0.6); /* stronger yellow glow on hover */
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5), 0 0 15px rgba(251, 191, 36, 0.6);
+  /* stronger yellow glow on hover */
 }
 
 /* Line clamp utilities for text truncation */

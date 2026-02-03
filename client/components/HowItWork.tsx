@@ -228,17 +228,15 @@ export default function HowItWorks() {
             onClick={() => setCurrent(index)}
             whileHover={{ scale: 1.5, y: -5 }}
             whileTap={{ scale: 0.9 }}
-            className={`relative transition-all duration-300 cursor-pointer ${
-              index === current ? "w-12 h-5" : "w-5 h-5"
-            }`}
+            className={`relative transition-all duration-300 cursor-pointer ${index === current ? "w-12 h-5" : "w-5 h-5"
+              }`}
             aria-label={`Go to slide ${index + 1}`}
           >
             <div
-              className={`w-full h-full rounded-full border-3 border-black transition-all duration-300 ${
-                index === current
+              className={`w-full h-full rounded-full border-3 border-black transition-all duration-300 ${index === current
                   ? "bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                   : "bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-              }`}
+                }`}
             />
             {index === current && (
               <motion.div
