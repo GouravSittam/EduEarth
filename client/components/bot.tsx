@@ -332,17 +332,19 @@ const BotComponent: React.FC = () => {
             <input
               type="text"
               placeholder="Type your message..."
+              aria-label="Chat Input"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 p-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-500"
             />
             <motion.button
               onClick={sendMessage}
+              aria-label="Send Message"
               disabled={!inputMessage.trim() || isLoading}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center"
+              className="p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-500"
             >
               <motion.div whileHover={{ x: 2 }} transition={{ duration: 0.2 }}>
                 <Send size={18} />

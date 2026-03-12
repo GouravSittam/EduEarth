@@ -116,7 +116,7 @@ export default function Hero() {
             rotate: [0, -1, 1, 0],
             transition: { duration: 0.4 },
           }}
-          className="mb-8 sm:mb-10 md:mb-12 inline-flex max-w-[95%] sm:max-w-[90%] md:max-w-[950px] items-center justify-center rounded-3xl sm:rounded-4xl border-6 border-black bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-400 px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-6 shadow-[0_8px_0_#000,0_12px_25px_rgba(0,0,0,0.5)] sm:shadow-[0_10px_0_#000,0_15px_30px_rgba(0,0,0,0.6)] hover:shadow-[0_12px_0_#000,0_18px_35px_rgba(0,0,0,0.7)] transition-all duration-300 relative overflow-hidden group cursor-pointer"
+          className="mb-8 sm:mb-10 md:mb-12 inline-flex max-w-[95%] sm:max-w-[90%] md:max-w-[950px] items-center justify-center rounded-3xl sm:rounded-4xl border-6 border-black bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-400 px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-6 shadow-[0_8px_0_#000,0_12px_25px_rgba(0,0,0,0.5)] sm:shadow-[0_10px_0_#000,0_15px_30px_rgba(0,0,0,0.6)] hover:shadow-[0_12px_0_#000,0_18px_35px_rgba(0,0,0,0.7)] transition-[transform,box-shadow] duration-300 relative overflow-hidden group cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-400"
           style={{ fontFamily: '"Press Start 2P", system-ui, sans-serif' }}
         >
           {/* Shine effect on hover */}
@@ -213,7 +213,7 @@ export default function Hero() {
               transition: { duration: 0.1 },
             }}
             onClick={() => router.push("/games")}
-            className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 sm:gap-4 rounded-2xl border-4 sm:border-5 border-black bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-400 px-6 py-4 sm:px-8 sm:py-5 md:px-10 md:py-5 text-black shadow-[0_6px_0_#000] sm:shadow-[0_8px_0_#000] transition-all duration-300 relative overflow-hidden cursor-pointer"
+            className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 sm:gap-4 rounded-2xl border-4 sm:border-5 border-black bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-400 px-6 py-4 sm:px-8 sm:py-5 md:px-10 md:py-5 text-black shadow-[0_6px_0_#000] sm:shadow-[0_8px_0_#000] transition-[transform,box-shadow] duration-300 relative overflow-hidden cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-400"
             style={{ fontFamily: '"Press Start 2P", system-ui, sans-serif' }}
           >
             {/* Animated background on hover */}
@@ -248,7 +248,7 @@ export default function Hero() {
               transition: { duration: 0.1 },
             }}
             onClick={handleDashboardRedirect}
-            className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 sm:gap-4 rounded-2xl border-4 sm:border-5 border-black bg-gradient-to-br from-green-400 via-emerald-400 to-teal-400 px-6 py-4 sm:px-8 sm:py-5 md:px-10 md:py-5 text-black shadow-[0_6px_0_#000] sm:shadow-[0_8px_0_#000] transition-all duration-300 relative overflow-hidden cursor-pointer"
+            className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 sm:gap-4 rounded-2xl border-4 sm:border-5 border-black bg-gradient-to-br from-green-400 via-emerald-400 to-teal-400 px-6 py-4 sm:px-8 sm:py-5 md:px-10 md:py-5 text-black shadow-[0_6px_0_#000] sm:shadow-[0_8px_0_#000] transition-[transform,box-shadow] duration-300 relative overflow-hidden cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-green-400"
             style={{ fontFamily: '"Press Start 2P", system-ui, sans-serif' }}
           >
             {/* Animated background on hover */}

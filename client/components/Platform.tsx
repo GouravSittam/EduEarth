@@ -179,7 +179,7 @@ export default function WhyThisPlatform() {
       >
         <motion.div
           whileHover={{ scale: 1.05, rotate: [-1, 1, -1, 0] }}
-          className="inline-block bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 px-6 py-3 rounded-2xl border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 mb-4 cursor-pointer"
+          className="inline-block bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 px-6 py-3 rounded-2xl border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] transition-[transform,box-shadow] duration-300 mb-4 cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-400"
         >
           <motion.h1 className="text-black text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-wide font-[pixel]">
             🌟 Why This Platform?
@@ -261,7 +261,7 @@ export default function WhyThisPlatform() {
               stiffness: 150,
             }}
             whileHover={{ scale: 1.12, y: -8, rotate: 3 }}
-            className="bg-gradient-to-br from-white to-yellow-100 backdrop-blur-md rounded-2xl px-5 sm:px-7 py-4 flex items-center gap-3 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 cursor-pointer"
+            className="bg-gradient-to-br from-white to-yellow-100 backdrop-blur-md rounded-2xl px-5 sm:px-7 py-4 flex items-center gap-3 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] transition-[transform,box-shadow] duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-400"
           >
             <motion.div
               animate={{ rotate: [0, 10, -10, 0] }}
@@ -311,7 +311,7 @@ export default function WhyThisPlatform() {
                 }}
                 onHoverStart={() => setActiveCard(index)}
                 onHoverEnd={() => setActiveCard(null)}
-                className="flex flex-col bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-400 rounded-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[14px_14px_0px_0px_rgba(0,0,0,1)] border-4 border-black p-5 sm:p-7 h-auto sm:h-[550px] relative overflow-hidden cursor-pointer transition-all duration-300"
+                className="flex flex-col bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-400 rounded-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[14px_14px_0px_0px_rgba(0,0,0,1)] border-4 border-black p-5 sm:p-7 h-auto sm:h-[550px] relative overflow-hidden cursor-pointer transition-[transform,box-shadow] duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-400"
               >
                 {/* Decorative corners */}
                 <div className="absolute top-2 left-2 w-3 h-3 bg-black rounded-full" />
@@ -385,7 +385,7 @@ export default function WhyThisPlatform() {
                           delay: 0.2 + featureIndex * 0.1,
                         }}
                         whileHover={{ x: 5, scale: 1.02 }}
-                        className="flex items-center gap-3 bg-white/50 backdrop-blur-sm rounded-xl px-3 py-2.5 border-2 border-black/20 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.15)] transition-all duration-200 cursor-pointer"
+                        className="flex items-center gap-3 bg-white/50 backdrop-blur-sm rounded-xl px-3 py-2.5 border-2 border-black/20 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.15)] transition-[transform,box-shadow] duration-200 cursor-pointer"
                       >
                         <span className="w-2.5 h-2.5 rounded-full bg-black" />
                         <span className="text-black text-sm sm:text-base font-semibold">
@@ -440,14 +440,14 @@ export default function WhyThisPlatform() {
           <motion.button
             whileHover={{ scale: 1.08, y: -3 }}
             whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 rounded-2xl bg-white/20 border-4 border-white/50 backdrop-blur-md font-bold text-white text-base sm:text-lg hover:bg-white/30 transition-all duration-300 shadow-[6px_6px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-[10px_10px_0px_0px_rgba(255,255,255,0.3)] cursor-pointer"
+            className="px-8 py-4 rounded-2xl bg-white/20 border-4 border-white/50 backdrop-blur-md font-bold text-white text-base sm:text-lg hover:bg-white/30 transition-[background-color,box-shadow,transform] duration-300 shadow-[6px_6px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-[10px_10px_0px_0px_rgba(255,255,255,0.3)] cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white"
           >
             📚 Explore Modules
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.08, y: -3 }}
             whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 rounded-2xl bg-gradient-to-r from-yellow-300 to-yellow-400 text-black border-4 border-black font-bold text-base sm:text-lg hover:from-yellow-400 hover:to-yellow-500 transition-all duration-300 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] cursor-pointer"
+            className="px-8 py-4 rounded-2xl bg-gradient-to-r from-yellow-300 to-yellow-400 text-black border-4 border-black font-bold text-base sm:text-lg hover:from-yellow-400 hover:to-yellow-500 transition-[background-color,box-shadow,transform] duration-300 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-400"
           >
             ⭐ Join the Beta
           </motion.button>

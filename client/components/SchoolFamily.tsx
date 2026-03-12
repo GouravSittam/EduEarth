@@ -56,7 +56,7 @@ export default function EducationLanding(): JSX.Element {
         >
           <motion.h1
             whileHover={{ scale: 1.05, rotate: [-1, 1, -1, 0] }}
-            className="bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-400 px-8 py-4 rounded-2xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] text-black font-extrabold text-lg md:text-xl lg:text-2xl transition-all duration-300 cursor-pointer"
+            className="bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-400 px-8 py-4 rounded-2xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] text-black font-extrabold text-lg md:text-xl lg:text-2xl transition-[transform,box-shadow,color] duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-400"
           >
             🏫 Built for Schools & Families
           </motion.h1>
@@ -78,7 +78,7 @@ export default function EducationLanding(): JSX.Element {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.3, type: "spring" }}
               whileHover={{ y: -10, scale: 1.03, rotate: 1 }}
-              className="bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-400 rounded-2xl border-4 border-black p-6 flex flex-col items-center text-center shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 relative cursor-pointer"
+              className="bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-400 rounded-2xl border-4 border-black p-6 flex flex-col items-center text-center shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-[transform,box-shadow] duration-300 relative cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-400"
             >
               {/* Decorative corners */}
               <div className="absolute top-2 left-2 w-3 h-3 bg-black rounded-full" />
@@ -178,7 +178,7 @@ export default function EducationLanding(): JSX.Element {
                 transition={{ duration: 0.5, delay: 0.8, type: "spring" }}
                 whileHover={{ scale: 1.08, y: -3 }}
                 whileTap={{ scale: 0.95 }}
-                className="mt-auto inline-flex items-center gap-3 bg-gradient-to-r from-black to-gray-800 text-yellow-400 px-5 py-3 rounded-xl border-3 border-yellow-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.7)] transition-all duration-300 cursor-pointer"
+                className="mt-auto inline-flex items-center gap-3 bg-gradient-to-r from-black to-gray-800 text-yellow-400 px-5 py-3 rounded-xl border-3 border-yellow-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.7)] transition-[transform,box-shadow,background-color] duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-400"
               >
                 <motion.svg
                   animate={{ x: [0, 5, 0] }}
@@ -217,7 +217,7 @@ export default function EducationLanding(): JSX.Element {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.4, type: "spring" }}
               whileHover={{ y: -10, scale: 1.03, rotate: -1 }}
-              className="bg-gradient-to-br from-green-300 via-emerald-400 to-teal-400 rounded-2xl border-4 border-black p-6 flex flex-col items-center text-center shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 relative cursor-pointer"
+              className="bg-gradient-to-br from-green-300 via-emerald-400 to-teal-400 rounded-2xl border-4 border-black p-6 flex flex-col items-center text-center shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-[transform,box-shadow] duration-300 relative cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-green-400"
             >
               {/* Decorative corners */}
               <div className="absolute top-2 left-2 w-3 h-3 bg-black rounded-full" />
@@ -315,7 +315,7 @@ export default function EducationLanding(): JSX.Element {
                 transition={{ duration: 0.5, delay: 0.9, type: "spring" }}
                 whileHover={{ scale: 1.08, y: -3 }}
                 whileTap={{ scale: 0.95 }}
-                className="mt-auto inline-flex items-center gap-3 bg-gradient-to-r from-black to-gray-800 text-green-400 px-5 py-3 rounded-xl border-3 border-green-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.7)] transition-all duration-300 cursor-pointer"
+                className="mt-auto inline-flex items-center gap-3 bg-gradient-to-r from-black to-gray-800 text-green-400 px-5 py-3 rounded-xl border-3 border-green-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.7)] transition-[transform,box-shadow,background-color] duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-green-400"
               >
                 <motion.svg
                   animate={{ x: [0, 5, 0] }}
@@ -352,7 +352,7 @@ export default function EducationLanding(): JSX.Element {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.5, type: "spring" }}
               whileHover={{ y: -10, scale: 1.03, rotate: 1 }}
-              className="bg-gradient-to-br from-blue-300 via-cyan-400 to-sky-400 rounded-2xl border-4 border-black p-6 flex flex-col items-center text-center shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 relative cursor-pointer"
+              className="bg-gradient-to-br from-blue-300 via-cyan-400 to-sky-400 rounded-2xl border-4 border-black p-6 flex flex-col items-center text-center shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] transition-[transform,box-shadow] duration-300 relative cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-400"
             >
               {/* Decorative corners */}
               <div className="absolute top-2 left-2 w-3 h-3 bg-black rounded-full" />
@@ -450,7 +450,7 @@ export default function EducationLanding(): JSX.Element {
                 transition={{ duration: 0.5, delay: 1, type: "spring" }}
                 whileHover={{ scale: 1.08, y: -3 }}
                 whileTap={{ scale: 0.95 }}
-                className="mt-auto inline-flex items-center gap-3 bg-gradient-to-r from-black to-gray-800 text-blue-400 px-5 py-3 rounded-xl border-3 border-blue-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.7)] transition-all duration-300 cursor-pointer"
+                className="mt-auto inline-flex items-center gap-3 bg-gradient-to-r from-black to-gray-800 text-blue-400 px-5 py-3 rounded-xl border-3 border-blue-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.7)] transition-[transform,box-shadow,background-color] duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-400"
               >
                 <motion.svg
                   animate={{ y: [0, 5, 0] }}

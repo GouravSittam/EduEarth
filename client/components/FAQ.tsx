@@ -93,7 +93,7 @@ export default function FAQPage() {
             type: "spring" as const,
             stiffness: 200,
           }}
-          whileHover={{ scale: 1.1, rotate: [0, -3, 3, 0] }}
+          whileHover={{ scale: 1.1, rotate: 3 }}
           className="bg-gradient-to-r from-white to-yellow-100 mx-auto flex items-center justify-center border-4 border-black text-black px-6 py-2 rounded-xl font-bold mb-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 cursor-pointer"
         >
           ❓ FAQs

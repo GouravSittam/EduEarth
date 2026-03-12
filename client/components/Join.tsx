@@ -46,7 +46,7 @@ export default function SparklyGrowthPage() {
         whileInView={{ scale: 1, rotate: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: 0.2, type: "spring" }}
-        whileHover={{ scale: 1.1, rotate: [0, -3, 3, 0] }}
+        whileHover={{ scale: 1.1, rotate: 3 }}
         className="mt-16 bg-gradient-to-r from-purple-300 to-purple-400 text-purple-900 px-6 py-2 rounded-xl text-sm font-bold border-3 border-purple-600 shadow-[4px_4px_0px_0px_rgba(109,40,217,0.5)] cursor-pointer"
       >
         ✨ Sparkly Growth

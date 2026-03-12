@@ -47,7 +47,7 @@ export default function Navbar() {
         }}
         className="fixed top-3 sm:top-4 md:top-6 left-1/2 transform -translate-x-1/2 w-[96%] sm:w-[92%] md:w-[90%] max-w-7xl z-50 pointer-events-auto"
       >
-        <div className="relative backdrop-blur-xl bg-gradient-to-r from-black/85 via-gray-900/85 to-black/85 rounded-2xl md:rounded-3xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(251,191,36,1)] hover:shadow-[12px_12px_0px_0px_rgba(251,191,36,1)] transition-all duration-300">
+        <div className="relative backdrop-blur-xl bg-gradient-to-r from-black/85 via-gray-900/85 to-black/85 rounded-2xl md:rounded-3xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(251,191,36,1)] hover:shadow-[12px_12px_0px_0px_rgba(251,191,36,1)] transition-shadow duration-300">
           {/* Decorative corner accents */}
           <div className="absolute -top-2 -left-2 w-4 h-4 bg-yellow-400 border-2 border-black rounded-full" />
           <div className="absolute -top-2 -right-2 w-4 h-4 bg-yellow-400 border-2 border-black rounded-full" />
@@ -58,7 +58,7 @@ export default function Navbar() {
             {/* Left: Logo */}
             <Link
               href="/"
-              className="group flex items-center gap-2 sm:gap-3 cursor-pointer"
+              className="group flex items-center gap-2 sm:gap-3 cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-400 rounded-xl"
             >
               <motion.div
                 whileHover={{ rotate: 360, scale: 1.1 }}
@@ -114,16 +114,16 @@ export default function Navbar() {
                     <Link
                       href={item.href}
                       className={
-                        "group relative px-4 py-2 rounded-xl font-semibold text-xs lg:text-sm transition-all duration-300 cursor-pointer inline-flex items-center gap-2 " +
+                        "group relative px-4 py-3 min-h-[44px] min-w-[44px] rounded-xl font-semibold text-xs lg:text-sm transition-[background-color,color,border-color,box-shadow] duration-300 cursor-pointer inline-flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-400 " +
                         (item.isActive
-                          ? "bg-gradient-to-r from-yellow-300 to-yellow-400 text-black border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)]"
-                          : "text-green-100 hover:text-yellow-300 hover:bg-white/10")
+                          ? "bg-yellow-400 text-black border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px]"
+                          : "text-green-100 hover:text-yellow-300 hover:bg-white/10 border-2 border-transparent")
                       }
                     >
                       <span className="text-base">{item.emoji}</span>
                       <span>{item.label}</span>
                       {!item.isActive && (
-                        <motion.span className="absolute bottom-0 left-0 h-0.5 bg-yellow-400 w-0 group-hover:w-full transition-all duration-300" />
+                        <motion.span className="absolute bottom-0 left-0 h-0.5 bg-yellow-400 w-0 group-hover:w-full transition-[width] duration-300" />
                       )}
                     </Link>
                   </motion.li>
@@ -143,7 +143,9 @@ export default function Navbar() {
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={toggleMobileMenu}
-                className="lg:hidden p-2.5 text-white bg-yellow-400/20 rounded-xl border-2 border-yellow-400 hover:bg-yellow-400 hover:text-black transition-all duration-300 cursor-pointer"
+                aria-label="Toggle mobile menu"
+                aria-expanded={isMobileMenuOpen}
+                className="lg:hidden p-2.5 text-white bg-yellow-400/20 rounded-xl border-2 border-yellow-400 hover:bg-yellow-400 hover:text-black transition-colors duration-300 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-400"
               >
                 {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </motion.button>
@@ -190,7 +192,7 @@ export default function Navbar() {
                         href={item.href}
                         onClick={() => setIsMobileMenuOpen(false)}
                         className={
-                          "flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-300 cursor-pointer " +
+                          "flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-xl font-semibold text-sm transition-[background-color,color,border-color,box-shadow,transform] duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-400 " +
                           (item.isActive
                             ? "bg-gradient-to-r from-yellow-300 to-yellow-400 text-black border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                             : "text-green-100 hover:bg-white/10 hover:text-yellow-300 border-2 border-transparent hover:border-yellow-400/50")

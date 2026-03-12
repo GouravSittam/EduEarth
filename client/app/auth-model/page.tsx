@@ -100,20 +100,22 @@ export default function AuthPage() {
             <input
               type="email"
               placeholder="Email"
+              aria-label="Email Address"
               value={signInData.email}
               onChange={(e) =>
                 setSignInData({ ...signInData, email: e.target.value })
               }
-              className="px-3 py-2 sm:px-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base"
+              className="px-3 py-2 sm:px-4 border rounded-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-green-400 text-sm sm:text-base"
             />
             <input
               type="password"
               placeholder="Password"
+              aria-label="Password"
               value={signInData.password}
               onChange={(e) =>
                 setSignInData({ ...signInData, password: e.target.value })
               }
-              className="px-3 py-2 sm:px-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base"
+              className="px-3 py-2 sm:px-4 border rounded-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-green-400 text-sm sm:text-base"
             />
             <button
               type="submit"
@@ -130,29 +132,32 @@ export default function AuthPage() {
             <input
               type="text"
               placeholder="Full Name"
+              aria-label="Full Name"
               value={signUpData.fullName}
               onChange={(e) =>
                 setSignUpData({ ...signUpData, fullName: e.target.value })
               }
-              className="px-3 py-2 sm:px-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base"
+              className="px-3 py-2 sm:px-4 border rounded-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-green-400 text-sm sm:text-base"
             />
             <input
               type="email"
               placeholder="Email"
+              aria-label="Email Address"
               value={signUpData.email}
               onChange={(e) =>
                 setSignUpData({ ...signUpData, email: e.target.value })
               }
-              className="px-3 py-2 sm:px-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base"
+              className="px-3 py-2 sm:px-4 border rounded-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-green-400 text-sm sm:text-base"
             />
             <input
               type="password"
               placeholder="Password"
+              aria-label="Password"
               value={signUpData.password}
               onChange={(e) =>
                 setSignUpData({ ...signUpData, password: e.target.value })
               }
-              className="px-3 py-2 sm:px-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base"
+              className="px-3 py-2 sm:px-4 border rounded-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-green-400 text-sm sm:text-base"
             />
             <div className="flex flex-col">
               <label htmlFor="role" className="text-gray-700 mb-1 text-sm sm:text-base">
@@ -164,7 +169,7 @@ export default function AuthPage() {
                 onChange={(e) =>
                   setSignUpData({ ...signUpData, role: e.target.value })
                 }
-                className="px-3 py-2 sm:px-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base"
+                className="px-3 py-2 sm:px-4 border rounded-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-green-400 text-sm sm:text-base"
               >
                 <option value="student">Student</option>
                 <option value="teacher">Teacher</option>
