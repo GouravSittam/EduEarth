@@ -1,67 +1,42 @@
-# Use Node.js 20 LTS as base image
-FROM node:20-alpine AS base
+FROM node:20-alpine AS builder
 
-# Install dependencies only when needed
-FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
+
 COPY package.json package-lock.json* ./
-RUN npm ci --only=production && npm cache clean --force
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
-# Development dependencies for building
-FROM base AS build-deps
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci
-
-# Build the application
-FROM base AS builder
-WORKDIR /app
-
-# Copy node_modules from build-deps
-COPY --from=build-deps /app/node_modules ./node_modules
-
-# Copy all necessary files for build
-COPY package.json tsconfig.json prisma.config.ts ./
+COPY tsconfig.json prisma.config.ts ./
 COPY src ./src
 
-# Generate Prisma client and build
+# Runs Prisma generate via prebuild, then compiles TypeScript.
 RUN npm run build
 
-# Production image
-FROM base AS runner
-WORKDIR /app
+# Keep only production dependencies for the runtime image.
+RUN npm prune --omit=dev && npm cache clean --force
 
-# Create a non-root user
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+ENV NODE_ENV=production
+ENV PORT=6969
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
 
-# Copy built application and production dependencies
-COPY --from=builder /app/build ./build
-COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
-
-# --- FIX: Copy the generated Prisma Client from the builder stage ---
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-
-# Copy Prisma files for runtime
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/build ./build
 COPY --from=builder /app/src/prisma ./src/prisma
+COPY --from=builder /app/src/public ./src/public
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
-# Copy static assets
-COPY --from=builder /app/src/public ./src/public
-
-# Change ownership to nodejs user
 RUN chown -R nodejs:nodejs /app
 USER nodejs
 
-# Expose port
 EXPOSE 6969
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:6969/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })" || exit 1
 
-# Start the application
-CMD ["npm", "start"]
+CMD ["node", "build/server.js"]
