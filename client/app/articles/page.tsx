@@ -4,14 +4,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import UserButton from "@/components/UserButton";
+import { server } from "@/lib/api";
 
 type Article = {
   section: string;
   source: string;
-  publishDate: Date;
-  extractedDate: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  publishDate: Date | string;
+  extractedDate: Date | string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
   headline: string;
   id: string;
   url: string;
@@ -20,39 +21,36 @@ type Article = {
   ai_summary: string | null;
 };
 
+type ArticlesResponseData = {
+  articles: Article[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalCount: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+};
+
 export default function ArticlePage() {
   const [articles, setArticles] = useState<Article[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const get = async () => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/articles`
-      );
-
-      if (!response.ok) {
-        alert("Failed to fetch articles");
-        return;
-      }
-
-      type ArticlesResponse = {
-        data: {
-          articles: Article[];
-          pagination: {
-            currentPage: number;
-            totalPages: number;
-            totalCount: number;
-            hasNext: boolean;
-            hasPrev: boolean;
-          };
-        };
-      };
-
-      const { data }: ArticlesResponse = await response.json();
-
-      setArticles(data.articles);
-    };
-
-    get();
+    server
+      .get<{ articles: Article[] } & ArticlesResponseData["pagination"]>(
+        "/articles"
+      )
+      .then((res) => {
+        const data = res.data as unknown as ArticlesResponseData;
+        if (data?.articles) {
+          setArticles(data.articles);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch articles:", err);
+        setError(err instanceof Error ? err.message : "Failed to fetch articles");
+      });
   }, []);
 
   const formatDate = (date: Date | string) => {
@@ -72,7 +70,6 @@ export default function ArticlePage() {
     if (article.ai_summary) {
       return truncateText(article.ai_summary);
     }
-    // If no AI summary, show the beginning of the body text
     return truncateText(article.body, 200);
   };
 
@@ -108,8 +105,21 @@ export default function ArticlePage() {
             </p>
           </div>
 
+          {/* Error state */}
+          {error && (
+            <div className="text-center text-red-400 mb-8">
+              <p>{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-2 text-sm underline"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
           {/* Loading state */}
-          {articles.length === 0 ? (
+          {articles.length === 0 && !error ? (
             <div className="flex justify-center items-center py-20">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-400"></div>
             </div>

@@ -59,11 +59,18 @@ const PORT = process.env.PORT || 6969;
 // ═══════════════════════════════════════════════════════════════════════════
 
 // CORS Configuration - Allow credentials from any origin
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  process.env.CLIENT_BASE_URL,
+].filter(Boolean);
+
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
-      return callback(null, origin);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      callback(null, origin); // allow all in dev
     },
     credentials: true,
   })
