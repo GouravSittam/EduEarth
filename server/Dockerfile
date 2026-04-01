@@ -21,9 +21,6 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=6969
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nodejs
-
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/build ./build
@@ -31,8 +28,8 @@ COPY --from=builder /app/src/prisma ./src/prisma
 COPY --from=builder /app/src/public ./src/public
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
-RUN chown -R nodejs:nodejs /app
-USER nodejs
+RUN chown -R node:node /app
+USER node
 
 EXPOSE 6969
 
