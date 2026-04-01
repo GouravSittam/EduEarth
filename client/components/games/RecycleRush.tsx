@@ -983,6 +983,7 @@ export default function RecycleRush({
           onClick={pauseGame}
           className="absolute top-5 left-5 size-20"
           src={"/recycle-rush/pause-button.png"}
+          alt="Pause game"
         />
       )}
     </div>
