@@ -467,7 +467,13 @@ export const submitQuizAttempt = async (
   try {
     const { id } = req.params;
     const { answers } = req.body;
-    const studentId = req.user?.id; // Assuming user is student
+
+    if (!req.user) {
+      sendErrorResponse(res, 401, "Unauthorized request");
+      return;
+    }
+
+    const studentId = req.user.id;
 
     if (!id || !answers || !Array.isArray(answers)) {
       sendErrorResponse(res, 400, "Quiz ID and answers array are required");
@@ -579,7 +585,13 @@ export const getQuizAttempts = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const studentId = req.user?.id; // Assuming user is student
+
+    if (!req.user) {
+      sendErrorResponse(res, 401, "Unauthorized request");
+      return;
+    }
+
+    const studentId = req.user.id;
 
     if (!id) {
       sendErrorResponse(res, 400, "Quiz ID is required");

@@ -558,7 +558,13 @@ export const completeLesson = async (
   try {
     const { id } = req.params;
     const { timeSpent } = req.body;
-    const studentId = req.user?.id; // Assuming user is student
+
+    if (!req.user) {
+      sendErrorResponse(res, 401, "Unauthorized request");
+      return;
+    }
+
+    const studentId = req.user.id;
 
     if (!id) {
       sendErrorResponse(res, 400, "Lesson ID is required");
@@ -645,7 +651,13 @@ export const getLessonCompletions = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const studentId = req.user?.id; // Assuming user is student
+
+    if (!req.user) {
+      sendErrorResponse(res, 401, "Unauthorized request");
+      return;
+    }
+
+    const studentId = req.user.id;
 
     if (!id) {
       sendErrorResponse(res, 400, "Lesson ID is required");

@@ -94,7 +94,7 @@ export default function HowItWorks() {
 
       {/* Slides Container */}
       <div className="w-full h-full mx-auto mt-5 overflow-hidden relative">
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           <motion.div
             key={current}
             initial={{ opacity: 0, x: 300, rotateY: 45 }}

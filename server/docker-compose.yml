@@ -12,11 +12,10 @@ services:
       - PORT=6969
       # Add your environment variables here or use env_file
       # DATABASE_URL=your_database_url
-      # JWT_SECRET=your_jwt_secret
+      # SUPABASE_URL=https://your-project-ref.supabase.co
+      # SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
       # AWS_ACCESS_KEY_ID=your_aws_access_key
       # AWS_SECRET_ACCESS_KEY=your_aws_secret
-      # GOOGLE_CLIENT_ID=your_google_client_id
-      # GOOGLE_CLIENT_SECRET=your_google_client_secret
     # Uncomment if you want to use an env file
     # env_file:
     #   - .env.production

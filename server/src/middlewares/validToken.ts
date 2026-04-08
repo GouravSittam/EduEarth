@@ -1,16 +1,106 @@
 import prisma from "../prisma/client.js";
-import { accessSecret } from "../utils/auth.js";
 import { getErrorMessage } from "../utils/utils.js";
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import { UserRole, type User } from "@prisma/client";
+import { type User as SupabaseUser } from "@supabase/supabase-js";
+import { getSupabaseServerClient } from "../utils/supabase.js";
 
 declare global {
   namespace Express {
     interface Request {
-      user?: any;
+      user?: User;
+      supabaseUser?: SupabaseUser;
     }
   }
 }
+
+const parseRole = (value: unknown): UserRole => {
+  if (typeof value !== "string") {
+    return UserRole.USER;
+  }
+
+  const normalizedValue = value.toUpperCase();
+
+  if (normalizedValue in UserRole) {
+    return UserRole[normalizedValue as keyof typeof UserRole];
+  }
+
+  return UserRole.USER;
+};
+
+const getAccessToken = (req: Request) => {
+  const authorizationHeader = req.headers.authorization;
+
+  if (authorizationHeader?.startsWith("Bearer ")) {
+    return authorizationHeader.slice("Bearer ".length);
+  }
+
+  const accessTokenHeader = req.headers["access-token"];
+
+  if (typeof accessTokenHeader === "string" && accessTokenHeader.length > 0) {
+    return accessTokenHeader;
+  }
+
+  return null;
+};
+
+const getMetadataValue = (
+  metadata: SupabaseUser["user_metadata"],
+  key: string
+) => {
+  const value = metadata?.[key];
+  return typeof value === "string" && value.trim().length > 0 ? value : null;
+};
+
+const syncPrismaUser = async (supabaseUser: SupabaseUser) => {
+  if (!supabaseUser.email) {
+    throw new Error("Supabase user email is missing");
+  }
+
+  const fullName =
+    getMetadataValue(supabaseUser.user_metadata, "full_name") ??
+    getMetadataValue(supabaseUser.user_metadata, "name");
+  const avatarUrl = getMetadataValue(supabaseUser.user_metadata, "avatar_url");
+  const role = parseRole(supabaseUser.user_metadata?.role);
+
+  const existingUser = await prisma.user.findUnique({
+    where: { email: supabaseUser.email },
+  });
+
+  if (!existingUser) {
+    return prisma.user.create({
+      data: {
+        email: supabaseUser.email,
+        name: fullName,
+        avatar: avatarUrl,
+        role,
+      },
+    });
+  }
+
+  const updates: Partial<User> = {};
+
+  if (!existingUser.name && fullName) {
+    updates.name = fullName;
+  }
+
+  if (!existingUser.avatar && avatarUrl) {
+    updates.avatar = avatarUrl;
+  }
+
+  if (existingUser.role === UserRole.USER && role !== UserRole.USER) {
+    updates.role = role;
+  }
+
+  if (Object.keys(updates).length === 0) {
+    return existingUser;
+  }
+
+  return prisma.user.update({
+    where: { id: existingUser.id },
+    data: updates,
+  });
+};
 
 export default async function validToken(
   req: Request,
@@ -18,41 +108,31 @@ export default async function validToken(
   next: NextFunction
 ): Promise<Response | void> {
   try {
-    console.log(
-      "🔐 Auth middleware - checking token for:",
-      req.method,
-      req.path
-    );
-
-    const accessToken = req.cookies?.accessToken || req.headers["access-token"];
+    const accessToken = getAccessToken(req);
 
     if (!accessToken) {
-      console.error("❌ No access token found in cookies or headers");
-      throw "Unauthorized request";
+      throw new Error("Unauthorized request");
     }
 
-    const { id: userId } = jwt.verify(
-      accessToken,
-      accessSecret
-    ) as AccessTokenPayload;
+    const supabase = getSupabaseServerClient();
+    const {
+      data: { user: supabaseUser },
+      error,
+    } = await supabase.auth.getUser(accessToken);
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      console.error("❌ User not found for ID:", userId);
-      throw "Invalid Access Token";
+    if (error || !supabaseUser) {
+      throw error ?? new Error("Invalid access token");
     }
 
-    console.log("✅ Auth successful for user:", user.email, "ID:", user.id);
+    const user = await syncPrismaUser(supabaseUser);
+
     req.user = user;
+    req.supabaseUser = supabaseUser;
 
     next();
-  } catch (err) {
-    console.error("❌ Auth middleware error:", err);
-    return res
-      .status(401)
-      .json({ error: getErrorMessage(err, "Unauthorized Access") });
+  } catch (error) {
+    return res.status(401).json({
+      error: getErrorMessage(error, "Unauthorized Access"),
+    });
   }
 }

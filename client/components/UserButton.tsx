@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 export default function UserButton({
   className = "",
@@ -9,21 +12,10 @@ export default function UserButton({
   className?: string;
   mobile?: boolean;
 }) {
-  const [user, setUser] = useState<any>(null);
+  const { user, authUser, signOut, isLoading } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const parsed = JSON.parse(storedUser);
-      if (parsed.isLoggedIn) {
-        setUser(parsed);
-      }
-    }
-  }, []);
-
-  // Handle click outside to close dropdown
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -33,23 +25,31 @@ export default function UserButton({
         setDropdownOpen(false);
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Logout handler
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    setUser(null);
+  const handleLogout = async () => {
+    await signOut();
     setDropdownOpen(false);
   };
 
-  if (!user) {
+  const displayName =
+    user?.name ??
+    authUser?.user_metadata?.full_name ??
+    authUser?.email ??
+    "User";
+  const displayEmail = user?.email ?? authUser?.email ?? "";
+
+  if (!user && !authUser && !isLoading) {
     return (
       <Link
         href="/auth-model"
-        className={`ml-1 rounded-full border-2 border-black bg-yellow-400 px-4 py-2 text-sm font-semibold text-black shadow-[0_3px_0_#000] transition-transform hover:-translate-y-0.5 active:translate-y-0 ${className} ${mobile ? "block text-center w-full" : ""
-          }`}
+        className={`ml-1 rounded-full border-2 border-black bg-yellow-400 px-4 py-2 text-sm font-semibold text-black shadow-[0_3px_0_#000] transition-transform hover:-translate-y-0.5 active:translate-y-0 ${className} ${
+          mobile ? "block text-center w-full" : ""
+        }`}
         style={{
           fontFamily: '"Press Start 2P", system-ui, sans-serif',
         }}
@@ -61,26 +61,38 @@ export default function UserButton({
     );
   }
 
+  if (!user && !authUser && isLoading) {
+    return (
+      <div
+        className={`ml-1 rounded-full border-2 border-black bg-yellow-300 px-4 py-2 text-sm font-semibold text-black shadow-[0_3px_0_#000] ${className}`}
+      >
+        Loading
+      </div>
+    );
+  }
+
   if (mobile) {
     return (
       <div className={`flex flex-col items-center gap-3 p-2 ${className}`}>
         <div className="flex items-center gap-3 w-full">
           <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-yellow-400 shrink-0">
             <img
-              src="/avatar.png"
+              src={user?.avatar || "/avatar.png"}
               alt="Profile"
               className="h-full w-full object-cover"
             />
           </div>
           <div className="flex flex-col overflow-hidden">
             <span className="text-sm font-semibold text-white truncate">
-              {user.fullName || "User"}
+              {displayName}
             </span>
-            <span className="text-xs text-gray-300 truncate">{user.email}</span>
+            <span className="text-xs text-gray-300 truncate">
+              {displayEmail}
+            </span>
           </div>
         </div>
         <button
-          onClick={handleLogout}
+          onClick={() => void handleLogout()}
           className="w-full rounded-xl bg-red-500/80 border border-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 transition-colors"
         >
           Logout
@@ -99,13 +111,12 @@ export default function UserButton({
       >
         <motion.img
           whileHover={{ scale: 1.1 }}
-          src="/avatar.png"
+          src={user?.avatar || "/avatar.png"}
           alt="Profile"
           className="h-full w-full object-cover"
         />
       </motion.button>
 
-      {/* Dropdown Menu */}
       <AnimatePresence>
         {dropdownOpen && (
           <motion.div
@@ -122,7 +133,7 @@ export default function UserButton({
               transition={{ duration: 0.3, delay: 0.1 }}
               className="text-sm font-semibold text-gray-800"
             >
-              {user.fullName || "User"}
+              {displayName}
             </motion.p>
             <motion.p
               initial={{ opacity: 0, x: -10 }}
@@ -130,7 +141,7 @@ export default function UserButton({
               transition={{ duration: 0.3, delay: 0.15 }}
               className="text-xs text-gray-500 mb-3"
             >
-              {user.email}
+              {displayEmail}
             </motion.p>
             <motion.button
               initial={{ opacity: 0, y: 10 }}
@@ -138,7 +149,7 @@ export default function UserButton({
               transition={{ duration: 0.3, delay: 0.2 }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={handleLogout}
+              onClick={() => void handleLogout()}
               className="w-full rounded-md bg-red-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-600 transition"
             >
               Logout

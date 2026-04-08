@@ -456,7 +456,7 @@ export default function ExploreModule() {
 
           {/* Cards Row */}
           <motion.div className="flex pb-20 sm:pb-32 md:pb-40 flex-row gap-4 sm:gap-6 md:gap-8 px-4 sm:px-6 md:px-8 w-full justify-center transition-all duration-700 ease-in-out min-h-[300px] sm:min-h-[350px] md:min-h-[400px]">
-            <AnimatePresence mode="wait">
+            <AnimatePresence>
               {visibleModules.map((mod, idx) => (
                 <ElectricBorder
                   key={`${activeCategory}-${page}-${idx}`}
