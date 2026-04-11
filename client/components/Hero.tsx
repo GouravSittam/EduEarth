@@ -1,37 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import BotComponent from "./bot";
 import { BsController } from "react-icons/bs";
 import { Users2Icon } from "lucide-react";
-import Link from "next/link";
 import GlitchText from "./GlitchText";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 export default function Hero() {
-  const [user, setUser] = useState<any>(null);
+  const { user, authUser, isLoading } = useAuth();
   const router = useRouter();
 
-  // Load user from localStorage when page mounts
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-    }
-  }, []);
+  const normalizedRole =
+    user?.role?.toUpperCase() ??
+    (typeof authUser?.user_metadata?.role === "string"
+      ? authUser.user_metadata.role.toUpperCase()
+      : null);
+  const isSignedIn = Boolean(user || authUser);
 
   // Handle dashboard navigation
   const handleDashboardRedirect = () => {
-    if (!user || !user.isLoggedIn) {
-      alert("Please sign in first!");
+    if (isLoading) {
+      return;
+    }
+
+    if (!isSignedIn) {
       router.push("/auth-model");
       return;
     }
 
-    if (user.role === "teacher") {
+    if (normalizedRole === "TEACHER") {
       router.push("/teacher-dashboard");
     } else {
       router.push("/student-dashboard");
@@ -255,9 +253,11 @@ export default function Hero() {
             <motion.div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
             <span className="relative z-10 text-sm sm:text-base md:text-lg text-center">
-              {user?.role === "teacher"
+              {isLoading
+                ? "Loading..."
+                : normalizedRole === "TEACHER"
                 ? "Teacher Dashboard"
-                : user?.role === "student"
+                : normalizedRole === "STUDENT"
                   ? "Student Dashboard"
                   : "Go to Dashboard"}
             </span>
