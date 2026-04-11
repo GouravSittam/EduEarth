@@ -34,7 +34,7 @@ export default function ArticleDetailPage() {
       try {
         setLoading(true);
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_SERVER_URL}/articles/${id}`
+          `${process.env.NEXT_PUBLIC_SERVER_URL}/articles/${id}`,
         );
 
         if (!response.ok) {
@@ -149,7 +149,7 @@ export default function ArticleDetailPage() {
       <nav className="sticky top-0 bg-gradient-to-r from-green-400 to-sky-400 shadow-lg z-50 px-6 py-2 flex items-center justify-between">
         <Link href="/home">
           <Image
-            src="/eco-play-logo-small.png"
+            src="/EduEarth-logo-small.png"
             alt="ECO Play Logo"
             width={100}
             height={100}

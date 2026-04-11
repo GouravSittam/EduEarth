@@ -39,7 +39,7 @@ export default function ArticlePage() {
   useEffect(() => {
     server
       .get<{ articles: Article[] } & ArticlesResponseData["pagination"]>(
-        "/articles"
+        "/articles",
       )
       .then((res) => {
         const data = res.data as unknown as ArticlesResponseData;
@@ -49,7 +49,9 @@ export default function ArticlePage() {
       })
       .catch((err) => {
         console.error("Failed to fetch articles:", err);
-        setError(err instanceof Error ? err.message : "Failed to fetch articles");
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch articles",
+        );
       });
   }, []);
 
@@ -79,7 +81,7 @@ export default function ArticlePage() {
       <nav className="sticky top-0 bg-gradient-to-r from-green-400 to-sky-400 shadow-lg z-50 px-6 py-2 flex items-center justify-between">
         <Link href="/home">
           <Image
-            src="/eco-play-logo-small.png"
+            src="/EduEarth-logo-small.png"
             alt="ECO Play Logo"
             width={100}
             height={100}

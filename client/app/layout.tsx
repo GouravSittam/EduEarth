@@ -109,7 +109,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="EduEarth" />
       </head>
-<body
+      <body
         className={`${pressStart.variable} antialiased min-h-dvh h-full overflow-x-hidden lenis lenis-smooth`}
       >
         <AuthProvider>

@@ -75,7 +75,7 @@ export default function Footer() {
             >
               <div className="relative h-12 w-12 bg-yellow-400 rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-1">
                 <Image
-                  src="/eco-play-logo-small.png"
+                  src="/EduEarth-logo-small.png"
                   alt="EduEarth"
                   fill
                   className="object-contain p-1"

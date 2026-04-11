@@ -78,7 +78,7 @@ export default function GamesPage() {
             transition={{ duration: 0.3 }}
           >
             <Image
-              src="/eco-play-logo-small.png"
+              src="/EduEarth-logo-small.png"
               alt="ECO Play Logo"
               width={100}
               height={100}
@@ -197,7 +197,10 @@ export default function GamesPage() {
                       }}
                     >
                       <IoGameController size={14} className="sm:hidden" />
-                      <IoGameController size={16} className="hidden sm:block md:hidden" />
+                      <IoGameController
+                        size={16}
+                        className="hidden sm:block md:hidden"
+                      />
                       <IoGameController size={18} className="hidden md:block" />
                     </motion.div>
                     <span className="text-xs sm:text-sm">{game.tagline}</span>
@@ -210,7 +213,10 @@ export default function GamesPage() {
                       }}
                     >
                       <IoGameController size={14} className="sm:hidden" />
-                      <IoGameController size={16} className="hidden sm:block md:hidden" />
+                      <IoGameController
+                        size={16}
+                        className="hidden sm:block md:hidden"
+                      />
                       <IoGameController size={18} className="hidden md:block" />
                     </motion.div>
                   </motion.div>
@@ -261,7 +267,9 @@ export default function GamesPage() {
             >
               More Games
             </motion.span>
-            <span className="text-xs sm:text-sm text-zinc-400 text-center">Coming soon...</span>
+            <span className="text-xs sm:text-sm text-zinc-400 text-center">
+              Coming soon...
+            </span>
           </motion.div>
         </motion.div>
       </motion.div>
