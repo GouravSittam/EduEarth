@@ -102,15 +102,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="lenis">
       <head>
         <meta name="theme-color" content="#22c55e" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="EduEarth" />
       </head>
-      <body
-        className={`${pressStart.variable} antialiased min-h-dvh h-full overflow-x-hidden`}
+<body
+        className={`${pressStart.variable} antialiased min-h-dvh h-full overflow-x-hidden lenis lenis-smooth`}
       >
         <AuthProvider>
           <SmoothScrolling>

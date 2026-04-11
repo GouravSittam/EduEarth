@@ -241,6 +241,28 @@ body {
   line-clamp: 3;
 }
 
+/* Leniz smooth scroll styles */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [class*="lenis__"] {
+  outline: none;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
 /* Pointer cursor for interactive elements to make links/buttons feel clickable */
 a,
 a:link,
