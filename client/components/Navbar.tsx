@@ -66,8 +66,8 @@ export default function Navbar() {
                 className="relative h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-xl border-3 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] p-1"
               >
                 <Image
-                  src="/EduEarth-logo-small.png"
-                  alt="ECO Play Logo"
+                  src="/eco-play-logo-small.png"
+                  alt="EduEarth logo"
                   width={48}
                   height={48}
                   className="h-full w-full object-contain p-0.5"

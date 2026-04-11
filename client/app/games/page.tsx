@@ -78,8 +78,8 @@ export default function GamesPage() {
             transition={{ duration: 0.3 }}
           >
             <Image
-              src="/EduEarth-logo-small.png"
-              alt="ECO Play Logo"
+              src="/eco-play-logo-small.png"
+              alt="EduEarth logo"
               width={100}
               height={100}
               className="h-10 w-10 sm:h-12 sm:w-12 md:h-15 md:w-15"

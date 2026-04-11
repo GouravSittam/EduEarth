@@ -81,8 +81,8 @@ export default function ArticlePage() {
       <nav className="sticky top-0 bg-gradient-to-r from-green-400 to-sky-400 shadow-lg z-50 px-6 py-2 flex items-center justify-between">
         <Link href="/home">
           <Image
-            src="/EduEarth-logo-small.png"
-            alt="ECO Play Logo"
+            src="/eco-play-logo-small.png"
+            alt="EduEarth logo"
             width={100}
             height={100}
             className="size-15"
