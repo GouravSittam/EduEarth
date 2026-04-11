@@ -36,10 +36,66 @@ export const getUser = async (req: Request, res: Response) => {
       });
     }
 
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      include: {
+        student: {
+          select: {
+            id: true,
+            ecoPoints: true,
+            level: true,
+            streak: true,
+            institution: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            _count: {
+              select: {
+                badges: true,
+                challengeParticipations: true,
+                classes: true,
+                completedLessons: true,
+                quizAttempts: true,
+              },
+            },
+          },
+        },
+        teacher: {
+          select: {
+            id: true,
+            institution: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            _count: {
+              select: {
+                classes: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      return sendResponse({
+        res,
+        success: false,
+        error: {
+          message: "User not found",
+        },
+        statusCode: 404,
+      });
+    }
+
     return sendResponse({
       res,
       success: true,
-      data: { user: req.user },
+      data: { user },
     });
   } catch (error) {
     return sendResponse({

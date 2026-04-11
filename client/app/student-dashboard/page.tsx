@@ -2,12 +2,140 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Search, Bell, MessageCircle, User, Home, Grid, FileText, Flag, Trophy, Settings, Award, Star, Shield, Calendar, Play, Menu } from "lucide-react";
-import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Search,
+  Bell,
+  MessageCircle,
+  Home,
+  Grid,
+  FileText,
+  Trophy,
+  Star,
+  Shield,
+  Calendar,
+  Play,
+  Menu,
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 export default function DashboardPage() {
-  type Tab = 'Overview' | 'Modules' | 'Assignments' | 'Missions' | 'LeaderBoard' | 'Messages' | 'Certificates' | 'Settings' | 'mobile-menu';
-  const [activeTab, setActiveTab] = useState<Tab>('Overview');
+  type Tab =
+    | "Overview"
+    | "Modules"
+    | "Assignments"
+    | "Missions"
+    | "LeaderBoard"
+    | "Messages"
+    | "Certificates"
+    | "Settings"
+    | "mobile-menu";
+
+  const [activeTab, setActiveTab] = useState<Tab>("Overview");
+  const router = useRouter();
+  const { user, authUser, isLoading } = useAuth();
+
+  const normalizedRole =
+    user?.role?.toUpperCase() ??
+    (typeof authUser?.user_metadata?.role === "string"
+      ? authUser.user_metadata.role.toUpperCase()
+      : null);
+  const isSignedIn = Boolean(user || authUser);
+  const isTeacher = normalizedRole === "TEACHER";
+  const studentProfile = user?.student ?? null;
+  const teacherProfile = user?.teacher ?? null;
+  const displayName =
+    user?.name ??
+    (typeof authUser?.user_metadata?.full_name === "string"
+      ? authUser.user_metadata.full_name
+      : null) ??
+    authUser?.email ??
+    "Eco Learner";
+  const profileAvatar =
+    user?.avatar ??
+    (typeof authUser?.user_metadata?.avatar_url === "string"
+      ? authUser.user_metadata.avatar_url
+      : null) ??
+    (typeof authUser?.user_metadata?.picture === "string"
+      ? authUser.user_metadata.picture
+      : null) ??
+    "/avatar.png";
+  const roleLabel =
+    normalizedRole === "TEACHER"
+      ? "Teacher"
+      : normalizedRole === "STUDENT" || studentProfile
+        ? "Student"
+        : "Explorer";
+  const ecoPoints = studentProfile?.ecoPoints ?? 0;
+  const streakCount = studentProfile?.streak ?? 0;
+  const missionCount = studentProfile?._count.challengeParticipations ?? 0;
+  const levelCount = studentProfile?.level ?? 1;
+  const badgeCount = studentProfile?._count.badges ?? 0;
+  const completedLessonCount = studentProfile?._count.completedLessons ?? 0;
+  const activeClassCount = studentProfile?._count.classes ?? 0;
+  const quizAttemptCount = studentProfile?._count.quizAttempts ?? 0;
+  const institutionName =
+    studentProfile?.institution?.name ??
+    teacherProfile?.institution?.name ??
+    null;
+  const hasEmail = Boolean(user?.email ?? authUser?.email);
+  const hasAvatar = Boolean(
+    user?.avatar ??
+      (typeof authUser?.user_metadata?.avatar_url === "string"
+        ? authUser.user_metadata.avatar_url
+        : null) ??
+      (typeof authUser?.user_metadata?.picture === "string"
+        ? authUser.user_metadata.picture
+        : null)
+  );
+  const profileCompletion = Math.max(
+    isSignedIn ? 25 : 0,
+    [
+      displayName ? 20 : 0,
+      hasEmail ? 20 : 0,
+      hasAvatar ? 20 : 0,
+      institutionName ? 20 : 0,
+      completedLessonCount > 0 || quizAttemptCount > 0 ? 20 : 0,
+    ].reduce((sum, value) => sum + value, 0)
+  );
+
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
+    if (!isSignedIn) {
+      router.replace("/auth-model");
+      return;
+    }
+
+    if (isTeacher) {
+      router.replace("/teacher-dashboard");
+    }
+  }, [isLoading, isSignedIn, isTeacher, router]);
+
+  if (isLoading || !isSignedIn || isTeacher) {
+    return (
+      <div
+        className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12 text-white"
+        style={{
+          backgroundImage: "url('/signimage.jpeg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          fontFamily: '"Press Start 2P", system-ui, sans-serif',
+        }}
+      >
+        <div className="absolute inset-0 bg-black/70" />
+        <div className="relative z-10 w-full max-w-xl rounded-3xl border-4 border-black bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-400 p-5 text-center text-black shadow-[0_10px_0_#000,0_18px_40px_rgba(0,0,0,0.4)] sm:p-7">
+          <div className="text-sm leading-relaxed sm:text-base">
+            Loading your dashboard...
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row relative text-gray-800" >
@@ -56,7 +184,7 @@ export default function DashboardPage() {
                 <path d="M12 22C16.4183 22 20 18.4183 20 14C20 9.58172 16.4183 6 12 6C7.58172 6 4 9.58172 4 14C4 18.4183 7.58172 22 12 22Z" fill="white" opacity="0.12" />
               </svg>
             </div>
-            <div className="text-white font-bold text-sm sm:text-lg">ECO Play</div>
+            <div className="text-white font-bold text-sm sm:text-lg">Edu Earth</div>
           </div>
 
           <div className="flex-1 mx-2 sm:mx-4 md:mx-6">
@@ -79,7 +207,11 @@ export default function DashboardPage() {
             </button>
 
             <div className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full overflow-hidden">
-              <Image src="/avatar.png" alt="avatar" width={36} height={36} className="object-cover" />
+              <img
+                src={profileAvatar}
+                alt={`${displayName} avatar`}
+                className="h-full w-full object-cover"
+              />
             </div>
           </div>
         </header>

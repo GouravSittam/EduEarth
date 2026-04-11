@@ -35,16 +35,20 @@ type ArticlesResponseData = {
 export default function ArticlePage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setIsLoading(true);
+    setError(null);
+
     server
-      .get<{ articles: Article[] } & ArticlesResponseData["pagination"]>(
-        "/articles",
-      )
+      .get<ArticlesResponseData>("/articles")
       .then((res) => {
-        const data = res.data as unknown as ArticlesResponseData;
+        const data = res.data;
         if (data?.articles) {
           setArticles(data.articles);
+        } else {
+          setArticles([]);
         }
       })
       .catch((err) => {
@@ -52,6 +56,10 @@ export default function ArticlePage() {
         setError(
           err instanceof Error ? err.message : "Failed to fetch articles",
         );
+        setArticles([]);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }, []);
 
@@ -121,9 +129,23 @@ export default function ArticlePage() {
           )}
 
           {/* Loading state */}
-          {articles.length === 0 && !error ? (
+          {isLoading ? (
             <div className="flex justify-center items-center py-20">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-400"></div>
+            </div>
+          ) : articles.length === 0 && !error ? (
+            <div className="mx-auto max-w-2xl rounded-2xl border border-green-400/30 bg-slate-900/90 px-6 py-10 text-center shadow-2xl">
+              <h2 className="text-2xl font-bold text-green-400">
+                No Articles Yet
+              </h2>
+              <p className="mt-4 text-zinc-300">
+                Your articles page is working again, but there are no
+                environmental stories in the database yet.
+              </p>
+              <p className="mt-3 text-sm text-zinc-400">
+                Once your article ingestion pipeline adds records, they will
+                show up here automatically.
+              </p>
             </div>
           ) : (
             /* Articles Grid */
