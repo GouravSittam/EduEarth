@@ -2,6 +2,28 @@ import { Request, Response } from "express";
 import { sendResponse } from "../utils/ResponseHelpers.js";
 import { prisma } from "../prisma/client.js";
 
+type GuardianSearchResult = {
+  webPublicationDate?: string;
+  webTitle?: string;
+  webUrl?: string;
+  sectionName?: string;
+  fields?: {
+    headline?: string;
+    trailText?: string;
+    bodyText?: string;
+    thumbnail?: string;
+  };
+};
+
+type GuardianSearchResponse = {
+  response?: {
+    results?: GuardianSearchResult[];
+  };
+};
+
+const GUARDIAN_CONTENT_API_URL = "https://content.guardianapis.com/search";
+const DEFAULT_GUARDIAN_FETCH_LIMIT = 12;
+
 // Helper functions for consistent responses
 const sendSuccessResponse = (
   res: Response,
@@ -19,6 +41,107 @@ const sendErrorResponse = (
   error?: any
 ) => {
   return sendResponse({ res, success: false, message, error, statusCode });
+};
+
+const sanitizeGuardianText = (value?: string | null) => {
+  if (!value) {
+    return null;
+  }
+
+  return value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+};
+
+const fetchGuardianEnvironmentArticles = async (
+  limit: number = DEFAULT_GUARDIAN_FETCH_LIMIT
+) => {
+  const apiKey = process.env.GUARDIAN_API_KEY || "test";
+  const requestUrl = new URL(GUARDIAN_CONTENT_API_URL);
+
+  requestUrl.searchParams.set("section", "environment");
+  requestUrl.searchParams.set("order-by", "newest");
+  requestUrl.searchParams.set("page-size", String(limit));
+  requestUrl.searchParams.set(
+    "show-fields",
+    "headline,trailText,bodyText,thumbnail"
+  );
+  requestUrl.searchParams.set("api-key", apiKey);
+
+  const response = await fetch(requestUrl.toString(), {
+    headers: {
+      Accept: "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Guardian API request failed with status ${response.status}`);
+  }
+
+  const payload = (await response.json()) as GuardianSearchResponse;
+  const results = payload.response?.results ?? [];
+  const extractedDate = new Date();
+
+  return results
+    .map((article) => {
+      const url = article.webUrl?.trim();
+      const headline =
+        sanitizeGuardianText(article.fields?.headline) ||
+        sanitizeGuardianText(article.webTitle) ||
+        "Untitled environmental article";
+      const body =
+        sanitizeGuardianText(article.fields?.bodyText) ||
+        sanitizeGuardianText(article.fields?.trailText) ||
+        "Open the original article to read the full environmental update.";
+
+      if (!url) {
+        return null;
+      }
+
+      return {
+        publishDate: article.webPublicationDate
+          ? new Date(article.webPublicationDate)
+          : extractedDate,
+        extractedDate,
+        url,
+        headline,
+        body,
+        section: article.sectionName?.trim() || "Environment",
+        source: "The Guardian",
+        image_url: article.fields?.thumbnail?.trim() || null,
+        ai_summary: sanitizeGuardianText(article.fields?.trailText),
+      };
+    })
+    .filter((article): article is NonNullable<typeof article> => Boolean(article));
+};
+
+const syncGuardianArticlesToDatabase = async (
+  limit: number = DEFAULT_GUARDIAN_FETCH_LIMIT
+) => {
+  const fetchedArticles = await fetchGuardianEnvironmentArticles(limit);
+
+  if (!fetchedArticles.length) {
+    return 0;
+  }
+
+  await Promise.all(
+    fetchedArticles.map((article) =>
+      prisma.article.upsert({
+        where: { url: article.url },
+        update: {
+          publishDate: article.publishDate,
+          extractedDate: article.extractedDate,
+          headline: article.headline,
+          body: article.body,
+          section: article.section,
+          source: article.source,
+          image_url: article.image_url,
+          ai_summary: article.ai_summary,
+        },
+        create: article,
+      })
+    )
+  );
+
+  return fetchedArticles.length;
 };
 
 /**
@@ -148,7 +271,7 @@ export const getAllArticles = async (
       orderBy.publishDate = "desc"; // Default sort
     }
 
-    const [articles, totalCount] = await Promise.all([
+    let [articles, totalCount] = await Promise.all([
       prisma.article.findMany({
         where,
         skip,
@@ -157,6 +280,32 @@ export const getAllArticles = async (
       }),
       prisma.article.count({ where }),
     ]);
+
+    if (
+      totalCount === 0 &&
+      page === 1 &&
+      !section &&
+      !source &&
+      !search
+    ) {
+      try {
+        const syncedCount = await syncGuardianArticlesToDatabase(limit);
+
+        if (syncedCount > 0) {
+          [articles, totalCount] = await Promise.all([
+            prisma.article.findMany({
+              where,
+              skip,
+              take: limit,
+              orderBy,
+            }),
+            prisma.article.count({ where }),
+          ]);
+        }
+      } catch (guardianSyncError) {
+        console.error("Guardian article sync failed:", guardianSyncError);
+      }
+    }
 
     const totalPages = Math.ceil(totalCount / limit);
 

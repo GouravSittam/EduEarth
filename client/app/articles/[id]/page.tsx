@@ -215,7 +215,7 @@ export default function ArticleDetailPage() {
                 {article.headline}
               </h1>
 
-              {/* AI Summary */}
+              {/* Summary */}
               {article.ai_summary && (
                 <div className="bg-slate-800 border border-slate-600 rounded-lg p-6 mb-6">
                   <div className="flex items-center mb-4">
@@ -227,7 +227,7 @@ export default function ArticleDetailPage() {
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                     </svg>
                     <span className="text-yellow-400 font-semibold">
-                      AI Summary
+                      Quick Summary
                     </span>
                   </div>
                   <p className="text-zinc-200 leading-relaxed font-light">

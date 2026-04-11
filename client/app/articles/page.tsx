@@ -238,7 +238,7 @@ export default function ArticlePage() {
                     </div>
                   </div>
 
-                  {/* AI Summary Indicator */}
+                  {/* Summary Indicator */}
                   {article.ai_summary && (
                     <div className="px-6 pb-4">
                       <div className="bg-slate-800 border border-slate-600 rounded-lg p-3">
@@ -251,7 +251,7 @@ export default function ArticlePage() {
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                           </svg>
                           <span className="text-yellow-400 text-sm font-medium">
-                            AI-generated summary available
+                            Summary available
                           </span>
                         </div>
                       </div>
@@ -291,7 +291,7 @@ export default function ArticlePage() {
                   <div className="text-3xl font-bold text-orange-400 mb-2">
                     {articles.filter((a) => a.ai_summary).length}
                   </div>
-                  <div className="text-zinc-300">AI Summaries</div>
+                  <div className="text-zinc-300">Summaries</div>
                 </div>
               </div>
             </div>
