@@ -120,11 +120,12 @@ export default function WhyThisPlatform() {
 
   return (
     <motion.div
+      id="games"
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.8 }}
-      className="min-h-screen w-full bg-gradient-to-br from-green-400 via-emerald-500 to-blue-600 flex flex-col items-center p-4 sm:p-6 md:p-10 lg:p-12 relative overflow-hidden"
+      className="scroll-mt-36 min-h-screen w-full bg-gradient-to-br from-green-400 via-emerald-500 to-blue-600 flex flex-col items-center p-4 sm:p-6 md:p-10 lg:p-12 relative overflow-hidden"
     >
       {/* Animated background elements */}
       <motion.div

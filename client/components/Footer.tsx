@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import ElectricBorder from "./ElectricBorder";
 import { motion } from "framer-motion";
+import BrandMark from "./BrandMark";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -73,17 +73,7 @@ export default function Footer() {
               whileHover={{ scale: 1.05 }}
               className="flex items-center gap-3"
             >
-              <div className="relative h-12 w-12 bg-yellow-400 rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-1">
-                <Image
-                  src="/eco-play-logo-small.png"
-                  alt="EduEarth"
-                  fill
-                  className="object-contain p-1"
-                />
-              </div>
-              <span className="text-xl sm:text-2xl font-black tracking-wider drop-shadow-[2px_2px_0px_rgba(255,255,255,0.5)]">
-                EduEarth
-              </span>
+              <BrandMark textClassName="text-xl sm:text-2xl" />
             </motion.div>
             <p className="text-xs sm:text-sm leading-relaxed max-w-xs font-sans">
               🌍 <strong>Learn. Play. Save the Planet.</strong>

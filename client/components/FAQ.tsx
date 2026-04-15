@@ -46,11 +46,12 @@ export default function FAQPage() {
 
   return (
     <motion.div
+      id="articles"
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.8 }}
-      className="min-h-screen bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-500 flex flex-col items-center justify-start p-6 sm:p-8 relative overflow-hidden"
+      className="scroll-mt-36 min-h-screen bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-500 flex flex-col items-center justify-start p-6 sm:p-8 relative overflow-hidden"
     >
       {/* Animated Background Elements */}
       <motion.div
@@ -151,10 +152,11 @@ export default function FAQPage() {
                 scale: 1.02,
                 y: -2,
               }}
-              className={`bg-white border-4 border-black rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 overflow-hidden ${open === faq.id
+              className={`bg-white border-4 border-black rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 overflow-hidden ${
+                open === faq.id
                   ? "bg-gradient-to-br from-white to-yellow-50"
                   : ""
-                }`}
+              }`}
             >
               <div
                 className="flex items-center justify-between cursor-pointer p-5 sm:p-6"

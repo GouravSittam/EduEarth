@@ -10,6 +10,7 @@ import { SlBadge } from "react-icons/sl";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import UserButton from "@/components/UserButton";
+import BrandMark from "@/components/BrandMark";
 
 interface Game {
   title: string;
@@ -77,13 +78,7 @@ export default function GamesPage() {
             whileHover={{ scale: 1.1, rotate: 10 }}
             transition={{ duration: 0.3 }}
           >
-            <Image
-              src="/eco-play-logo-small.png"
-              alt="EduEarth logo"
-              width={100}
-              height={100}
-              className="h-10 w-10 sm:h-12 sm:w-12 md:h-15 md:w-15"
-            />
+            <BrandMark textClassName="text-sm sm:text-base md:text-lg" />
           </motion.div>
         </Link>
         <motion.span

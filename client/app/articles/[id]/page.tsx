@@ -148,13 +148,7 @@ export default function ArticleDetailPage() {
       {/* Navbar */}
       <nav className="sticky top-0 bg-gradient-to-r from-green-400 to-sky-400 shadow-lg z-50 px-6 py-2 flex items-center justify-between">
         <Link href="/home">
-          <Image
-            src="/eco-play-logo-small.png"
-            alt="EduEarth logo"
-            width={100}
-            height={100}
-            className="size-15"
-          />
+          <BrandMark textClassName="text-base sm:text-lg md:text-xl" />
         </Link>
         <span className="text-xl text-yellow-300 drop-shadow-[1px_1px_0px_black]">
           Article Details

@@ -1,32 +1,98 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import React, { useState } from "react";
+import { usePathname } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import UserButton from "./UserButton";
+import BrandMark from "./BrandMark";
 
 type NavItem = {
   href: string;
   label: string;
-  isActive?: boolean;
   emoji: string;
+  sectionId?: string;
 };
 
 const navItems: NavItem[] = [
-  { href: "/home", label: "Home", isActive: true, emoji: "🏠" },
-  { href: "#missions", label: "Missions", emoji: "🚀" },
+  { href: "/home", label: "Home", emoji: "🏠" },
+  { href: "#missions", label: "Missions", emoji: "🚀", sectionId: "missions" },
   { href: "/games", label: "Games", emoji: "🎮" },
-  { href: "#modules", label: "Modules", emoji: "📚" },
+  { href: "#modules", label: "Modules", emoji: "📚", sectionId: "modules" },
   { href: "/articles", label: "Articles", emoji: "📰" },
 ];
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeLabel, setActiveLabel] = useState("Home");
+  const pathname = usePathname();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  useEffect(() => {
+    if (pathname !== "/home") {
+      const routeMatch = navItems.find((item) => item.href === pathname);
+      setActiveLabel(routeMatch?.label ?? "Home");
+      return;
+    }
+
+    const sectionItems = navItems.filter((item) => item.sectionId);
+    const sections = sectionItems
+      .map((item) => {
+        const element = document.getElementById(item.sectionId!);
+        return element ? { ...item, element } : null;
+      })
+      .filter(Boolean) as Array<NavItem & { element: HTMLElement }>;
+
+    const updateActiveFromScroll = () => {
+      if (window.scrollY < 120) {
+        setActiveLabel("Home");
+        return;
+      }
+
+      const viewportMid = window.innerHeight * 0.35;
+      let current = sections[0]?.label ?? "Home";
+
+      for (const section of sections) {
+        const rect = section.element.getBoundingClientRect();
+        if (rect.top <= viewportMid) {
+          current = section.label;
+        }
+      }
+
+      setActiveLabel(current);
+    };
+
+    updateActiveFromScroll();
+    window.addEventListener("scroll", updateActiveFromScroll, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener("scroll", updateActiveFromScroll);
+    };
+  }, [pathname]);
+
+  const handleSectionClick = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    item: NavItem,
+  ) => {
+    if (pathname !== "/home" || !item.sectionId) {
+      return;
+    }
+
+    event.preventDefault();
+    const section = document.getElementById(item.sectionId);
+    if (!section) {
+      return;
+    }
+
+    setActiveLabel(item.label);
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.history.replaceState(null, "", `#${item.sectionId}`);
   };
 
   return (
@@ -61,36 +127,10 @@ export default function Navbar() {
               className="group flex items-center gap-2 sm:gap-3 cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-400 rounded-xl"
             >
               <motion.div
-                whileHover={{ rotate: 360, scale: 1.1 }}
-                transition={{ duration: 0.6 }}
-                className="relative h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-xl border-3 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] p-1"
+                whileHover={{ scale: 1.03 }}
+                transition={{ duration: 0.3 }}
               >
-                <Image
-                  src="/eco-play-logo-small.png"
-                  alt="EduEarth logo"
-                  width={48}
-                  height={48}
-                  className="h-full w-full object-contain p-0.5"
-                />
-              </motion.div>
-              <motion.div
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="leading-tight"
-              >
-                <motion.div
-                  whileHover={{ scale: 1.05, color: "#fbbf24" }}
-                  className="text-base sm:text-lg md:text-xl lg:text-2xl font-extrabold tracking-wide text-transparent bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 bg-clip-text"
-                  style={{
-                    fontFamily: '"Press Start 2P", system-ui, sans-serif',
-                  }}
-                >
-                  EDU EARTH
-                </motion.div>
-                <div className="text-[8px] sm:text-[10px] text-green-300 font-sans hidden sm:block">
-                  🌍 Save the Planet
-                </div>
+                <BrandMark showTagline />
               </motion.div>
             </Link>
 
@@ -113,16 +153,17 @@ export default function Navbar() {
                   >
                     <Link
                       href={item.href}
+                      onClick={(event) => handleSectionClick(event, item)}
                       className={
                         "group relative px-4 py-3 min-h-[44px] min-w-[44px] rounded-xl font-semibold text-xs lg:text-sm transition-[background-color,color,border-color,box-shadow] duration-300 cursor-pointer inline-flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-400 " +
-                        (item.isActive
+                        (activeLabel === item.label
                           ? "bg-yellow-400 text-black border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px]"
                           : "text-green-100 hover:text-yellow-300 hover:bg-white/10 border-2 border-transparent")
                       }
                     >
                       <span className="text-base">{item.emoji}</span>
                       <span>{item.label}</span>
-                      {!item.isActive && (
+                      {activeLabel !== item.label && (
                         <motion.span className="absolute bottom-0 left-0 h-0.5 bg-yellow-400 w-0 group-hover:w-full transition-[width] duration-300" />
                       )}
                     </Link>
@@ -190,10 +231,13 @@ export default function Navbar() {
                     >
                       <Link
                         href={item.href}
-                        onClick={() => setIsMobileMenuOpen(false)}
+                        onClick={(event) => {
+                          handleSectionClick(event, item);
+                          setIsMobileMenuOpen(false);
+                        }}
                         className={
                           "flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-xl font-semibold text-sm transition-[background-color,color,border-color,box-shadow,transform] duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-400 " +
-                          (item.isActive
+                          (activeLabel === item.label
                             ? "bg-gradient-to-r from-yellow-300 to-yellow-400 text-black border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                             : "text-green-100 hover:bg-white/10 hover:text-yellow-300 border-2 border-transparent hover:border-yellow-400/50")
                         }

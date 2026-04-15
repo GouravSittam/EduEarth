@@ -344,7 +344,7 @@ export default function ExploreModule() {
   // Current visible set
   const visibleModules = filteredModules.slice(
     page * cardsPerPage,
-    page * cardsPerPage + cardsPerPage
+    page * cardsPerPage + cardsPerPage,
   );
 
   // Reset page when category changes
@@ -362,7 +362,7 @@ export default function ExploreModule() {
       whileInView={{ opacity: 1 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.8 }}
-      className="min-h-screen"
+      className="scroll-mt-36 min-h-screen"
     >
       <div
         className="relative pt-30 flex h-200px w-full flex-col items-center justify-center bg-cover bg-center px-4 py-10 text-center md:px-6"
@@ -418,10 +418,11 @@ export default function ExploreModule() {
               whileHover={{ scale: 1.1, y: -3 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 rounded-xl font-bold text-xs sm:text-sm md:text-base transition-all duration-300 cursor-pointer ${activeCategory === cat
+              className={`px-4 py-2 sm:px-5 sm:py-2.5 md:px-6 md:py-3 rounded-xl font-bold text-xs sm:text-sm md:text-base transition-all duration-300 cursor-pointer ${
+                activeCategory === cat
                   ? "bg-gradient-to-r from-black to-gray-800 text-yellow-400 border-3 border-yellow-400 shadow-[4px_4px_0px_0px_rgba(251,191,36,0.5)]"
                   : "bg-white text-black border-2 border-black hover:bg-yellow-50 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)]"
-                }`}
+              }`}
             >
               {cat}
             </motion.button>
@@ -446,10 +447,11 @@ export default function ExploreModule() {
             whileTap={{ scale: 0.9 }}
             onClick={handlePrev}
             disabled={page === 0}
-            className={`absolute left-2 sm:left-4 z-20 top-1/2 -translate-y-1/2 bg-gradient-to-r from-yellow-300 to-yellow-400 text-black rounded-full p-4 sm:p-5 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] font-bold text-2xl sm:text-3xl transition-all duration-300 ${page === 0
+            className={`absolute left-2 sm:left-4 z-20 top-1/2 -translate-y-1/2 bg-gradient-to-r from-yellow-300 to-yellow-400 text-black rounded-full p-4 sm:p-5 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] font-bold text-2xl sm:text-3xl transition-all duration-300 ${
+              page === 0
                 ? "opacity-30 cursor-not-allowed"
                 : "hover:from-yellow-400 hover:to-yellow-500 cursor-pointer"
-              }`}
+            }`}
           >
             ◀
           </motion.button>
@@ -597,10 +599,11 @@ export default function ExploreModule() {
             whileTap={{ scale: 0.9 }}
             onClick={handleNext}
             disabled={page >= totalPages - 1}
-            className={`absolute right-2 sm:right-4 z-20 top-1/2 -translate-y-1/2 bg-gradient-to-r from-yellow-300 to-yellow-400 text-black rounded-full p-4 sm:p-5 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] font-bold text-2xl sm:text-3xl transition-all duration-300 ${page >= totalPages - 1
+            className={`absolute right-2 sm:right-4 z-20 top-1/2 -translate-y-1/2 bg-gradient-to-r from-yellow-300 to-yellow-400 text-black rounded-full p-4 sm:p-5 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] font-bold text-2xl sm:text-3xl transition-all duration-300 ${
+              page >= totalPages - 1
                 ? "opacity-30 cursor-not-allowed"
                 : "hover:from-yellow-400 hover:to-yellow-500 cursor-pointer"
-              }`}
+            }`}
           >
             ▶
           </motion.button>

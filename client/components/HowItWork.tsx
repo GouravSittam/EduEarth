@@ -48,7 +48,7 @@ export default function HowItWorks() {
       whileInView={{ opacity: 1 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.8 }}
-      className="min-h-screen relative overflow-hidden bg-gradient-to-br from-green-400 via-emerald-500 to-blue-600 px-4 sm:px-6"
+      className="scroll-mt-36 min-h-screen relative overflow-hidden bg-gradient-to-br from-green-400 via-emerald-500 to-blue-600 px-4 sm:px-6"
     >
       {/* Animated Background Elements */}
       <motion.div
@@ -236,15 +236,17 @@ export default function HowItWorks() {
             onClick={() => setCurrent(index)}
             whileHover={{ scale: 1.5, y: -5 }}
             whileTap={{ scale: 0.9 }}
-            className={`relative transition-all duration-300 cursor-pointer ${index === current ? "w-12 h-5" : "w-5 h-5"
-              }`}
+            className={`relative transition-all duration-300 cursor-pointer ${
+              index === current ? "w-12 h-5" : "w-5 h-5"
+            }`}
             aria-label={`Go to slide ${index + 1}`}
           >
             <div
-              className={`w-full h-full rounded-full border-3 border-black transition-all duration-300 ${index === current
-                ? "bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-                : "bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                }`}
+              className={`w-full h-full rounded-full border-3 border-black transition-all duration-300 ${
+                index === current
+                  ? "bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                  : "bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+              }`}
             />
             {index === current && (
               <motion.div
