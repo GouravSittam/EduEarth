@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import UserButton from "@/components/UserButton";
+import BrandMark from "@/components/BrandMark";
 
 type Article = {
   section: string;

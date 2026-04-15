@@ -9,10 +9,30 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   const socialLinks = [
-    { icon: "🐦", label: "Twitter", href: "#", color: "hover:bg-blue-400" },
-    { icon: "▶️", label: "YouTube", href: "#", color: "hover:bg-red-500" },
-    { icon: "💬", label: "Discord", href: "#", color: "hover:bg-indigo-500" },
-    { icon: "📘", label: "Facebook", href: "#", color: "hover:bg-blue-600" },
+    {
+      icon: "💼",
+      label: "LinkedIn",
+      href: "https://www.linkedin.com/in/gouravsittam/",
+      color: "hover:bg-blue-500",
+    },
+    {
+      icon: "🐙",
+      label: "GitHub",
+      href: "https://github.com/GouravSittam",
+      color: "hover:bg-gray-900 hover:text-white",
+    },
+    {
+      icon: "📸",
+      label: "Instagram",
+      href: "https://www.instagram.com/gouravv.c/",
+      color: "hover:bg-pink-500",
+    },
+    {
+      icon: "𝕏",
+      label: "X",
+      href: "https://x.com/Gouravv_c",
+      color: "hover:bg-black hover:text-white",
+    },
   ];
 
   const exploreLinks = [
@@ -89,6 +109,8 @@ export default function Footer() {
                 <motion.a
                   key={social.label}
                   href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={social.label}
                   initial={{ opacity: 0, scale: 0 }}
                   whileInView={{ opacity: 1, scale: 1 }}
