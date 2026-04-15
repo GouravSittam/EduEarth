@@ -73,7 +73,7 @@ app.use(
       callback(null, origin); // allow all in dev
     },
     credentials: true,
-  })
+  }),
 );
 
 // Request Parsing
@@ -92,7 +92,7 @@ app.use(express.urlencoded({ extended: false }));
  */
 app.get("/", (_req, res) => {
   res.send(`
-    🌍 EduEarth API Server
+    🌍 Edu Earth API Server
     ━━━━━━━━━━━━━━━━━━━━━━
     Status: ✅ Running
     Docs: /health
@@ -109,7 +109,7 @@ app.get("/health", (_req, res) => {
     status: "healthy",
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    service: "EduEarth API",
+    service: "Edu Earth API",
   });
 });
 
@@ -138,7 +138,7 @@ app.use("/lessons", lessonsRouter); // 📖 Lesson Management
 const gameServer = new GameServer(server);
 app.use(
   "/game",
-  createGameRouter(() => gameServer)
+  createGameRouter(() => gameServer),
 );
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -146,11 +146,10 @@ app.use(
 // ═══════════════════════════════════════════════════════════════════════════
 
 server.listen(PORT, () => {
-  
   console.log(`
 ╔═══════════════════════════════════════════════════════════════════════════╗
 ║                                                                           ║
-║   🌍 EDUEARTH SERVER STARTED SUCCESSFULLY                                 ║
+║   🌍 EDU EARTH SERVER STARTED SUCCESSFULLY                                ║
 ║                                                                           ║
 ╠═══════════════════════════════════════════════════════════════════════════╣
 ║                                                                           ║
@@ -164,6 +163,9 @@ server.listen(PORT, () => {
 ║   📌 AVAILABLE ENDPOINTS                                                  ║
 ║   ──────────────────────                                                  ║
 ║   🏠 Base:         http://localhost:${String(PORT).padEnd(37)}║
+║   ❤️  Health:       /health                                            ║
+║   🧭 Flow Chart:    /flow                                              ║
+║   🗺️  Flow Data:     /flow/data                                         ║
 ║   🔐 Auth:         /auth                                              ║
 ║   🏫 Institutions: /institutions                                      ║
 ║   📚 Classes:      /classes                                           ║
