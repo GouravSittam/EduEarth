@@ -6,6 +6,8 @@ import UserButton from "@/components/UserButton";
 import { server } from "@/lib/api";
 import BrandMark from "@/components/BrandMark";
 
+const AUTO_REFRESH_INTERVAL_MS = 10 * 60 * 1000;
+
 type Article = {
   section: string;
   source: string;
@@ -36,31 +38,62 @@ export default function ArticlePage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<Date | null>(null);
 
   useEffect(() => {
-    setIsLoading(true);
-    setError(null);
+    let isMounted = true;
 
-    server
-      .get<ArticlesResponseData>("/articles")
-      .then((res) => {
-        const data = res.data;
-        if (data?.articles) {
-          setArticles(data.articles);
-        } else {
-          setArticles([]);
+    const fetchArticles = async (withLoader: boolean) => {
+      if (!isMounted) {
+        return;
+      }
+
+      if (withLoader) {
+        setIsLoading(true);
+      }
+
+      try {
+        const res = await server.get<ArticlesResponseData>("/articles");
+        const fetchedArticles = res.data?.articles ?? [];
+        const sortedArticles = [...fetchedArticles].sort(
+          (a, b) =>
+            new Date(b.extractedDate).getTime() -
+            new Date(a.extractedDate).getTime(),
+        );
+
+        if (!isMounted) {
+          return;
         }
-      })
-      .catch((err) => {
+
+        setArticles(sortedArticles);
+        setError(null);
+        setLastUpdatedAt(new Date());
+      } catch (err) {
+        if (!isMounted) {
+          return;
+        }
+
         console.error("Failed to fetch articles:", err);
         setError(
           err instanceof Error ? err.message : "Failed to fetch articles",
         );
         setArticles([]);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+      } finally {
+        if (isMounted && withLoader) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchArticles(true);
+    const refreshTimer = window.setInterval(() => {
+      fetchArticles(false);
+    }, AUTO_REFRESH_INTERVAL_MS);
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(refreshTimer);
+    };
   }, []);
 
   const formatDate = (date: Date | string) => {
@@ -68,6 +101,13 @@ export default function ArticlePage() {
       year: "numeric",
       month: "short",
       day: "numeric",
+    });
+  };
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -106,6 +146,12 @@ export default function ArticlePage() {
             <p className="text-lg text-zinc-300 max-w-2xl mx-auto">
               Stay updated with the latest environmental news, research, and
               insights from around the world.
+            </p>
+            <p className="mt-3 text-sm text-zinc-400">
+              Auto-refreshes every 10 minutes
+              {lastUpdatedAt
+                ? ` • Last updated at ${formatTime(lastUpdatedAt)}`
+                : ""}
             </p>
           </div>
 
