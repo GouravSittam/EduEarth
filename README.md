@@ -1,713 +1,244 @@
-<div align="center">
+# EduEarth
 
-```
-███████╗██████╗ ██╗   ██╗███████╗ █████╗ ██████╗ ████████╗██╗  ██╗
-██╔════╝██╔══██╗██║   ██║██╔════╝██╔══██╗██╔══██╗╚══██╔══╝██║  ██║
-█████╗  ██║  ██║██║   ██║█████╗  ███████║██████╔╝   ██║   ███████║
-██╔══╝  ██║  ██║██║   ██║██╔══╝  ██╔══██║██╔══██╗   ██║   ██╔══██║
-███████╗██████╔╝╚██████╔╝███████╗██║  ██║██║  ██║   ██║   ██║  ██║
-╚══════╝╚═════╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
-```
+EduEarth is a gamified environmental education platform for students, teachers, and institutions. The project combines a Next.js learning experience, an Express/Prisma API, real-time Socket.io game services, Supabase authentication, and a Python/Airflow workspace for environmental article/data workflows.
 
-<h1>🌍 Where Learning Meets Action for a Sustainable Future 🚀</h1>
+![EduEarth home](project_screenshots/1_home.png)
 
-<h3>
-<code>Gamified Environmental Education</code> × <code>Real-Time Collaboration</code> × <code>Interactive Learning</code>
-</h3>
+## Current Highlights
 
-<br/>
+- Student and teacher dashboards with role-aware routing.
+- Supabase-backed authentication and profile sync through the server API.
+- Environmental articles page with auto-refresh, image support, and optional AI summaries.
+- Interactive game hub with Recycle Rush, Eco Strike, and Eco Sprint.
+- Learning modules, course detail pages, assignments, missions, leaderboards, and certificates UI.
+- REST APIs for users, institutions, classes, lessons, quizzes, articles, and game health/stats.
+- Prisma schema for users, institutions, classes, lessons, quizzes, challenges, badges, achievements, leaderboards, notifications, and articles.
+- Server Docker and production Docker Compose files.
+- Python/Airflow project scaffold for ETL workflows.
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Next.js](https://img.shields.io/badge/Next.js_15-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)](https://www.prisma.io/)
-[![Socket.io](https://img.shields.io/badge/Socket.io-black?style=for-the-badge&logo=socket.io&badgeColor=010101)](https://socket.io/)
-[![Framer Motion](https://img.shields.io/badge/Framer_Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white)](https://www.framer.com/motion/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+## Tech Stack
 
-<br/>
+| Area | Tools |
+| --- | --- |
+| Client | Next.js 15, React 19, TypeScript, Tailwind CSS 4, Framer Motion |
+| Server | Node.js, Express 5, TypeScript, Socket.io |
+| Data | PostgreSQL, Prisma, Supabase |
+| Auth | Supabase Auth with server-side token validation |
+| ETL | Python, Apache Airflow/Astronomer scaffold |
+| Deployment | Docker, Docker Compose, Vercel-compatible client |
 
-> **🎮 Transform environmental education through immersive games, interactive modules, and real-time multiplayer challenges that make learning about sustainability exciting, engaging, and impactful!**
+## Repository Structure
 
-<br/>
-
-[🚀 **Get Started**](#-quick-start) •
-[🎯 **Features**](#-features) •
-[🎮 **Play Games**](#-interactive-games) •
-[📚 **Learn More**](#-learning-modules) •
-[🤝 **Contribute**](#-contributing)
-
-<br/>
-
----
-
-### 📊 **Real-Time Impact**
-
-🌱 **10K+ Students Engaged** • 🏫 **500+ Schools** • 🎓 **50+ Learning Modules** • 🎮 **200+ Challenges Completed** • 🌍 **Making Earth Better, One Student at a Time**
-
----
-
-</div>
-
-<br/>
-
-## ⚡ What is EduEarth?
-
-<table>
-<tr>
-<td width="60%">
-
-**EduEarth** is a revolutionary educational platform that transforms how students learn about environmental sustainability. We combine:
-
-- 🎮 **Immersive Gaming** - Learn through exciting multiplayer challenges
-- 🌍 **Real-World Impact** - Connect classroom learning to environmental action
-- 🤖 **AI-Powered Learning** - Personalized educational experiences
-- 🏆 **Achievement System** - Earn badges, certificates, and eco-points
-- 👥 **Collaborative Platform** - Students, teachers, and parents together
-- 📊 **Progress Tracking** - Real-time analytics and insights
-
-**Built for the next generation of environmental leaders!**
-
-</td>
-<td width="40%">
-
-```javascript
-// 🌟 EduEarth Formula
-const success = (
-  🎮 games +
-  📚 modules +
-  🤝 collaboration +
-  🌍 real_impact
-) * 🔥 engagement;
-
-// Result: Engaged global citizens
-// ready to tackle environmental
-// challenges! 🚀
-```
-
-</td>
-</tr>
-</table>
-
-### 🎯 **Our Mission**
-
-> **Transform environmental education by making sustainability learning interactive, engaging, and impactful. Every student becomes an eco-champion equipped with knowledge, skills, and passion to create positive change.**
-
-<br/>
-
----
-
-## 🚀 Features
-
-<div align="center">
-
-### 🎨 **Brutalist Design Meets Modern Education**
-
-</div>
-
-<table>
-<tr>
-<td width="33%" align="center">
-
-### 🎮 **Gaming Hub**
-
-<img src="https://img.shields.io/badge/Eco_Sprint-FFD700?style=for-the-badge&logoColor=black" alt="Eco Sprint"/>
-<img src="https://img.shields.io/badge/Eco_Strike-00D9FF?style=for-the-badge&logoColor=black" alt="Eco Strike"/>
-<img src="https://img.shields.io/badge/Recycle_Rush-22C55E?style=for-the-badge&logoColor=black" alt="Recycle Rush"/>
-
-**Multiplayer races, strategic challenges, and simulation games with real-time Socket.io connectivity**
-
-🏃‍♂️ Real-time racing
-⚡ Strategic gameplay  
-♻️ Hands-on simulations
-🏆 Global leaderboards
-
-</td>
-<td width="33%" align="center">
-
-### 📚 **Learning Modules**
-
-<img src="https://img.shields.io/badge/Climate-FF6B6B?style=for-the-badge&logoColor=white" alt="Climate"/>
-<img src="https://img.shields.io/badge/Biodiversity-4ECDC4?style=for-the-badge&logoColor=white" alt="Biodiversity"/>
-<img src="https://img.shields.io/badge/Energy-FFE66D?style=for-the-badge&logoColor=black" alt="Energy"/>
-
-**50+ interactive modules covering all environmental topics**
-
-🌡️ Climate Action
-🌿 Biodiversity  
-⚡ Renewable Energy
-♻️ Circular Economy
-💧 Water Conservation
-🌍 Sustainability
-
-</td>
-<td width="33%" align="center">
-
-### 🎯 **Engagement System**
-
-<img src="https://img.shields.io/badge/Achievements-8B5CF6?style=for-the-badge&logoColor=white" alt="Achievements"/>
-<img src="https://img.shields.io/badge/Certificates-F59E0B?style=for-the-badge&logoColor=black" alt="Certificates"/>
-<img src="https://img.shields.io/badge/Leaderboards-EC4899?style=for-the-badge&logoColor=white" alt="Leaderboards"/>
-
-**Comprehensive reward and recognition system**
-
-🏅 Eco-Points & Badges
-📜 Verified Certificates  
-📊 Progress Analytics
-🔥 Streak Tracking
-⭐ Peer Recognition
-🎖️ Achievement Unlocks
-
-</td>
-</tr>
-</table>
-
-<br/>
-
-<div align="center">
-
-### 🏫 **Multi-Stakeholder Platform**
-
-</div>
-
-<table>
-<tr>
-<td width="33%" align="center">
-
-### 👨‍🎓 **For Students**
-
-🎮 **Play & Learn**  
-Interactive games and challenges
-
-📚 **Explore Modules**  
-Self-paced learning paths
-
-🏆 **Earn Rewards**  
-Badges and certificates
-
-📊 **Track Progress**  
-Personal dashboards
-
-🤝 **Collaborate**  
-Team challenges
-
-</td>
-<td width="33%" align="center">
-
-### 👨‍🏫 **For Teachers**
-
-📝 **Auto-Generate**  
-PPTs, quizzes, lessons
-
-📊 **Monitor Progress**  
-Real-time analytics
-
-👥 **Manage Classes**  
-Student organization
-
-🎯 **Assign Tasks**  
-Custom challenges
-
-✅ **Grade Easily**  
-Automated assessments
-
-</td>
-<td width="33%" align="center">
-
-### 👨‍👩‍👧 **For Parents**
-
-👀 **View Progress**  
-Child's learning journey
-
-🏆 **Celebrate Wins**  
-Achievements & streaks
-
-📜 **Download Certificates**  
-Printable rewards
-
-🌍 **Track Impact**  
-Real eco-actions
-
-💬 **Stay Connected**  
-Teacher communication
-
-</td>
-</tr>
-</table>
-
-<br/>
-
----
-
-## 🎮 Interactive Games
-
-<div align="center">
-
-### **Learn Through Play - Master Through Gaming**
-
-</div>
-
-<table>
-<tr>
-<td width="33%" align="center">
-
-<img src="https://img.shields.io/badge/🏃‍♂️_ECO_SPRINT-FFD700?style=for-the-badge&logoColor=black" alt="Eco Sprint" height="50"/>
-
-### **Knowledge Racing**
-
-⚡ **Real-time multiplayer quiz races**  
-🎯 Test sustainability knowledge  
-🏆 Compete on global leaderboards  
-⏱️ Fast-paced, exciting gameplay  
-🧠 Learn while racing
-
-> _"Answer questions faster than your opponents and race to the finish line!"_
-
-**[▶ Play Now](#)**
-
-</td>
-<td width="33%" align="center">
-
-<img src="https://img.shields.io/badge/⚡_ECO_STRIKE-00D9FF?style=for-the-badge&logoColor=black" alt="Eco Strike" height="50"/>
-
-### **Strategic Problem-Solving**
-
-🎯 **Navigate complex environmental scenarios**  
-⚖️ Balance economic & ecological factors  
-🗺️ Make real-world decisions  
-📊 See impact of your choices  
-🌍 Solve global challenges
-
-> _"Every decision matters - can you strike the perfect balance?"_
-
-**[▶ Play Now](#)**
-
-</td>
-<td width="33%" align="center">
-
-<img src="https://img.shields.io/badge/♻️_RECYCLE_RUSH-22C55E?style=for-the-badge&logoColor=black" alt="Recycle Rush" height="50"/>
-
-### **Waste Management Sim**
-
-♻️ **Hands-on recycling simulation**  
-🗑️ Sort waste correctly & quickly  
-🏭 Learn circular economy  
-⏰ Time-based challenges  
-🌱 Reduce environmental impact
-
-> _"Race against time to sort and recycle efficiently!"_
-
-**[▶ Play Now](#)**
-
-</td>
-</tr>
-</table>
-
-<br/>
-- Real-world case study simulations
-- Collaborative problem-solving activities
-- Reflective learning journals and portfolios
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-### 🏆 **Comprehensive Assessment System**
-
-- Competency-based progress tracking
-- Peer evaluation and feedback systems
-- Portfolio-based authentic assessments
-- Real-world impact measurement tools
-
-</td>
-<td width="50%">
-
-### 🏫 **Institutional Integration**
-
-- Multi-stakeholder platform (Students, Teachers, Administrators)
-- Curriculum alignment tools
-- Professional development resources
-- Community partnership frameworks
-
-</td>
-</tr>
-</table>
-
----
-
-## 🛠️ Tech Stack
-
-<div align="center">
-
-### Frontend Architecture
-
-![Next.js](https://img.shields.io/badge/Next.js_15-000000?style=flat-square&logo=next.js&logoColor=white)
-![React 19](https://img.shields.io/badge/React_19-20232A?style=flat-square&logo=react&logoColor=61DAFB)
-![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)
-![Framer Motion](https://img.shields.io/badge/Framer_Motion-black?style=flat-square&logo=framer&logoColor=blue)
-
-### Backend Infrastructure
-
-![Node.js](https://img.shields.io/badge/Node.js-43853D?style=flat-square&logo=node.js&logoColor=white)
-![Express.js](https://img.shields.io/badge/Express.js-404D59?style=flat-square&logo=express&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)
-![Socket.io](https://img.shields.io/badge/Socket.io-black?style=flat-square&logo=socket.io&badgeColor=010101)
-
-### Data & Analytics
-
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat-square&logo=postgresql&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=flat-square&logo=Prisma&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
-
-</div>
-
----
-
-## 🎯 Experiential Learning Framework
-
-### 🔄 **Learning Cycle Integration**
-
-EduEarth implements Kolb's Experiential Learning Theory through:
-
-1. **🎬 Concrete Experience**: Immersive environmental simulations and real-world challenges
-2. **🤔 Reflective Observation**: Guided reflection tools and peer discussion forums
-3. **📚 Abstract Conceptualization**: Theoretical knowledge integration and concept mapping
-4. **🛠️ Active Experimentation**: Project implementation and community action initiatives
-
-### 🌍 **Sustainability Focus Areas**
-
-- **Climate Action & Mitigation**: Carbon footprint reduction strategies
-- **Circular Economy**: Waste reduction and resource optimization
-- **Biodiversity Conservation**: Ecosystem protection and restoration
-- **Renewable Energy**: Clean technology innovation and implementation
-- **Sustainable Communities**: Social equity and environmental justice
-- **Green Innovation**: Technology solutions for environmental challenges
-
----
-
-## 🎮 Interactive Learning Games
-
-### 🏃‍♂️ **Eco Sprint**
-
-Fast-paced multiplayer quiz races that test sustainability knowledge while building competitive engagement and collaborative learning.
-
-### ⚡ **Eco Strike**
-
-Strategic decision-making game where players navigate complex environmental scenarios, balancing economic, social, and environmental factors.
-
-### ♻️ **Recycle Rush**
-
-Hands-on simulation teaching waste management principles, circular economy concepts, and resource optimization strategies.
-
----
-
-## 💡 Getting Started
-
-### Prerequisites
-
-- **Node.js** (v18 or higher)
-- **PostgreSQL** database
-- **npm** or **yarn** package manager
-
-### 🚀 Quick Setup
-
-```bash
-# Clone the EduEarth repository
-git clone https://github.com/GouravSittam/EduEarth-sustainability-experiential-learning.git
-cd EduEarth-sustainability-experiential-learning
-
-# Install dependencies for both client and server
-cd client && npm install
-cd ../server && npm install
-
-# Set up environment variables
-cp server/.env.example server/.env
-cp client/.example.env client/.env.local
-
-# Configure your database connection in server/.env
-# DATABASE_URL="postgresql://username:password@localhost:5432/eduearth"
-
-# Set up the database schema
-cd server
-npx prisma migrate dev --name init
-npx prisma generate
-
-# Start the development servers
-# Terminal 1: Start the backend server
-cd server && npm run dev
-
-# Terminal 2: Start the frontend client
-cd client && npm run dev
-```
-
-### 🌐 Access EduEarth
-
-- **Frontend Application**: [http://localhost:3000](http://localhost:3000)
-- **Backend API**: [http://localhost:6969](http://localhost:6969)
-- **API Health Check**: [http://localhost:6969/health](http://localhost:6969/health)
-
----
-
-## 📁 Project Architecture
-
-```
+```text
 EduEarth/
-├── 📁 client/                    # Next.js Frontend Application
-│   ├── 📁 app/                   # App Router & Page Components
-│   │   ├── 📁 games/             # Interactive Learning Games
-│   │   │   ├── eco-sprint/       # Quiz Racing Game
-│   │   │   ├── eco-strike/       # Strategy Game
-│   │   │   └── recycle-rush/     # Simulation Game
-│   │   ├── 📁 student-dashboard/ # Student Learning Interface
-│   │   ├── 📁 teacher-dashboard/ # Educator Management Portal
-│   │   ├── 📁 course-detail/     # Course Content Management
-│   │   └── 📁 auth-model/        # Authentication System
-│   ├── 📁 components/            # Reusable UI Components
-│   └── 📁 lib/                   # Utilities & Helper Functions
-├── 📁 server/                    # Express.js Backend Server
-│   ├── 📁 src/
-│   │   ├── 📁 routes/            # API Endpoint Definitions
-│   │   │   ├── auth.routes.js    # Authentication APIs
-│   │   │   ├── institutions.routes.js # Institution Management
-│   │   │   ├── classes.routes.js # Class Management
-│   │   │   ├── lessons.routes.js # Learning Content APIs
-│   │   │   └── game.routes.js    # Game Server APIs
-│   │   ├── 📁 game/              # Real-time Game Logic
-│   │   ├── 📁 prisma/            # Database Schema & Models
-│   │   └── 📁 utils/             # Server Utilities
-│   ├── 📁 docker/                # Containerization Config
-│   └── 📄 INSTITUTION_API.md     # API Documentation
-└── 📁 python/                    # AI/ML Analytics Components
+  client/                 Next.js application
+    app/                  App Router pages
+    components/           Shared UI and game components
+    lib/                  API, auth, module, and type helpers
+    public/               Images and game assets
+  server/                 Express API and Socket.io server
+    src/controllers/      Route handlers
+    src/routes/           API route definitions
+    src/game/             Real-time game server
+    src/prisma/           Prisma schema and migrations
+    src/utils/            Supabase, mail, env, and response helpers
+  python/                 Airflow/Astronomer project scaffold
+  project_screenshots/    Product screenshots, diagrams, and demo video
 ```
 
----
+## Screenshots
 
-## 🎯 Educational Impact & Assessment
+| Home | Student Dashboard |
+| --- | --- |
+| ![Home](project_screenshots/1_home.png) | ![Student dashboard](project_screenshots/2_StudentDashboard.png) |
 
-### 📊 **Learning Analytics Dashboard**
+| Teacher Dashboard | Articles |
+| --- | --- |
+| ![Teacher dashboard](project_screenshots/3_TeacherDashboard.png) | ![Articles](project_screenshots/4_Articles.png) |
 
-- Individual student progress tracking with competency mapping
-- Class-wide performance analytics and engagement metrics
-- Institution-level sustainability impact measurements
-- Real-world project outcome assessments
+| Games | Modules |
+| --- | --- |
+| ![Games](project_screenshots/5_Games.png) | ![Modules](project_screenshots/6_Modules.png) |
 
-### 🏅 **Achievement & Recognition System**
+## Prerequisites
 
-- **Eco Points**: Quantified learning progress and environmental impact
-- **Competency Badges**: Skill-based recognition in sustainability domains
-- **Leadership Certificates**: Community engagement and project leadership
-- **Impact Portfolios**: Documentation of real-world environmental contributions
+- Node.js 18 or newer
+- npm or Bun
+- PostgreSQL database, usually Supabase Postgres
+- Supabase project with public URL and publishable key
+- Docker, optional for server deployment
+- Astronomer CLI, optional for the Python/Airflow workspace
 
-### 🌍 **Community Integration**
+## Environment Variables
 
-- Local environmental organization partnerships
-- Real-world project implementation opportunities
-- Community impact measurement and reporting
-- Global sustainability challenge participation
+Create `server/.env` from `server/.env.example`:
 
----
+```env
+PORT="6969"
+SERVER_BASE_URL="http://localhost:6969"
+CLIENT_BASE_URL="http://localhost:3000"
+NODE_ENV="development"
 
-## 🐳 Deployment Options
+DATABASE_URL="postgresql://postgres.<project-ref>:[YOUR-PASSWORD]@aws-<region>.pooler.supabase.com:5432/postgres?sslmode=require"
+SUPABASE_URL="https://<project-ref>.supabase.co"
+SUPABASE_PUBLISHABLE_KEY=""
+```
 
-### Development Environment
+Create `client/.env.local` from `client/.env.example`:
+
+```env
+NEXT_PUBLIC_SERVER_URL=http://localhost:6969
+NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+```
+
+Optional server integrations currently referenced in the codebase include `GUARDIAN_API_KEY`, `GMAIL_USER`, and `GMAIL_PASS`.
+
+## Local Development
+
+Install dependencies:
 
 ```bash
-# Local development with hot reload
+cd client
+npm install
+
+cd ../server
+npm install
+```
+
+Prepare Prisma:
+
+```bash
+cd server
+npx prisma generate
+npx prisma migrate dev
+```
+
+Run the backend:
+
+```bash
+cd server
 npm run dev
 ```
 
-### Docker Containerization
+Run the frontend in another terminal:
 
 ```bash
-# Build and run with Docker Compose
-docker-compose up --build
-
-# Production deployment
-docker-compose -f docker-compose.prod.yml up -d
+cd client
+npm run dev
 ```
 
-### Cloud Deployment
+Open:
 
-- **Frontend**: Vercel, Netlify, or AWS Amplify
-- **Backend**: AWS EC2, Google Cloud Run, or DigitalOcean
-- **Database**: AWS RDS, Google Cloud SQL, or managed PostgreSQL
+- Client: http://localhost:3000
+- API: http://localhost:6969
+- API health: http://localhost:6969/health
+- Game health: http://localhost:6969/game/health
+- Flow view: http://localhost:6969/flow
 
----
+## Available Scripts
 
-## 🤝 Contributing to EduEarth
+Client:
 
-We welcome contributions from educators, developers, sustainability experts, and students!
-
-### 🔧 Development Workflow
-
-1. **Fork** the repository and create your feature branch
-2. **Set up** your local development environment
-3. **Implement** your feature with comprehensive testing
-4. **Document** your changes and update relevant documentation
-5. **Submit** a pull request with detailed description
-
-### 📋 Contribution Areas
-
-- **🎮 Game Development**: Create new interactive learning experiences
-- **📚 Content Creation**: Develop sustainability curriculum and assessments
-- **🔧 Platform Enhancement**: Improve user experience and functionality
-- **🌍 Localization**: Translate content for global accessibility
-- **📊 Analytics**: Enhance learning analytics and impact measurement
-- **🎨 Design**: Improve UI/UX and accessibility features
-
-### 🌟 Code Standards
-
-- Follow TypeScript best practices and ESLint configurations
-- Write comprehensive unit and integration tests
-- Ensure accessibility compliance (WCAG 2.1 AA)
-- Document all new features and API endpoints
-- Follow semantic versioning for releases
-
----
-
-## 📄 API Documentation
-
-### 🔐 Authentication & User Management
-
-```
-POST /auth/register          # User registration with role assignment
-POST /auth/login            # Secure authentication with JWT
-POST /auth/logout           # Session termination
-POST /auth/refresh          # Token refresh mechanism
-GET  /auth/profile          # User profile information
+```bash
+npm run dev      # Start Next.js development server
+npm run build    # Build production client
+npm run start    # Serve production build
+npm run lint     # Run ESLint
 ```
 
-### 🏫 Institution & Class Management
+Server:
 
-```
-GET    /institutions         # List all institutions
-POST   /institutions         # Create new institution
-GET    /institutions/:id     # Institution details and analytics
-PUT    /institutions/:id     # Update institution information
-DELETE /institutions/:id     # Remove institution
-
-GET    /classes             # List classes for institution
-POST   /classes             # Create new class
-GET    /classes/:id         # Class details and student roster
-PUT    /classes/:id         # Update class information
+```bash
+npm run dev      # Start Express server with tsx watch
+npm run build    # Generate Prisma client and compile TypeScript
+npm run start    # Run compiled server
+npm run lint     # Type-check without emitting files
+npm run clean    # Remove build output
 ```
 
-### 📚 Learning Content & Assessment
+## API Overview
 
+Base URL: `http://localhost:6969`
+
+| Resource | Endpoints |
+| --- | --- |
+| Health | `GET /health` |
+| Flow | `GET /flow`, `GET /flow/data` |
+| Auth | `GET /auth/user`, `POST /auth/user`, `PATCH /auth/user` |
+| Institutions | `GET/POST /institutions`, `GET/PUT/DELETE /institutions/:id`, statistics, students, teachers, classes |
+| Classes | `GET/POST /classes`, `GET/PUT/DELETE /classes/:id`, student and teacher enrollment, statistics |
+| Lessons | `GET/POST /lessons`, `GET/PUT/DELETE /lessons/:id`, completions, lesson modules |
+| Quizzes | `GET/POST /quizzes`, `GET/PUT/DELETE /quizzes/:id`, questions, attempts |
+| Articles | `GET/POST /articles`, `GET/PUT/DELETE /articles/:id`, source, section, statistics |
+| Games | `GET /game/health`, `GET /game/stats`, Socket.io game events |
+
+Protected routes expect a Supabase bearer token:
+
+```http
+Authorization: Bearer <supabase-access-token>
 ```
-GET    /lessons             # Available learning modules
-GET    /lessons/:id         # Detailed lesson content
-POST   /lessons/:id/complete # Mark lesson completion
-GET    /quizzes             # Available assessments
-POST   /quizzes/:id/attempt # Submit quiz attempt
-GET    /progress            # Student learning progress
+
+## Games
+
+- `Recycle Rush`: waste sorting game with custom image assets.
+- `Eco Strike`: 1v1 quiz battle where correct answers trigger attacks.
+- `Eco Sprint`: real-time eco quiz race powered by Socket.io.
+
+Game pages live under `client/app/games`, with reusable components in `client/components/games`.
+
+## Articles And ETL
+
+The article UI reads from the server `/articles` API and displays environmental stories from the database. Article records support:
+
+- headline, body, source, section, URL
+- publish and extracted dates
+- image URL
+- optional AI summary
+
+The `python/` folder contains an Airflow/Astronomer scaffold that can be used for ingestion and ETL workflows.
+
+## Docker
+
+From `server/`, run the development compose file:
+
+```bash
+docker compose up --build
 ```
 
-### 🎮 Gaming & Engagement
+For production server deployment:
 
-```
-GET    /game/rooms          # Active game sessions
-POST   /game/rooms          # Create new game room
-POST   /game/join           # Join existing game
-GET    /game/leaderboard    # Global and class leaderboards
-POST   /game/results        # Submit game results
+```bash
+docker compose -f docker-compose.prod.yml up -d --build
 ```
 
----
+Set production secrets in `server/.env.production` before using the production compose file.
 
-## 🌟 Demo & Screenshots
+## Python/Airflow Workspace
 
-### Learning Experience Showcase
+The `python/` folder is an Astronomer project. To start Airflow locally:
 
-<div align="center">
+```bash
+cd python
+astro dev start
+```
 
-|                                    Student Learning Dashboard                                     |                                Interactive Game Interface                                 |
-| :-----------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------: |
-| ![Student Dashboard](https://via.placeholder.com/400x250/22c55e/ffffff?text=Student+Learning+Hub) | ![Game Interface](https://via.placeholder.com/400x250/3b82f6/ffffff?text=Eco+Sprint+Game) |
+Airflow UI defaults to http://localhost:8080.
 
-|                                  Teacher Management Portal                                   |                              Analytics & Progress Tracking                              |
-| :------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------: |
-| ![Teacher Portal](https://via.placeholder.com/400x250/f59e0b/ffffff?text=Educator+Dashboard) | ![Analytics](https://via.placeholder.com/400x250/8b5cf6/ffffff?text=Learning+Analytics) |
+## Project Assets
 
-</div>
+Useful visual references are stored in `project_screenshots/`, including:
 
-### 🎥 **Live Demo**
+- architecture diagram: `arch.png`
+- database diagram: `database.png`
+- data-flow diagrams
+- authentication, Eco Sprint, and Airflow flow diagrams
+- demo video: `EduEarth.mp4`
 
-Experience EduEarth in action: [Demo Link](#) _(Coming Soon)_
+## Notes For Contributors
 
----
-
-## 📊 Project Impact & Statistics
-
-<div align="center">
-
-![GitHub repo size](https://img.shields.io/github/repo-size/GouravSittam/EduEarth-sustainability-experiential-learning?style=for-the-badge&color=22c55e)
-![GitHub last commit](https://img.shields.io/github/last-commit/GouravSittam/EduEarth-sustainability-experiential-learning?style=for-the-badge&color=3b82f6)
-![GitHub issues](https://img.shields.io/github/issues/GouravSittam/EduEarth-sustainability-experiential-learning?style=for-the-badge&color=f59e0b)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/GouravSittam/EduEarth-sustainability-experiential-learning?style=for-the-badge&color=8b5cf6)
-
-### 🌍 Educational Impact Metrics
-
-**Students Engaged**: 1,000+ | **Institutions**: 50+ | **Environmental Projects**: 200+ | **CO₂ Reduced**: 500+ tons
-
-</div>
-
----
-
-## 📜 License & Usage
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for complete details.
-
-### 🎓 Educational Use
-
-EduEarth is free for educational institutions and non-profit organizations. Commercial licensing options are available for enterprise implementations.
-
----
-
-## 🙏 Acknowledgments & Partners
-
-- **🎓 Educational Institutions** for curriculum guidance and pilot testing
-- **🌱 Environmental Organizations** for sustainability content and real-world partnerships
-- **💻 Open Source Community** for foundational technologies and continuous support
-- **👥 Beta Testing Community** for invaluable feedback and feature suggestions
-- **🌍 Global Sustainability Advocates** for inspiration and collaborative vision
-
----
-
-## 📞 Connect with EduEarth
-
-<div align="center">
-
-### Join Our Community
-
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-black?style=for-the-badge&logo=github)](https://github.com/GouravSittam/EduEarth-sustainability-experiential-learning)
-[![Email](https://img.shields.io/badge/Email-Contact-blue?style=for-the-badge&logo=gmail)](mailto:eduearth@example.com)
-[![Discord](https://img.shields.io/badge/Discord-Community-purple?style=for-the-badge&logo=discord)](https://discord.gg/eduearth)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Network-blue?style=for-the-badge&logo=linkedin)](https://linkedin.com/company/eduearth)
-
-### 🌟 Support Our Mission
-
-If EduEarth is making a difference in your educational journey, please consider:
-
-- ⭐ **Starring** our repository
-- 🤝 **Contributing** to the project
-- 📢 **Sharing** with your network
-- 💡 **Suggesting** new features
-
-</div>
-
----
-
-<div align="center">
-
-### 🌍 _Transforming Education, One Experience at a Time_ 🎓
-
-**EduEarth: Where Learning Meets Action for a Sustainable Future**
-
-_Made with 💚 for Educators, Students, and Our Planet_
-
-</div>
+- Keep client code in TypeScript and follow the existing App Router structure.
+- Keep server changes scoped by route/controller pairs.
+- Run `npm run lint` in `server` before changing API contracts.
+- Run `npm run lint` and `npm run build` in `client` before UI releases.
+- Update this README when routes, setup steps, environment variables, or major user-facing features change.
