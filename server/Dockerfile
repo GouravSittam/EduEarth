@@ -9,10 +9,10 @@ RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 COPY tsconfig.json prisma.config.ts ./
 COPY src ./src
 
-# Runs Prisma generate via prebuild, then compiles TypeScript.
+# Build runs Prisma generate through prebuild and then compiles TypeScript.
 RUN npm run build
 
-# Keep only production dependencies for the runtime image.
+# Reduce runtime image size by removing dev dependencies.
 RUN npm prune --omit=dev && npm cache clean --force
 
 FROM node:20-alpine AS runner
@@ -33,7 +33,7 @@ USER node
 
 EXPOSE 6969
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:6969/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })" || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:6969/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"
 
 CMD ["node", "build/server.js"]

@@ -18,14 +18,14 @@ EduEarth is a gamified environmental education platform for students, teachers, 
 
 ## Tech Stack
 
-| Area | Tools |
-| --- | --- |
-| Client | Next.js 15, React 19, TypeScript, Tailwind CSS 4, Framer Motion |
-| Server | Node.js, Express 5, TypeScript, Socket.io |
-| Data | PostgreSQL, Prisma, Supabase |
-| Auth | Supabase Auth with server-side token validation |
-| ETL | Python, Apache Airflow/Astronomer scaffold |
-| Deployment | Docker, Docker Compose, Vercel-compatible client |
+| Area       | Tools                                                           |
+| ---------- | --------------------------------------------------------------- |
+| Client     | Next.js 15, React 19, TypeScript, Tailwind CSS 4, Framer Motion |
+| Server     | Node.js, Express 5, TypeScript, Socket.io                       |
+| Data       | PostgreSQL, Prisma, Supabase                                    |
+| Auth       | Supabase Auth with server-side token validation                 |
+| ETL        | Python, Apache Airflow/Astronomer scaffold                      |
+| Deployment | Docker, Docker Compose, Vercel-compatible client                |
 
 ## Repository Structure
 
@@ -48,16 +48,16 @@ EduEarth/
 
 ## Screenshots
 
-| Home | Student Dashboard |
-| --- | --- |
+| Home                                    | Student Dashboard                                                |
+| --------------------------------------- | ---------------------------------------------------------------- |
 | ![Home](project_screenshots/1_home.png) | ![Student dashboard](project_screenshots/2_StudentDashboard.png) |
 
-| Teacher Dashboard | Articles |
-| --- | --- |
+| Teacher Dashboard                                                | Articles                                        |
+| ---------------------------------------------------------------- | ----------------------------------------------- |
 | ![Teacher dashboard](project_screenshots/3_TeacherDashboard.png) | ![Articles](project_screenshots/4_Articles.png) |
 
-| Games | Modules |
-| --- | --- |
+| Games                                     | Modules                                       |
+| ----------------------------------------- | --------------------------------------------- |
 | ![Games](project_screenshots/5_Games.png) | ![Modules](project_screenshots/6_Modules.png) |
 
 ## Prerequisites
@@ -161,17 +161,17 @@ npm run clean    # Remove build output
 
 Base URL: `http://localhost:6969`
 
-| Resource | Endpoints |
-| --- | --- |
-| Health | `GET /health` |
-| Flow | `GET /flow`, `GET /flow/data` |
-| Auth | `GET /auth/user`, `POST /auth/user`, `PATCH /auth/user` |
+| Resource     | Endpoints                                                                                             |
+| ------------ | ----------------------------------------------------------------------------------------------------- |
+| Health       | `GET /health`                                                                                         |
+| Flow         | `GET /flow`, `GET /flow/data`                                                                         |
+| Auth         | `GET /auth/user`, `POST /auth/user`, `PATCH /auth/user`                                               |
 | Institutions | `GET/POST /institutions`, `GET/PUT/DELETE /institutions/:id`, statistics, students, teachers, classes |
-| Classes | `GET/POST /classes`, `GET/PUT/DELETE /classes/:id`, student and teacher enrollment, statistics |
-| Lessons | `GET/POST /lessons`, `GET/PUT/DELETE /lessons/:id`, completions, lesson modules |
-| Quizzes | `GET/POST /quizzes`, `GET/PUT/DELETE /quizzes/:id`, questions, attempts |
-| Articles | `GET/POST /articles`, `GET/PUT/DELETE /articles/:id`, source, section, statistics |
-| Games | `GET /game/health`, `GET /game/stats`, Socket.io game events |
+| Classes      | `GET/POST /classes`, `GET/PUT/DELETE /classes/:id`, student and teacher enrollment, statistics        |
+| Lessons      | `GET/POST /lessons`, `GET/PUT/DELETE /lessons/:id`, completions, lesson modules                       |
+| Quizzes      | `GET/POST /quizzes`, `GET/PUT/DELETE /quizzes/:id`, questions, attempts                               |
+| Articles     | `GET/POST /articles`, `GET/PUT/DELETE /articles/:id`, source, section, statistics                     |
+| Games        | `GET /game/health`, `GET /game/stats`, Socket.io game events                                          |
 
 Protected routes expect a Supabase bearer token:
 
@@ -200,19 +200,49 @@ The `python/` folder contains an Airflow/Astronomer scaffold that can be used fo
 
 ## Docker
 
-From `server/`, run the development compose file:
+The repository now includes Docker support for the full stack and service-level deployment.
+
+### Full stack from repository root
+
+1. Ensure these files exist:
+
+- `server/.env` (based on `server/.env.example`)
+- `client/.env.local` (based on `client/.env.example`)
+
+2. Start client + server:
 
 ```bash
 docker compose up --build
 ```
 
-For production server deployment:
+Open:
+
+- Client: http://localhost:3000
+- API: http://localhost:6969
+
+Optional local Postgres profile:
+
+```bash
+docker compose --profile local-db up -d
+```
+
+### Server-only (development)
+
+From `server/`:
+
+```bash
+docker compose up --build
+```
+
+This uses hot-reload (`npm run dev`) inside the container.
+
+### Server-only (production)
+
+From `server/`, with `server/.env.production` configured:
 
 ```bash
 docker compose -f docker-compose.prod.yml up -d --build
 ```
-
-Set production secrets in `server/.env.production` before using the production compose file.
 
 ## Python/Airflow Workspace
 

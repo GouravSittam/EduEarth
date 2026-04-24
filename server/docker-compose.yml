@@ -1,29 +1,22 @@
-version: "3.8"
-
 services:
-  app:
+  server:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: eduearth-server-dev
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+      PORT: 6969
     ports:
       - "6969:6969"
-    environment:
-      - NODE_ENV=production
-      - PORT=6969
-      # Add your environment variables here or use env_file
-      # DATABASE_URL=your_database_url
-      # SUPABASE_URL=https://your-project-ref.supabase.co
-      # SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
-      # AWS_ACCESS_KEY_ID=your_aws_access_key
-      # AWS_SECRET_ACCESS_KEY=your_aws_secret
-    # Uncomment if you want to use an env file
-    # env_file:
-    #   - .env.production
     volumes:
-      # Mount uploads directory if you need persistent file storage
-      - uploads:/app/uploads
-    depends_on:
-      - db
+      - ./src:/app/src
+      - ./prisma.config.ts:/app/prisma.config.ts
+      - ./tsconfig.json:/app/tsconfig.json
+      - /app/node_modules
+    command: sh -c "npx prisma generate && npm run dev"
     restart: unless-stopped
     healthcheck:
       test:
@@ -31,25 +24,9 @@ services:
           "CMD",
           "node",
           "-e",
-          "require('http').get('http://localhost:6969/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })",
+          "require('http').get('http://localhost:6969/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))",
         ]
       interval: 30s
       timeout: 10s
       retries: 3
-
-  # Uncomment if you want to include a database in your compose
-  # db:
-  #   image: postgres:15-alpine
-  #   environment:
-  #     POSTGRES_DB: genai
-  #     POSTGRES_USER: your_username
-  #     POSTGRES_PASSWORD: your_password
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #   ports:
-  #     - "5432:5432"
-  #   restart: unless-stopped
-
-volumes:
-  uploads:
-  # postgres_data:
+      start_period: 10s

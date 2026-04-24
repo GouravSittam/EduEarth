@@ -1,21 +1,17 @@
-version: "3.8"
-
 services:
-  app:
+  server:
     build:
       context: .
       dockerfile: Dockerfile
       target: runner
-    ports:
-      - "6969:6969"
-    environment:
-      - NODE_ENV=production
-      - PORT=6969
+    container_name: eduearth-server
     env_file:
       - .env.production
-    volumes:
-      - uploads:/app/uploads
-      - logs:/app/logs
+    environment:
+      NODE_ENV: production
+      PORT: 6969
+    ports:
+      - "6969:6969"
     restart: unless-stopped
     healthcheck:
       test:
@@ -23,12 +19,12 @@ services:
           "CMD",
           "node",
           "-e",
-          "require('http').get('http://localhost:6969/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })",
+          "require('http').get('http://localhost:6969/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))",
         ]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 40s
+      start_period: 20s
     deploy:
       resources:
         limits:
@@ -36,11 +32,7 @@ services:
         reservations:
           memory: 256M
     logging:
-      driver: "json-file"
+      driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
-
-volumes:
-  uploads:
-  logs:

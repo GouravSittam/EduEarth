@@ -1,8 +1,7 @@
 node_modules
-build
-dist
+.next
 
-.env
+.env.local
 .env.*
 !.env.example
 
@@ -15,11 +14,7 @@ npm-debug.log*
 .idea
 
 coverage
-.nyc_output
-
-test
-tests
-__tests__
-
+build.log
+build_utf8.log
 Dockerfile*
 docker-compose*.yml
