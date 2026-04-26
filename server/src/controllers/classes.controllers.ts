@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import { sendResponse } from "../utils/ResponseHelpers.js";
 import { prisma } from "../prisma/client.js";
+import { parseBoundedPagination } from "../utils/pagination.js";
+import { classesService } from "../services/classes.service.js";
+import { cacheService } from "../services/cache.service.js";
 
 // Helper functions for consistent responses
 const sendSuccessResponse = (
@@ -65,6 +68,7 @@ export const createClass = async (
     });
 
     sendSuccessResponse(res, 201, "Class created successfully", newClass);
+    await cacheService.delByPrefix("classes:stats:");
   } catch (error) {
     console.error("Create class error:", error);
     sendErrorResponse(res, 500, "Failed to create class");
@@ -80,9 +84,7 @@ export const getAllClasses = async (
   res: Response
 ): Promise<void> => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const skip = (page - 1) * limit;
+    const { page, limit, skip } = parseBoundedPagination(req.query.page, req.query.limit, 10, 50);
     const institutionId = req.query.institutionId as string;
     const subject = req.query.subject as string;
     const search = req.query.search as string;
@@ -216,6 +218,7 @@ export const updateClass = async (
     });
 
     sendSuccessResponse(res, 200, "Class updated successfully", updatedClass);
+    await cacheService.delByPrefix("classes:stats:");
   } catch (error) {
     console.error("Update class error:", error);
     sendErrorResponse(res, 500, "Failed to update class");
@@ -255,6 +258,7 @@ export const deleteClass = async (
     });
 
     sendSuccessResponse(res, 200, "Class deleted successfully");
+    await cacheService.delByPrefix("classes:stats:");
   } catch (error) {
     console.error("Delete class error:", error);
     sendErrorResponse(res, 500, "Failed to delete class");
@@ -279,63 +283,53 @@ export const addStudentToClass = async (
       return;
     }
 
-    // Check if class exists
-    const classData = await prisma.class.findUnique({
-      where: { id },
-    });
-
-    if (!classData) {
-      sendErrorResponse(res, 404, "Class not found");
-      return;
-    }
-
-    // Check if student exists
-    const student = await prisma.student.findUnique({
-      where: { id: studentId },
-    });
-
-    if (!student) {
-      sendErrorResponse(res, 404, "Student not found");
-      return;
-    }
-
-    // Check if student is already enrolled
-    const existingEnrollment = await (prisma as any).studentClass.findFirst({
-      where: {
-        studentId,
-        classId: id,
-        isActive: true,
-      },
-    });
-
-    if (existingEnrollment) {
-      sendErrorResponse(res, 409, "Student is already enrolled in this class");
-      return;
-    }
-
-    // Add student to class
-    const enrollment = await (prisma as any).studentClass.create({
-      data: {
-        studentId,
-        classId: id,
-        isActive: true,
-      },
-      include: {
-        student: {
-          include: {
-            user: {
-              select: { id: true, name: true, email: true, avatar: true },
+    const enrollment = await prisma.$transaction(async (tx) => {
+      const [classData, student] = await Promise.all([
+        tx.class.findUnique({ where: { id } }),
+        tx.student.findUnique({ where: { id: studentId } }),
+      ]);
+      if (!classData) {
+        throw new Error("CLASS_NOT_FOUND");
+      }
+      if (!student) {
+        throw new Error("STUDENT_NOT_FOUND");
+      }
+      const existingEnrollment = await (tx as any).studentClass.findFirst({
+        where: { studentId, classId: id, isActive: true },
+      });
+      if (existingEnrollment) {
+        throw new Error("STUDENT_ALREADY_ENROLLED");
+      }
+      return (tx as any).studentClass.create({
+        data: { studentId, classId: id, isActive: true },
+        include: {
+          student: {
+            include: {
+              user: { select: { id: true, name: true, email: true, avatar: true } },
             },
           },
+          class: {
+            select: { id: true, name: true, subject: true },
+          },
         },
-        class: {
-          select: { id: true, name: true, subject: true },
-        },
-      },
+      });
     });
 
     sendSuccessResponse(res, 201, "Student added to class successfully", enrollment);
+    await cacheService.delByPrefix(`classes:stats:${id}`);
   } catch (error) {
+    if (error instanceof Error && error.message === "CLASS_NOT_FOUND") {
+      sendErrorResponse(res, 404, "Class not found");
+      return;
+    }
+    if (error instanceof Error && error.message === "STUDENT_NOT_FOUND") {
+      sendErrorResponse(res, 404, "Student not found");
+      return;
+    }
+    if (error instanceof Error && error.message === "STUDENT_ALREADY_ENROLLED") {
+      sendErrorResponse(res, 409, "Student is already enrolled in this class");
+      return;
+    }
     console.error("Add student to class error:", error);
     sendErrorResponse(res, 500, "Failed to add student to class");
   }
@@ -379,6 +373,7 @@ export const removeStudentFromClass = async (
     });
 
     sendSuccessResponse(res, 200, "Student removed from class successfully");
+    await cacheService.delByPrefix(`classes:stats:${id}`);
   } catch (error) {
     console.error("Remove student from class error:", error);
     sendErrorResponse(res, 500, "Failed to remove student from class");
@@ -395,9 +390,7 @@ export const getClassStudents = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
-    const skip = (page - 1) * limit;
+    const { page, limit, skip } = parseBoundedPagination(req.query.page, req.query.limit, 20, 100);
 
     if (!id) {
       sendErrorResponse(res, 400, "Class ID is required");
@@ -471,6 +464,13 @@ export const getClassStatistics = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
+    const cacheKey = `classes:stats:${id}`;
+    const cached = await cacheService.get(cacheKey);
+    if (cached) {
+      sendSuccessResponse(res, 200, "Class statistics retrieved successfully", cached);
+      return;
+    }
+
 
     if (!id) {
       sendErrorResponse(res, 400, "Class ID is required");
@@ -551,6 +551,7 @@ export const getClassStatistics = async (
     };
 
     sendSuccessResponse(res, 200, "Class statistics retrieved successfully", statistics);
+    await cacheService.set(cacheKey, statistics, 120);
   } catch (error) {
     console.error("Get class statistics error:", error);
     sendErrorResponse(res, 500, "Failed to retrieve class statistics");
@@ -569,70 +570,58 @@ export const addTeacherToClass = async (
   try {
     const { id } = req.params;
     const { teacherId, role = "PRIMARY" } = req.body;
+    const normalizedRole = classesService.normalizeRole(role);
 
     if (!id || !teacherId) {
       sendErrorResponse(res, 400, "Class ID and teacher ID are required");
       return;
     }
 
-    // Check if class exists
-    const classData = await prisma.class.findUnique({
-      where: { id },
-    });
-
-    if (!classData) {
-      sendErrorResponse(res, 404, "Class not found");
-      return;
-    }
-
-    // Check if teacher exists
-    const teacher = await prisma.teacher.findUnique({
-      where: { id: teacherId },
-    });
-
-    if (!teacher) {
-      sendErrorResponse(res, 404, "Teacher not found");
-      return;
-    }
-
-    // Check if teacher is already assigned
-    const existingAssignment = await (prisma as any).teacherClass.findFirst({
-      where: {
-        teacherId,
-        classId: id,
-        isActive: true,
-      },
-    });
-
-    if (existingAssignment) {
-      sendErrorResponse(res, 409, "Teacher is already assigned to this class");
-      return;
-    }
-
-    // Add teacher to class
-    const assignment = await (prisma as any).teacherClass.create({
-      data: {
-        teacherId,
-        classId: id,
-        role,
-        isActive: true,
-      },
-      include: {
-        teacher: {
-          include: {
-            user: {
-              select: { id: true, name: true, email: true, avatar: true },
+    const assignment = await prisma.$transaction(async (tx) => {
+      const [classData, teacher] = await Promise.all([
+        tx.class.findUnique({ where: { id } }),
+        tx.teacher.findUnique({ where: { id: teacherId } }),
+      ]);
+      if (!classData) {
+        throw new Error("CLASS_NOT_FOUND");
+      }
+      if (!teacher) {
+        throw new Error("TEACHER_NOT_FOUND");
+      }
+      const existingAssignment = await (tx as any).teacherClass.findFirst({
+        where: { teacherId, classId: id, isActive: true },
+      });
+      if (existingAssignment) {
+        throw new Error("TEACHER_ALREADY_ASSIGNED");
+      }
+      return (tx as any).teacherClass.create({
+        data: { teacherId, classId: id, role: normalizedRole, isActive: true },
+        include: {
+          teacher: {
+            include: {
+              user: { select: { id: true, name: true, email: true, avatar: true } },
             },
           },
+          class: { select: { id: true, name: true, subject: true } },
         },
-        class: {
-          select: { id: true, name: true, subject: true },
-        },
-      },
+      });
     });
 
     sendSuccessResponse(res, 201, "Teacher added to class successfully", assignment);
+    await cacheService.delByPrefix(`classes:stats:${id}`);
   } catch (error) {
+    if (error instanceof Error && error.message === "CLASS_NOT_FOUND") {
+      sendErrorResponse(res, 404, "Class not found");
+      return;
+    }
+    if (error instanceof Error && error.message === "TEACHER_NOT_FOUND") {
+      sendErrorResponse(res, 404, "Teacher not found");
+      return;
+    }
+    if (error instanceof Error && error.message === "TEACHER_ALREADY_ASSIGNED") {
+      sendErrorResponse(res, 409, "Teacher is already assigned to this class");
+      return;
+    }
     console.error("Add teacher to class error:", error);
     sendErrorResponse(res, 500, "Failed to add teacher to class");
   }
@@ -676,6 +665,7 @@ export const removeTeacherFromClass = async (
     });
 
     sendSuccessResponse(res, 200, "Teacher removed from class successfully");
+    await cacheService.delByPrefix(`classes:stats:${id}`);
   } catch (error) {
     console.error("Remove teacher from class error:", error);
     sendErrorResponse(res, 500, "Failed to remove teacher from class");
@@ -692,9 +682,7 @@ export const getClassTeachers = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
-    const skip = (page - 1) * limit;
+    const { page, limit, skip } = parseBoundedPagination(req.query.page, req.query.limit, 20, 100);
 
     if (!id) {
       sendErrorResponse(res, 400, "Class ID is required");

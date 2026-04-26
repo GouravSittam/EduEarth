@@ -1,6 +1,10 @@
 "use client";
 
-import EcoStrike from "@/components/games/EcoStrike";
+import dynamic from "next/dynamic";
+
+const EcoStrike = dynamic(() => import("@/components/games/EcoStrike"), {
+  ssr: false,
+});
 
 export default function EcoStrikePage() {
   return (

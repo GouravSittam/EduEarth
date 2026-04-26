@@ -1,0 +1,44 @@
+{
+  "ci": {
+    "collect": {
+      "numberOfRuns": 2,
+      "url": [
+        "http://localhost:3000/home",
+        "http://localhost:3000/articles",
+        "http://localhost:3000/games",
+        "http://localhost:3000/student-dashboard"
+      ]
+    },
+    "assert": {
+      "assertions": {
+        "largest-contentful-paint": [
+          "warn",
+          {
+            "maxNumericValue": 2800
+          }
+        ],
+        "interactive": [
+          "warn",
+          {
+            "maxNumericValue": 3800
+          }
+        ],
+        "total-byte-weight": [
+          "warn",
+          {
+            "maxNumericValue": 450000
+          }
+        ],
+        "cumulative-layout-shift": [
+          "warn",
+          {
+            "maxNumericValue": 0.15
+          }
+        ]
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

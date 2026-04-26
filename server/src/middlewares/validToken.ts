@@ -52,6 +52,11 @@ const getMetadataValue = (
   return typeof value === "string" && value.trim().length > 0 ? value : null;
 };
 
+const authCache = new Map<
+  string,
+  { expiresAt: number; user: User; supabaseUser: SupabaseUser }
+>();
+
 const syncPrismaUser = async (supabaseUser: SupabaseUser) => {
   if (!supabaseUser.email) {
     throw new Error("Supabase user email is missing");
@@ -114,6 +119,14 @@ export default async function validToken(
       throw new Error("Unauthorized request");
     }
 
+    const cachedAuth = authCache.get(accessToken);
+    if (cachedAuth && cachedAuth.expiresAt > Date.now()) {
+      req.user = cachedAuth.user;
+      req.supabaseUser = cachedAuth.supabaseUser;
+      next();
+      return;
+    }
+
     const supabase = getSupabaseServerClient();
     const {
       data: { user: supabaseUser },
@@ -128,6 +141,11 @@ export default async function validToken(
 
     req.user = user;
     req.supabaseUser = supabaseUser;
+    authCache.set(accessToken, {
+      expiresAt: Date.now() + 60_000,
+      user,
+      supabaseUser,
+    });
 
     next();
   } catch (error) {

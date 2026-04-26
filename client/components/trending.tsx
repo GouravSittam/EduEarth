@@ -42,9 +42,9 @@ const TrendingNewsCarousel: React.FC = () => {
           className="flex w-[200%] animate-[scrollLeft_40s_linear_infinite] hover:pause p-4 sm:p-6 md:p-10"
           style={{ animationPlayState: "running" }}
         >
-          {[...newsData, ...newsData].map((card) => (
+          {[...newsData, ...newsData].map((card, index) => (
             <div
-              key={card.id + "-" + Math.random()}
+              key={`${card.id}-${index}`}
               className="flex-0 w-[220px] sm:w-[260px] md:w-[300px] h-[260px] sm:h-[300px] md:h-[340px] border-2 border-purple-600 rounded-xl p-4 m-2 shadow-md 
                          flex flex-col items-center text-center transform transition-transform duration-300 hover:scale-105 bg-white/80"
             >

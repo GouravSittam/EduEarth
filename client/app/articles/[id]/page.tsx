@@ -187,10 +187,13 @@ export default function ArticleDetailPage() {
             {/* Article Header Image */}
             {article.image_url && (
               <div className="relative h-64 md:h-80 overflow-hidden">
-                <img
+                <Image
                   src={article.image_url}
                   alt={article.headline}
-                  className="w-full h-full object-cover"
+                  fill
+                  unoptimized
+                  sizes="(max-width: 768px) 100vw, 1200px"
+                  className="object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
               </div>

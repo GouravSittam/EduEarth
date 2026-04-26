@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import ElectricBorder from "./ElectricBorder";
 import { JSX } from "react";

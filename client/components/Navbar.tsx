@@ -47,33 +47,41 @@ export default function Navbar() {
       })
       .filter(Boolean) as Array<NavItem & { element: HTMLElement }>;
 
-    const updateActiveFromScroll = () => {
-      if (window.scrollY < 120) {
-        setActiveLabel("Home");
-        return;
-      }
-
-      const viewportMid = window.innerHeight * 0.35;
-      let current = sections[0]?.label ?? "Home";
-
-      for (const section of sections) {
-        const rect = section.element.getBoundingClientRect();
-        if (rect.top <= viewportMid) {
-          current = section.label;
+    const visibility = new Map<string, number>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          visibility.set(entry.target.id, entry.intersectionRatio);
         }
-      }
 
-      setActiveLabel(current);
-    };
+        if (window.scrollY < 120) {
+          setActiveLabel("Home");
+          return;
+        }
 
-    updateActiveFromScroll();
-    window.addEventListener("scroll", updateActiveFromScroll, {
-      passive: true,
-    });
+        const activeSection = sections.reduce(
+          (best, section) => {
+            const ratio = visibility.get(section.sectionId ?? "") ?? 0;
+            if (ratio > best.ratio) {
+              return { label: section.label, ratio };
+            }
+            return best;
+          },
+          { label: "Home", ratio: 0 },
+        );
 
-    return () => {
-      window.removeEventListener("scroll", updateActiveFromScroll);
-    };
+        setActiveLabel(activeSection.label);
+      },
+      {
+        root: null,
+        rootMargin: "-30% 0px -50% 0px",
+        threshold: [0, 0.25, 0.5, 0.75, 1],
+      },
+    );
+
+    sections.forEach((section) => observer.observe(section.element));
+
+    return () => observer.disconnect();
   }, [pathname]);
 
   const handleSectionClick = (

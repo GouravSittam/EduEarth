@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { InstitutionType } from "@prisma/client";
 import { sendResponse } from "../utils/ResponseHelpers.js";
 import { prisma } from "../prisma/client.js";
+import { parseBoundedPagination } from "../utils/pagination.js";
+import { cacheService } from "../services/cache.service.js";
 
 // Helper functions for consistent responses
 const sendSuccessResponse = (
@@ -87,6 +89,7 @@ export const createInstitution = async (
       "Institution created successfully",
       institution
     );
+    await cacheService.delByPrefix("institutions:stats:");
   } catch (error) {
     console.error("Create institution error:", error);
     sendErrorResponse(res, 500, "Failed to create institution");
@@ -102,9 +105,7 @@ export const getAllInstitutions = async (
   res: Response
 ): Promise<void> => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const skip = (page - 1) * limit;
+    const { page, limit, skip } = parseBoundedPagination(req.query.page, req.query.limit, 10, 50);
     const type = req.query.type as InstitutionType;
     const search = req.query.search as string;
 
@@ -280,6 +281,7 @@ export const updateInstitution = async (
       "Institution updated successfully",
       updatedInstitution
     );
+    await cacheService.delByPrefix("institutions:stats:");
   } catch (error) {
     console.error("Update institution error:", error);
     sendErrorResponse(res, 500, "Failed to update institution");
@@ -352,6 +354,7 @@ export const deleteInstitution = async (
     });
 
     sendSuccessResponse(res, 200, "Institution deleted successfully");
+    await cacheService.delByPrefix("institutions:stats:");
   } catch (error) {
     console.error("Delete institution error:", error);
     sendErrorResponse(res, 500, "Failed to delete institution");
@@ -368,6 +371,18 @@ export const getInstitutionStatistics = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
+    const cacheKey = `institutions:stats:${id}`;
+    const cached = await cacheService.get(cacheKey);
+    if (cached) {
+      sendSuccessResponse(
+        res,
+        200,
+        "Institution statistics retrieved successfully",
+        cached
+      );
+      return;
+    }
+
 
     if (!id) {
       sendErrorResponse(res, 400, "Institution ID is required");
@@ -452,6 +467,7 @@ export const getInstitutionStatistics = async (
       "Institution statistics retrieved successfully",
       statistics
     );
+    await cacheService.set(cacheKey, statistics, 120);
   } catch (error) {
     console.error("Get institution statistics error:", error);
     sendErrorResponse(res, 500, "Failed to retrieve institution statistics");
@@ -468,9 +484,7 @@ export const getInstitutionStudents = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
-    const skip = (page - 1) * limit;
+    const { page, limit, skip } = parseBoundedPagination(req.query.page, req.query.limit, 20, 100);
 
     if (!id) {
       sendErrorResponse(res, 400, "Institution ID is required");
@@ -542,9 +556,7 @@ export const getInstitutionTeachers = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
-    const skip = (page - 1) * limit;
+    const { page, limit, skip } = parseBoundedPagination(req.query.page, req.query.limit, 20, 100);
 
     if (!id) {
       sendErrorResponse(res, 400, "Institution ID is required");
@@ -613,9 +625,7 @@ export const getInstitutionClasses = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
-    const skip = (page - 1) * limit;
+    const { page, limit, skip } = parseBoundedPagination(req.query.page, req.query.limit, 20, 100);
 
     if (!id) {
       sendErrorResponse(res, 400, "Institution ID is required");

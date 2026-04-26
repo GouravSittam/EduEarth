@@ -4,7 +4,9 @@ import {
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useState,
+  useCallback,
   type ReactNode,
 } from "react";
 import type { Session, User as SupabaseUser } from "@supabase/supabase-js";
@@ -254,7 +256,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const refreshUser = async () => {
+  const refreshUser = useCallback(async () => {
     if (!session) {
       setUser(null);
       return null;
@@ -269,9 +271,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [session]);
 
-  const signIn = async ({ email, password }: SignInInput) => {
+  const signIn = useCallback(async ({ email, password }: SignInInput) => {
     const supabase = getSupabaseBrowserClient();
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -281,9 +283,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) {
       throw new Error(error.message);
     }
-  };
+  }, []);
 
-  const signUp = async ({
+  const signUp = useCallback(async ({
     email,
     password,
     fullName,
@@ -309,9 +311,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {
       requiresEmailConfirmation: !data.session,
     };
-  };
+  }, []);
 
-  const sendMagicLink = async ({
+  const sendMagicLink = useCallback(async ({
     email,
     fullName,
     role,
@@ -335,9 +337,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) {
       throw new Error(error.message);
     }
-  };
+  }, []);
 
-  const signInWithGoogle = async (input?: GoogleInput) => {
+  const signInWithGoogle = useCallback(async (input?: GoogleInput) => {
     const supabase = getSupabaseBrowserClient();
     savePendingProfileDraft(input);
 
@@ -352,9 +354,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearPendingProfileDraft();
       throw new Error(error.message);
     }
-  };
+  }, []);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     const supabase = getSupabaseBrowserClient();
     const { error } = await supabase.auth.signOut();
 
@@ -366,23 +368,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setAuthUser(null);
     setSession(null);
-  };
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      user,
+      authUser,
+      session,
+      isLoading,
+      signIn,
+      signUp,
+      sendMagicLink,
+      signInWithGoogle,
+      signOut,
+      refreshUser,
+    }),
+    [
+      user,
+      authUser,
+      session,
+      isLoading,
+      signIn,
+      signUp,
+      sendMagicLink,
+      signInWithGoogle,
+      signOut,
+      refreshUser,
+    ],
+  );
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        authUser,
-        session,
-        isLoading,
-        signIn,
-        signUp,
-        sendMagicLink,
-        signInWithGoogle,
-        signOut,
-        refreshUser,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

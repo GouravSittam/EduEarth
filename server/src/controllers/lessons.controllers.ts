@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { sendResponse } from "../utils/ResponseHelpers.js";
 import { prisma } from "../prisma/client.js";
+import { parseBoundedPagination } from "../utils/pagination.js";
 
 // Helper functions for consistent responses
 const sendSuccessResponse = (
@@ -68,9 +69,7 @@ export const getAllLessonModules = async (
   res: Response
 ): Promise<void> => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const skip = (page - 1) * limit;
+    const { page, limit, skip } = parseBoundedPagination(req.query.page, req.query.limit, 10, 50);
     const category = req.query.category as string;
     const difficulty = req.query.difficulty as string;
     const search = req.query.search as string;
@@ -571,70 +570,48 @@ export const completeLesson = async (
       return;
     }
 
-    // Check if lesson exists
-    const lesson = await prisma.lesson.findUnique({
-      where: { id },
-    });
+    const result = await prisma.$transaction(async (tx) => {
+      const lesson = await tx.lesson.findUnique({ where: { id } });
+      if (!lesson) throw new Error("LESSON_NOT_FOUND");
+      const student = await tx.student.findUnique({ where: { userId: studentId } });
+      if (!student) throw new Error("STUDENT_NOT_FOUND");
+      const existingCompletion = await (tx as any).lessonCompletion.findUnique({
+        where: { studentId_lessonId: { studentId: student.id, lessonId: id } },
+      });
+      if (existingCompletion) throw new Error("LESSON_ALREADY_COMPLETED");
 
-    if (!lesson) {
-      sendErrorResponse(res, 404, "Lesson not found");
-      return;
-    }
-
-    // Check if student exists
-    const student = await prisma.student.findUnique({
-      where: { userId: studentId },
-    });
-
-    if (!student) {
-      sendErrorResponse(res, 404, "Student not found");
-      return;
-    }
-
-    // Check if already completed
-    const existingCompletion = await (prisma as any).lessonCompletion.findUnique({
-      where: {
-        studentId_lessonId: {
-          studentId: student.id,
-          lessonId: id,
+      const completion = await (tx as any).lessonCompletion.create({
+        data: { studentId: student.id, lessonId: id, timeSpent },
+        include: {
+          lesson: { select: { id: true, title: true, ecoPoints: true } },
         },
-      },
-    });
+      });
 
-    if (existingCompletion) {
-      sendErrorResponse(res, 409, "Lesson already completed");
-      return;
-    }
+      await tx.student.update({
+        where: { id: student.id },
+        data: { ecoPoints: { increment: lesson.ecoPoints } },
+      });
 
-    // Create completion record
-    const completion = await (prisma as any).lessonCompletion.create({
-      data: {
-        studentId: student.id,
-        lessonId: id,
-        timeSpent,
-      },
-      include: {
-        lesson: {
-          select: { id: true, title: true, ecoPoints: true },
-        },
-      },
-    });
-
-    // Award eco points
-    await prisma.student.update({
-      where: { id: student.id },
-      data: {
-        ecoPoints: {
-          increment: lesson.ecoPoints,
-        },
-      },
+      return { completion, ecoPoints: lesson.ecoPoints };
     });
 
     sendSuccessResponse(res, 201, "Lesson completed successfully", {
-      completion,
-      ecoPointsAwarded: lesson.ecoPoints,
+      completion: result.completion,
+      ecoPointsAwarded: result.ecoPoints,
     });
   } catch (error) {
+    if (error instanceof Error && error.message === "LESSON_NOT_FOUND") {
+      sendErrorResponse(res, 404, "Lesson not found");
+      return;
+    }
+    if (error instanceof Error && error.message === "STUDENT_NOT_FOUND") {
+      sendErrorResponse(res, 404, "Student not found");
+      return;
+    }
+    if (error instanceof Error && error.message === "LESSON_ALREADY_COMPLETED") {
+      sendErrorResponse(res, 409, "Lesson already completed");
+      return;
+    }
     console.error("Complete lesson error:", error);
     sendErrorResponse(res, 500, "Failed to complete lesson");
   }

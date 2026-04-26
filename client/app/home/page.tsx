@@ -1,26 +1,18 @@
-"use client";
-
-import { motion } from "framer-motion";
-import Hero from "@/components/Hero";
-import Explore from "@/components/explore";
-import HowItWork from "@/components/HowItWork";
-import SchoolAndFamily from "@/components/SchoolFamily";
-import Join from "@/components/Join";
-import FAQ from "@/components/FAQ";
-import Platform from "@/components/Platform";
+import dynamic from "next/dynamic";
 import Navbar from "@/components/Navbar";
-import Trending from "@/components/trending";
+import Hero from "@/components/Hero";
 import Footer from "@/components/Footer";
 
-export default function HomePage() {
-  const pageVariants = {
-    initial: { opacity: 0 },
-    animate: { opacity: 1 },
-    transition: { duration: 0.5 },
-  };
+const Platform = dynamic(() => import("@/components/Platform"));
+const Explore = dynamic(() => import("@/components/explore"));
+const HowItWork = dynamic(() => import("@/components/HowItWork"));
+const SchoolAndFamily = dynamic(() => import("@/components/SchoolFamily"));
+const Join = dynamic(() => import("@/components/Join"));
+const FAQ = dynamic(() => import("@/components/FAQ"));
 
+export default function HomePage() {
   return (
-    <motion.div initial="initial" animate="animate" variants={pageVariants}>
+    <div>
       <Navbar />
       <Hero />
       <Platform />
@@ -30,6 +22,6 @@ export default function HomePage() {
       <Join />
       <FAQ />
       <Footer />
-    </motion.div>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useMemo, use } from "react";
 import { Star, Users, Clock, Calendar, Globe, Award } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { motion } from "framer-motion";
@@ -51,20 +51,14 @@ const FlashcardSet = ({ title, cards }: { title: string; cards: number }) => (
 
 export default function ModuleDetail({ params }: { params: Promise<{ slug: string }> }) {
     const [activeTab, setActiveTab] = useState("Overview");
-    const [module, setModule] = useState<any>(null);
     const [progress, setProgress] = useState(20);
 
     // Unwrap the params promise using React.use()
     const { slug } = use(params);
 
-    useEffect(() => {
-        const foundModule = modulesData.find(m => m.slug === slug);
-        if (foundModule) {
-            setModule(foundModule);
-        }
-    }, [slug]);
+    const currentModule = useMemo(() => modulesData.find((item) => item.slug === slug), [slug]);
 
-    if (!module) {
+    if (!currentModule) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
@@ -80,8 +74,8 @@ export default function ModuleDetail({ params }: { params: Promise<{ slug: strin
         );
     }
 
-    const assignments = assignmentsData[module.slug] || [];
-    const missions = missionsData[module.slug] || [
+    const assignments = assignmentsData[currentModule.slug] || [];
+    const missions = missionsData[currentModule.slug] || [
         { name: "Complete Module Challenge", obj: "Finish all lessons in this module", reward: "+100 XP", status: "Available" },
     ];
 
@@ -108,15 +102,16 @@ export default function ModuleDetail({ params }: { params: Promise<{ slug: strin
                 className="mb-6"
             >
                 <div className="flex justify-between text-xl text-black mb-2 flex-wrap gap-2">
-                    <span className="font-bold text-black">{module.title}</span>
-                    <span>{module.category}</span>
-                    <span>Duration - {module.duration} | {module.chapters} Chapters | {module.missions} Missions</span>
+                    <span className="font-bold text-black">{currentModule.title}</span>
+                    <span>{currentModule.category}</span>
+                    <span>Duration - {currentModule.duration} | {currentModule.chapters} Chapters | {currentModule.missions} Missions</span>
                 </div>
                 <div className="bg-gray-200 rounded-lg overflow-hidden mb-2 relative h-96 flex items-center justify-center">
                     <iframe
                         className="absolute inset-0 w-full h-full"
-                        src={module.videoUrl}
+                        src={currentModule.videoUrl}
                         title="YouTube video player"
+                        loading="lazy"
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
@@ -160,23 +155,23 @@ export default function ModuleDetail({ params }: { params: Promise<{ slug: strin
             >
                 {activeTab === "Overview" && (
                     <div>
-                        <h2 className="text-2xl font-bold mb-4">{module.title}</h2>
+                        <h2 className="text-2xl font-bold mb-4">{currentModule.title}</h2>
                         <ul className="mb-4 space-y-2">
-                            <li className="flex items-center gap-2"><Star className="text-yellow-400" /> Rating: {module.rating}/5</li>
-                            <li className="flex items-center gap-2"><Users /> Students Enrolled: {module.enrolled.toLocaleString()}</li>
-                            <li className="flex items-center gap-2"><Clock /> Duration: {module.duration} | {module.chapters} Chapters | {module.missions} Missions</li>
-                            <li className="flex items-center gap-2"><Calendar /> Last Updated: {module.lastUpdated}</li>
+                            <li className="flex items-center gap-2"><Star className="text-yellow-400" /> Rating: {currentModule.rating}/5</li>
+                            <li className="flex items-center gap-2"><Users /> Students Enrolled: {currentModule.enrolled.toLocaleString()}</li>
+                            <li className="flex items-center gap-2"><Clock /> Duration: {currentModule.duration} | {currentModule.chapters} Chapters | {currentModule.missions} Missions</li>
+                            <li className="flex items-center gap-2"><Calendar /> Last Updated: {currentModule.lastUpdated}</li>
                             <li className="flex items-center gap-2"><Globe /> Language: English</li>
                         </ul>
                         <div className="flex items-center gap-2 mb-4">
                             <Award className="text-green-500" />
                             <button className="px-3 py-1 bg-green-500 text-white rounded">Download Certificate</button>
                         </div>
-                        <p className="mb-4">{module.overview}</p>
+                        <p className="mb-4">{currentModule.overview}</p>
                         <div className="mb-4">
                             <h3 className="font-bold mb-2">Related Modules:</h3>
                             <div className="flex overflow-x-auto">
-                                {module.relatedModules.map((relatedTitle: string, idx: number) => (
+                                {currentModule.relatedModules.map((relatedTitle: string, idx: number) => (
                                     <RecommendedCard key={idx} title={relatedTitle} />
                                 ))}
                             </div>
@@ -218,7 +213,7 @@ export default function ModuleDetail({ params }: { params: Promise<{ slug: strin
                 {activeTab === "Flashcards" && (
                     <div>
                         <h2 className="text-2xl font-bold mb-4">Key Terms & Definitions</h2>
-                        <FlashcardSet title={`${module.category} Vocabulary`} cards={15} />
+                        <FlashcardSet title={`${currentModule.category} Vocabulary`} cards={15} />
                         <FlashcardSet title="Sustainability Concepts" cards={12} />
                         <FlashcardSet title="Environmental Science Terms" cards={18} />
                     </div>

@@ -30,6 +30,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import http from "http";
+import crypto from "crypto";
+import pinoHttp from "pino-http";
 
 // Route Modules
 import authRouter from "./routes/auth.routes.js";
@@ -39,10 +41,13 @@ import classesRouter from "./routes/classes.routes.js";
 import quizzesRouter from "./routes/quizzes.routes.js";
 import lessonsRouter from "./routes/lessons.routes.js";
 import { createGameRouter } from "./routes/game.routes.js";
+import metricsRouter from "./routes/metrics.routes.js";
 
 // Utilities & Game Engine
 import { FlowController } from "./utils/flowController.js";
 import GameServer from "./game/gameServer.js";
+import logger from "./observability/logger.js";
+import { httpRequestDurationMs } from "./observability/metrics.js";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ⚙️ CONFIGURATION
@@ -76,8 +81,40 @@ app.use(
   }),
 );
 
+app.use(
+  pinoHttp({
+    logger,
+    genReqId: (req, res) => {
+      const existingId = req.headers["x-request-id"];
+      const requestId =
+        typeof existingId === "string" && existingId.length > 0
+          ? existingId
+          : crypto.randomUUID();
+      res.setHeader("x-request-id", requestId);
+      return requestId;
+    },
+  }),
+);
+
+app.use((req, res, next) => {
+  const start = process.hrtime.bigint();
+  res.on("finish", () => {
+    const elapsedMs = Number(process.hrtime.bigint() - start) / 1_000_000;
+    const route = req.route?.path ? `${req.baseUrl}${req.route.path}` : req.path;
+    httpRequestDurationMs.observe(
+      {
+        method: req.method,
+        route,
+        status_code: String(res.statusCode),
+      },
+      elapsedMs,
+    );
+  });
+  next();
+});
+
 // Request Parsing
-app.use(express.json({ limit: "50mb" }));
+app.use(express.json({ limit: "2mb" }));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 
@@ -112,6 +149,7 @@ app.get("/health", (_req, res) => {
     service: "Edu Earth API",
   });
 });
+app.use("/metrics", metricsRouter);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 📊 FLOW VISUALIZATION ROUTES

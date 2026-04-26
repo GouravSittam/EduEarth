@@ -131,6 +131,7 @@ const useAnimationLoop = (
   const lastTimestampRef = useRef<number | null>(null);
   const offsetRef = useRef(0);
   const velocityRef = useRef(0);
+  const isVisibleRef = useRef(true);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -154,7 +155,17 @@ const useAnimationLoop = (
       };
     }
 
+    const handleVisibilityChange = () => {
+      isVisibleRef.current = document.visibilityState === "visible";
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     const animate = (timestamp: number) => {
+      if (!isVisibleRef.current) {
+        rafRef.current = requestAnimationFrame(animate);
+        return;
+      }
       if (lastTimestampRef.current === null) {
         lastTimestampRef.current = timestamp;
       }
@@ -188,6 +199,7 @@ const useAnimationLoop = (
         cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
       }
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       lastTimestampRef.current = null;
     };
   }, [targetVelocity, seqWidth, isHovered, pauseOnHover]);

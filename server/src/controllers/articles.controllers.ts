@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { sendResponse } from "../utils/ResponseHelpers.js";
 import { prisma } from "../prisma/client.js";
+import { parseBoundedPagination } from "../utils/pagination.js";
+import { articlesService } from "../services/articles.service.js";
 
 type GuardianSearchResult = {
   webPublicationDate?: string;
@@ -200,7 +202,7 @@ export const createArticle = async (
     }
 
     // Create article
-    const article = await prisma.article.create({
+    const article = await articlesService.repository.create({
       data: {
         publishDate: new Date(publishDate),
         extractedDate: new Date(extractedDate),
@@ -213,6 +215,7 @@ export const createArticle = async (
     });
 
     sendSuccessResponse(res, 201, "Article created successfully", article);
+    await articlesService.invalidateListCache();
   } catch (error) {
     console.error("Create article error:", error);
     sendErrorResponse(res, 500, "Failed to create article");
@@ -228,9 +231,12 @@ export const getAllArticles = async (
   res: Response
 ): Promise<void> => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const skip = (page - 1) * limit;
+    const { page, limit, skip } = parseBoundedPagination(
+      req.query.page,
+      req.query.limit,
+      10,
+      50,
+    );
     const section = req.query.section as string;
     const source = req.query.source as string;
     const search = req.query.search as string;
@@ -271,7 +277,29 @@ export const getAllArticles = async (
       orderBy.publishDate = "desc"; // Default sort
     }
 
-    let [articles, totalCount] = await Promise.all([
+    const cacheKey = articlesService.getListCacheKey(
+      JSON.stringify({ page, limit, section, source, search, sortBy, sortOrder }),
+    );
+    const cached = await articlesService.getCachedList<{
+      articles: Awaited<ReturnType<typeof prisma.article.findMany>>;
+      totalCount: number;
+    }>(cacheKey);
+    if (cached) {
+      const totalPages = Math.ceil(cached.totalCount / limit);
+      sendSuccessResponse(res, 200, "Articles retrieved successfully", {
+        articles: cached.articles,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalCount: cached.totalCount,
+          hasNext: page < totalPages,
+          hasPrev: page > 1,
+        },
+      });
+      return;
+    }
+
+    const [articles, totalCount] = await Promise.all([
       prisma.article.findMany({
         where,
         skip,
@@ -289,25 +317,14 @@ export const getAllArticles = async (
       !search
     ) {
       try {
-        const syncedCount = await syncGuardianArticlesToDatabase(limit);
-
-        if (syncedCount > 0) {
-          [articles, totalCount] = await Promise.all([
-            prisma.article.findMany({
-              where,
-              skip,
-              take: limit,
-              orderBy,
-            }),
-            prisma.article.count({ where }),
-          ]);
-        }
+        void syncGuardianArticlesToDatabase(limit);
       } catch (guardianSyncError) {
         console.error("Guardian article sync failed:", guardianSyncError);
       }
     }
 
     const totalPages = Math.ceil(totalCount / limit);
+    await articlesService.setCachedList(cacheKey, { articles, totalCount }, 45);
 
     sendSuccessResponse(res, 200, "Articles retrieved successfully", {
       articles,
@@ -423,7 +440,7 @@ export const updateArticle = async (
     if (section !== undefined) updateData.section = section;
     if (source !== undefined) updateData.source = source;
 
-    const updatedArticle = await prisma.article.update({
+    const updatedArticle = await articlesService.repository.update({
       where: { id },
       data: updateData,
     });
@@ -434,6 +451,7 @@ export const updateArticle = async (
       "Article updated successfully",
       updatedArticle
     );
+    await articlesService.invalidateListCache();
   } catch (error) {
     console.error("Update article error:", error);
     sendErrorResponse(res, 500, "Failed to update article");
@@ -474,11 +492,12 @@ export const deleteArticle = async (
     }
 
     // Delete the article
-    await prisma.article.delete({
+    await articlesService.repository.delete({
       where: { id },
     });
 
     sendSuccessResponse(res, 200, "Article deleted successfully");
+    await articlesService.invalidateListCache();
   } catch (error) {
     console.error("Delete article error:", error);
     sendErrorResponse(res, 500, "Failed to delete article");
@@ -612,6 +631,18 @@ export const getArticleStatistics = async (
   res: Response
 ): Promise<void> => {
   try {
+    const cacheKey = "articles:stats";
+    const cached = await articlesService.getCachedList(cacheKey);
+    if (cached) {
+      sendSuccessResponse(
+        res,
+        200,
+        "Article statistics retrieved successfully",
+        cached
+      );
+      return;
+    }
+
     const [totalArticles, articlesBySection, articlesBySource, recentArticles] =
       await Promise.all([
         // Total articles count
@@ -666,6 +697,7 @@ export const getArticleStatistics = async (
       "Article statistics retrieved successfully",
       statistics
     );
+    await articlesService.setCachedList(cacheKey, statistics, 120);
   } catch (error) {
     console.error("Get article statistics error:", error);
     sendErrorResponse(res, 500, "Failed to retrieve article statistics");

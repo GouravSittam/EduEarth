@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { sendResponse } from "../utils/ResponseHelpers.js";
 import { prisma } from "../prisma/client.js";
+import { parseBoundedPagination } from "../utils/pagination.js";
+import { quizzesService } from "../services/quizzes.service.js";
 
 // Helper functions for consistent responses
 const sendSuccessResponse = (
@@ -90,9 +92,7 @@ export const getAllQuizzes = async (
   res: Response
 ): Promise<void> => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const skip = (page - 1) * limit;
+    const { page, limit, skip } = parseBoundedPagination(req.query.page, req.query.limit, 10, 50);
     const lessonId = req.query.lessonId as string;
     const search = req.query.search as string;
 
@@ -503,64 +503,43 @@ export const submitQuizAttempt = async (
       return;
     }
 
-    // Calculate score
-    let totalPoints = 0;
-    let earnedPoints = 0;
-    const questionAnswers = [];
+    const { questionAnswers, totalPoints, score, isPassed } =
+      quizzesService.evaluateAttempt(quiz.questions, answers, quiz.passingScore);
 
-    for (const question of quiz.questions) {
-      totalPoints += question.points;
-      
-      const answer = answers.find(a => a.questionId === question.id);
-      const isCorrect = answer && answer.answer === question.correctAnswer;
-      
-      if (isCorrect) {
-        earnedPoints += question.points;
+    const attempt = await prisma.$transaction(async (tx) => {
+      const createdAttempt = await tx.quizAttempt.create({
+        data: {
+          studentId: student.id,
+          quizId: id,
+          score,
+          totalPoints,
+          isPassed,
+          answers: {
+            create: questionAnswers,
+          },
+        },
+        include: {
+          answers: {
+            include: {
+              question: true,
+            },
+          },
+        },
+      });
+
+      if (isPassed) {
+        await tx.student.update({
+          where: { id: student.id },
+          data: {
+            ecoPoints: {
+              increment: quiz.ecoPoints,
+            },
+          },
+        });
       }
 
-      questionAnswers.push({
-        questionId: question.id,
-        answer: answer?.answer || "",
-        isCorrect,
-        pointsEarned: isCorrect ? question.points : 0,
-      });
-    }
-
-    const score = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0;
-    const isPassed = score >= quiz.passingScore;
-
-    // Create attempt
-    const attempt = await prisma.quizAttempt.create({
-      data: {
-        studentId: student.id,
-        quizId: id,
-        score,
-        totalPoints,
-        isPassed,
-        answers: {
-          create: questionAnswers,
-        },
-      },
-      include: {
-        answers: {
-          include: {
-            question: true,
-          },
-        },
-      },
+      return createdAttempt;
     });
-
-    // Award eco points if passed
-    if (isPassed) {
-      await prisma.student.update({
-        where: { id: student.id },
-        data: {
-          ecoPoints: {
-            increment: quiz.ecoPoints,
-          },
-        },
-      });
-    }
 
     sendSuccessResponse(res, 201, "Quiz attempt submitted successfully", {
       attempt,

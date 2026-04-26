@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint . --ignore-pattern .next --ignore-pattern next-env.d.ts",
+    "build:analyze": "ANALYZE=true next build",
+    "perf:lighthouse": "lhci autorun --config=./lighthouserc.json"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
@@ -21,6 +23,7 @@
     "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.5.4",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
@@ -28,6 +31,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
+    "@lhci/cli": "^0.15.1",
+    "lighthouse": "^12.8.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

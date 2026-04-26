@@ -1,4 +1,8 @@
-import RecycleRush from "@/components/games/RecycleRush";
+import dynamic from "next/dynamic";
+
+const RecycleRush = dynamic(() => import("@/components/games/RecycleRush"), {
+  ssr: false,
+});
 
 export default function RecycleRushPage() {
   return (

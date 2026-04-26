@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import UserButton from "@/components/UserButton";
 import { server } from "@/lib/api";
 import BrandMark from "@/components/BrandMark";
@@ -198,10 +199,13 @@ export default function ArticlePage() {
                   {/* Article Image */}
                   <div className="relative h-48 bg-slate-800 overflow-hidden">
                     {article.image_url ? (
-                      <img
+                      <Image
                         src={article.image_url}
                         alt={article.headline}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        fill
+                        unoptimized
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-600 to-sky-600">

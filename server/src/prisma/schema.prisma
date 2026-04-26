@@ -86,6 +86,7 @@ model Class {
   teachers      TeacherClass[]
 
   @@map("classes")
+  @@index([institutionId])
 }
 
 model Teacher {
@@ -99,6 +100,7 @@ model Teacher {
   user          User           @relation(fields: [userId], references: [id])
 
   @@map("teachers")
+  @@index([institutionId])
 }
 
 model Student {
@@ -122,6 +124,7 @@ model Student {
   user                    User                     @relation(fields: [userId], references: [id])
 
   @@map("students")
+  @@index([institutionId])
 }
 
 model StudentClass {
@@ -135,6 +138,7 @@ model StudentClass {
 
   @@unique([studentId, classId])
   @@map("student_classes")
+  @@index([classId, isActive])
 }
 
 model TeacherClass {
@@ -149,6 +153,7 @@ model TeacherClass {
 
   @@unique([teacherId, classId])
   @@map("teacher_classes")
+  @@index([classId, isActive])
 }
 
 model Article {
@@ -184,6 +189,7 @@ model LessonModule {
   lessons     Lesson[]
 
   @@map("lesson_modules")
+  @@index([isActive, order])
 }
 
 model Lesson {
@@ -204,6 +210,7 @@ model Lesson {
   quizzes       Quiz[]
 
   @@map("lessons")
+  @@index([moduleId, isActive, order])
 }
 
 model LessonCompletion {
@@ -217,6 +224,7 @@ model LessonCompletion {
 
   @@unique([studentId, lessonId])
   @@map("lesson_completions")
+  @@index([lessonId, completedAt])
 }
 
 model Quiz {
@@ -235,6 +243,7 @@ model Quiz {
   lesson       Lesson?        @relation(fields: [lessonId], references: [id])
 
   @@map("quizzes")
+  @@index([lessonId, isActive, createdAt])
 }
 
 model QuizQuestion {
@@ -269,6 +278,7 @@ model QuizAttempt {
   student     Student      @relation(fields: [studentId], references: [id])
 
   @@map("quiz_attempts")
+  @@index([quizId, studentId, completedAt])
 }
 
 model QuizAnswer {
