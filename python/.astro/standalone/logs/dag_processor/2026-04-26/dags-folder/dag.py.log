@@ -1,0 +1,6 @@
+{"timestamp":"2026-04-26T18:29:15.951603","level":"info","event":"Filling up the DagBag from /mnt/d/PROJECTS/EduEarth/python/dags/dag.py","logger":"airflow.models.dagbag.DagBag"}
+{"timestamp":"2026-04-26T18:29:46.852212","level":"info","event":"Filling up the DagBag from /mnt/d/PROJECTS/EduEarth/python/dags/dag.py","logger":"airflow.models.dagbag.DagBag"}
+{"timestamp":"2026-04-26T18:30:17.181185","level":"info","event":"Filling up the DagBag from /mnt/d/PROJECTS/EduEarth/python/dags/dag.py","logger":"airflow.models.dagbag.DagBag"}
+{"timestamp":"2026-04-26T18:30:48.039840","level":"info","event":"Filling up the DagBag from /mnt/d/PROJECTS/EduEarth/python/dags/dag.py","logger":"airflow.models.dagbag.DagBag"}
+{"timestamp":"2026-04-26T18:31:18.673774","level":"info","event":"Filling up the DagBag from /mnt/d/PROJECTS/EduEarth/python/dags/dag.py","logger":"airflow.models.dagbag.DagBag"}
+{"timestamp":"2026-04-26T18:31:49.714659","level":"info","event":"Filling up the DagBag from /mnt/d/PROJECTS/EduEarth/python/dags/dag.py","logger":"airflow.models.dagbag.DagBag"}

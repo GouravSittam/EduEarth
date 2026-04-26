@@ -1,0 +1,215 @@
+[2026-04-26T18:28:55.696+0000] {providers_manager.py:953} INFO - The hook_class 'airflow.providers.standard.hooks.filesystem.FSHook' is not fully initialized (UI widgets will be missing), because the 'flask_appbuilder' package is not installed, however it is not required for Airflow components to work
+[2026-04-26T18:28:55.701+0000] {providers_manager.py:953} INFO - The hook_class 'airflow.providers.standard.hooks.package_index.PackageIndexHook' is not fully initialized (UI widgets will be missing), because the 'flask_appbuilder' package is not installed, however it is not required for Airflow components to work
+standalone | Starting Airflow Standalone
+standalone | Checking database is initialized
+standalone | Database ready
+scheduler  | [2026-04-26T18:29:11.018+0000] {providers_manager.py:953} INFO - The hook_class 'airflow.providers.standard.hooks.filesystem.FSHook' is not fully initialized (UI widgets will be missing), because the 'flask_appbuilder' package is not installed, however it is not required for Airflow components to work
+scheduler  | [2026-04-26T18:29:11.024+0000] {providers_manager.py:953} INFO - The hook_class 'airflow.providers.standard.hooks.package_index.PackageIndexHook' is not fully initialized (UI widgets will be missing), because the 'flask_appbuilder' package is not installed, however it is not required for Airflow components to work
+dag-processor | [2026-04-26T18:29:11.660+0000] {providers_manager.py:953} INFO - The hook_class 'airflow.providers.standard.hooks.filesystem.FSHook' is not fully initialized (UI widgets will be missing), because the 'flask_appbuilder' package is not installed, however it is not required for Airflow components to work
+dag-processor | [2026-04-26T18:29:11.667+0000] {providers_manager.py:953} INFO - The hook_class 'airflow.providers.standard.hooks.package_index.PackageIndexHook' is not fully initialized (UI widgets will be missing), because the 'flask_appbuilder' package is not installed, however it is not required for Airflow components to work
+scheduler  | ____________       _____________
+scheduler  | ____    |__( )_________  __/__  /________      __
+scheduler  | ____  /| |_  /__  ___/_  /_ __  /_  __ \_ | /| / /
+scheduler  | ___  ___ |  / _  /   _  __/ _  / / /_/ /_ |/ |/ /
+scheduler  | _/_/  |_/_/  /_/    /_/    /_/  \____/____/|__/
+scheduler  | [2026-04-26T18:29:12.231+0000] {scheduler_job_runner.py:1022} INFO - Starting the scheduler
+scheduler  | [2026-04-26T18:29:12.272+0000] {executor_loader.py:269} INFO - Loaded executor: :LocalExecutor:
+scheduler  | [2026-04-26T18:29:12.287+0000] {scheduler_job_runner.py:2218} INFO - Adopting or resetting orphaned tasks for active dag runs
+scheduler  | [2026-04-26 18:29:12 +0000] [4051] [INFO] Starting gunicorn 23.0.0
+scheduler  | [2026-04-26 18:29:12 +0000] [4051] [INFO] Listening at: http://[::]:8793 (4051)
+scheduler  | [2026-04-26 18:29:12 +0000] [4051] [INFO] Using worker: sync
+scheduler  | [2026-04-26 18:29:12 +0000] [4052] [INFO] Booting worker with pid: 4052
+dag-processor | [2026-04-26T18:29:12.514+0000] {settings.py:60} INFO - Configured default timezone UTC
+scheduler  | [2026-04-26 18:29:12 +0000] [4053] [INFO] Booting worker with pid: 4053
+dag-processor | [2026-04-26T18:29:12.748+0000] {dag_processor_job_runner.py:59} INFO - Starting the Dag Processor Job
+dag-processor | [2026-04-26T18:29:12.749+0000] {manager.py:252} INFO - Processing files using up to 2 processes at a time
+dag-processor | [2026-04-26T18:29:12.751+0000] {manager.py:253} INFO - Process each file at most once every 30 seconds
+dag-processor | [2026-04-26T18:29:12.774+0000] {manager.py:122} INFO - DAG bundles loaded: dags-folder
+dag-processor | [2026-04-26T18:29:12.799+0000] {manager.py:133} INFO - Added new DAG bundle dags-folder to the database
+dag-processor | [2026-04-26T18:29:12.817+0000] {manager.py:122} INFO - DAG bundles loaded: dags-folder
+dag-processor | [2026-04-26T18:29:12.818+0000] {manager.py:263} INFO - Checking for new files in bundle dags-folder every 300 seconds
+dag-processor | [2026-04-26T18:29:12.868+0000] {manager.py:534} INFO - Refreshing bundle dags-folder
+dag-processor | [2026-04-26T18:29:12.889+0000] {manager.py:585} INFO - Searching for files in dags-folder at /mnt/d/PROJECTS/EduEarth/python/dags
+dag-processor | [2026-04-26T18:29:12.921+0000] {manager.py:587} INFO - Found 2 files for bundle dags-folder
+api-server | [2026-04-26T18:29:15.572+0000] {providers_manager.py:953} INFO - The hook_class 'airflow.providers.standard.hooks.filesystem.FSHook' is not fully initialized (UI widgets will be missing), because the 'flask_appbuilder' package is not installed, however it is not required for Airflow components to work
+api-server | [2026-04-26T18:29:15.578+0000] {providers_manager.py:953} INFO - The hook_class 'airflow.providers.standard.hooks.package_index.PackageIndexHook' is not fully initialized (UI widgets will be missing), because the 'flask_appbuilder' package is not installed, however it is not required for Airflow components to work
+dag-processor | /mnt/d/PROJECTS/EduEarth/python/.venv/lib/python3.12/site-packages/airflow/sdk/execution_time/supervisor.py:476 DeprecationWarning: This process (pid=4045) is multi-threaded, use of fork() may lead to deadlocks in the child.
+api-server | ____________       _____________
+api-server | ____    |__( )_________  __/__  /________      __
+api-server | ____  /| |_  /__  ___/_  /_ __  /_  __ \_ | /| / /
+api-server | ___  ___ |  / _  /   _  __/ _  / / /_/ /_ |/ |/ /
+api-server | _/_/  |_/_/  /_/    /_/    /_/  \____/____/|__/
+api-server | [2026-04-26T18:29:15.942+0000] {api_server_command.py:119} INFO - Running the uvicorn with:
+api-server | Apps: all
+api-server | Workers: 1
+api-server | Host: 0.0.0.0:8090
+api-server | Timeout: 120
+api-server | Logfiles: -
+api-server | =================================================================
+dag-processor | [2026-04-26T18:29:16.000+0000] {manager.py:756} INFO -
+dag-processor | ================================================================================
+dag-processor | DAG File Processing Stats
+dag-processor | Bundle       File Path                        PID  Current Duration      # DAGs    # Errors  Last Duration    Last Run At
+dag-processor | -----------  -----------------------------  -----  ------------------  --------  ----------  ---------------  -------------
+dag-processor | dags-folder  dag.py                          4058  0.07s                      0           0
+dag-processor | dags-folder  environmental_ingestion_v2.py   4057  0.10s                      0           0
+dag-processor | ================================================================================
+dag-processor | [2026-04-26T18:29:16.358+0000] {dag.py:1622} INFO - Sync 1 DAGs
+dag-processor | [2026-04-26T18:29:16.395+0000] {collection.py:82} INFO - Creating ORM DAG for env_etl_pipeline_dag
+dag-processor | [2026-04-26T18:29:16.440+0000] {dag.py:2236} INFO - Setting next_dagrun for env_etl_pipeline_dag to 2026-04-26 00:00:00+00:00, run_after=2026-04-26 00:00:00+00:00
+triggerer  | [2026-04-26T18:29:17.622+0000] {providers_manager.py:953} INFO - The hook_class 'airflow.providers.standard.hooks.filesystem.FSHook' is not fully initialized (UI widgets will be missing), because the 'flask_appbuilder' package is not installed, however it is not required for Airflow components to work
+triggerer  | [2026-04-26T18:29:17.628+0000] {providers_manager.py:953} INFO - The hook_class 'airflow.providers.standard.hooks.package_index.PackageIndexHook' is not fully initialized (UI widgets will be missing), because the 'flask_appbuilder' package is not installed, however it is not required for Airflow components to work
+dag-processor | [2026-04-26T18:29:19.271+0000] {dag.py:1622} INFO - Sync 1 DAGs
+dag-processor | [2026-04-26T18:29:19.304+0000] {collection.py:82} INFO - Creating ORM DAG for environmental_ingestion_v2
+dag-processor | [2026-04-26T18:29:19.339+0000] {dag.py:2236} INFO - Setting next_dagrun for environmental_ingestion_v2 to 2026-04-26 18:20:00+00:00, run_after=2026-04-26 18:20:00+00:00
+triggerer  | ____________       _____________
+triggerer  | ____    |__( )_________  __/__  /________      __
+triggerer  | ____  /| |_  /__  ___/_  /_ __  /_  __ \_ | /| / /
+triggerer  | ___  ___ |  / _  /   _  __/ _  / / /_/ /_ |/ |/ /
+triggerer  | _/_/  |_/_/  /_/    /_/    /_/  \____/____/|__/
+triggerer  | [2026-04-26 18:29:19 +0000] [4060] [INFO] Starting gunicorn 23.0.0
+triggerer  | [2026-04-26 18:29:19 +0000] [4060] [INFO] Listening at: http://[::]:8794 (4060)
+triggerer  | [2026-04-26 18:29:19 +0000] [4060] [INFO] Using worker: sync
+triggerer  | [2026-04-26 18:29:19 +0000] [4061] [INFO] Booting worker with pid: 4061
+triggerer  | [2026-04-26 18:29:19 +0000] [4062] [INFO] Booting worker with pid: 4062
+triggerer  | [2026-04-26T18:29:20.078+0000] {triggerer_job_runner.py:160} INFO - Starting the triggerer
+dag-processor | [2026-04-26T18:29:20.319+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+standalone | Airflow is ready
+standalone | Airflow Standalone is for development purposes only. Do not use this in production!
+api-server | INFO:     Started server process [4047]
+api-server | INFO:     Waiting for application startup.
+api-server | INFO:     Application startup complete.
+api-server | INFO:     Uvicorn running on http://0.0.0.0:8090 (Press CTRL+C to quit)
+dag-processor | [2026-04-26T18:29:25.557+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+api-server | INFO:     127.0.0.1:59852 - "GET /api/v2/monitor/health HTTP/1.1" 200 OK
+dag-processor | [2026-04-26T18:29:30.893+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+dag-processor | [2026-04-26T18:29:36.221+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+dag-processor | [2026-04-26T18:29:41.502+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+dag-processor | [2026-04-26T18:29:46.797+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+dag-processor | [2026-04-26T18:29:47.027+0000] {dag.py:1622} INFO - Sync 1 DAGs
+dag-processor | [2026-04-26T18:29:47.061+0000] {dag.py:2236} INFO - Setting next_dagrun for env_etl_pipeline_dag to 2026-04-26 00:00:00+00:00, run_after=2026-04-26 00:00:00+00:00
+dag-processor | [2026-04-26T18:29:50.184+0000] {manager.py:756} INFO -
+dag-processor | ================================================================================
+dag-processor | DAG File Processing Stats
+dag-processor | Bundle       File Path                      PID    Current Duration      # DAGs    # Errors  Last Duration    Last Run At
+dag-processor | -----------  -----------------------------  -----  ------------------  --------  ----------  ---------------  -------------------
+dag-processor | dags-folder  environmental_ingestion_v2.py                                    1           0  1.07s            2026-04-26T18:29:19
+dag-processor | dags-folder  dag.py                                                           1           0  0.19s            2026-04-26T18:29:47
+dag-processor | ================================================================================
+dag-processor | [2026-04-26T18:29:52.143+0000] {dag.py:1622} INFO - Sync 1 DAGs
+dag-processor | [2026-04-26T18:29:52.184+0000] {dag.py:2236} INFO - Setting next_dagrun for environmental_ingestion_v2 to 2026-04-26 18:20:00+00:00, run_after=2026-04-26 18:20:00+00:00
+dag-processor | [2026-04-26T18:29:54.453+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+api-server | INFO:     127.0.0.1:55164 - "GET / HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:55164 - "GET /static/assets/index-1D_PLaVH.js HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:55164 - "GET /static/assets/index-1D_PLaVH.js HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:38770 - "GET /ui/config HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:55164 - "GET /ui/auth/menus HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:38770 - "GET /api/v2/plugins HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:38778 - "GET /api/v2/version HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:38770 - "GET /api/v2/importErrors HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:55164 - "GET /ui/dashboard/dag_stats HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:38778 - "GET /api/v2/monitor/health HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:55164 - "GET /api/v2/assets/events?limit=6&order_by=-timestamp&timestamp_gte=2026-04-25T18%3A29%3A57.797Z&timestamp_lte=2026-04-26T18%3A29%3A57.797Z HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:38770 - "GET /ui/dashboard/historical_metrics_data?start_date=2026-04-25T18%3A29%3A57.797Z HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:38778 - "GET /static/pin_32.png HTTP/1.1" 200 OK
+dag-processor | [2026-04-26T18:30:00.061+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+api-server | INFO:     127.0.0.1:38770 - "GET /ui/dashboard/dag_stats HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:38794 - "GET /ui/dashboard/historical_metrics_data?start_date=2026-04-25T18%3A29%3A57.797Z HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:55164 - "GET /api/v2/monitor/health HTTP/1.1" 200 OK
+dag-processor | [2026-04-26T18:30:05.372+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+dag-processor | [2026-04-26T18:30:10.672+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+dag-processor | [2026-04-26T18:30:15.962+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+dag-processor | [2026-04-26T18:30:17.349+0000] {dag.py:1622} INFO - Sync 1 DAGs
+dag-processor | [2026-04-26T18:30:17.385+0000] {dag.py:2236} INFO - Setting next_dagrun for env_etl_pipeline_dag to 2026-04-26 00:00:00+00:00, run_after=2026-04-26 00:00:00+00:00
+dag-processor | [2026-04-26T18:30:22.472+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+dag-processor | [2026-04-26T18:30:22.600+0000] {manager.py:756} INFO -
+dag-processor | ================================================================================
+dag-processor | DAG File Processing Stats
+dag-processor | Bundle       File Path                        PID  Current Duration      # DAGs    # Errors  Last Duration    Last Run At
+dag-processor | -----------  -----------------------------  -----  ------------------  --------  ----------  ---------------  -------------------
+dag-processor | dags-folder  environmental_ingestion_v2.py   4189  0.08s                      1           0  0.46s            2026-04-26T18:29:52
+dag-processor | dags-folder  dag.py                                                           1           0  0.18s            2026-04-26T18:30:17
+dag-processor | ================================================================================
+dag-processor | [2026-04-26T18:30:22.958+0000] {dag.py:1622} INFO - Sync 1 DAGs
+dag-processor | [2026-04-26T18:30:23.030+0000] {dag.py:2236} INFO - Setting next_dagrun for environmental_ingestion_v2 to 2026-04-26 18:30:00+00:00, run_after=2026-04-26 18:30:00+00:00
+triggerer  | 2026-04-26 18:30:23 [info     ] 0 triggers currently running   [airflow.jobs.triggerer_job_runner]
+api-server | INFO:     127.0.0.1:38770 - "GET /ui/dashboard/dag_stats HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:38794 - "GET /ui/dashboard/historical_metrics_data?start_date=2026-04-25T18%3A29%3A57.797Z HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:37450 - "GET /api/v2/monitor/health HTTP/1.1" 200 OK
+dag-processor | [2026-04-26T18:30:28.243+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+api-server | INFO:     127.0.0.1:38794 - "GET /ui/dashboard/dag_stats HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:38770 - "GET /ui/dashboard/historical_metrics_data?start_date=2026-04-25T18%3A29%3A57.797Z HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:37466 - "GET /api/v2/monitor/health HTTP/1.1" 200 OK
+dag-processor | [2026-04-26T18:30:33.552+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+api-server | INFO:     127.0.0.1:38770 - "GET /ui/dashboard/dag_stats HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:38794 - "GET /ui/dashboard/historical_metrics_data?start_date=2026-04-25T18%3A29%3A57.797Z HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:37480 - "GET /api/v2/monitor/health HTTP/1.1" 200 OK
+dag-processor | [2026-04-26T18:30:41.677+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+api-server | INFO:     127.0.0.1:38794 - "GET /ui/dashboard/dag_stats HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:38770 - "GET /ui/dashboard/historical_metrics_data?start_date=2026-04-25T18%3A29%3A57.797Z HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:39508 - "GET /api/v2/monitor/health HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:38770 - "GET /api/v2/assets?limit=50&offset=0 HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:38770 - "GET /api/v2/dagTags?limit=10&offset=0&order_by=name&tag_name_pattern= HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:39510 - "GET /api/v2/dags?limit=50&offset=0&order_by=dag_display_name HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:38794 - "GET /ui/dags/recent_dag_runs?dag_runs_limit=14&limit=50&offset=0 HTTP/1.1" 200 OK
+dag-processor | [2026-04-26T18:30:46.941+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+dag-processor | [2026-04-26T18:30:48.212+0000] {dag.py:1622} INFO - Sync 1 DAGs
+dag-processor | [2026-04-26T18:30:48.245+0000] {dag.py:2236} INFO - Setting next_dagrun for env_etl_pipeline_dag to 2026-04-26 00:00:00+00:00, run_after=2026-04-26 00:00:00+00:00
+api-server | INFO:     127.0.0.1:39510 - "GET /static/assets/FailedLogs-DTYriU1j.js HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:54168 - "GET /ui/backfills?dag_id=environmental_ingestion_v2 HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:39510 - "GET /ui/grid/structure/environmental_ingestion_v2?limit=10&order_by=-run_after HTTP/1.1" 200 OK
+api-server | [2026-04-26T18:30:51.450+0000] {manager.py:122} INFO - DAG bundles loaded: dags-folder
+api-server | INFO:     127.0.0.1:54168 - "GET /ui/grid/runs/environmental_ingestion_v2?limit=10&order_by=-run_after HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:38770 - "GET /api/v2/dags/environmental_ingestion_v2/details HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:38770 - "GET /api/v2/assets/events?limit=10&order_by=-timestamp&source_dag_id=environmental_ingestion_v2&timestamp_gte=2026-04-25T18%3A30%3A50.422Z&timestamp_lte=2026-04-26T18%3A30%3A50.422Z HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:54168 - "GET /api/v2/dags/environmental_ingestion_v2/dagRuns?limit=10&run_after_gte=2026-04-25T18%3A30%3A50.422Z&run_after_lte=2026-04-26T18%3A30%3A50.422Z&state=failed HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:39510 - "GET /api/v2/dags/environmental_ingestion_v2/dagRuns/~/taskInstances?run_after_gte=2026-04-25T18%3A30%3A50.422Z&run_after_lte=2026-04-26T18%3A30%3A50.422Z&state=failed&order_by=-run_after HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:54190 - "GET /ui/grid/latest_run/environmental_ingestion_v2 HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:38770 - "GET /api/v2/dags/environmental_ingestion_v2 HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:54198 - "GET /static/assets/FailedLogs-DTYriU1j.js HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:54182 - "GET /api/v2/dagWarnings?dag_id=environmental_ingestion_v2 HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:54192 - "GET /ui/dags/recent_dag_runs?dag_runs_limit=1&dag_ids=environmental_ingestion_v2 HTTP/1.1" 200 OK
+dag-processor | [2026-04-26T18:30:52.527+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+dag-processor | [2026-04-26T18:30:54.017+0000] {dag.py:1622} INFO - Sync 1 DAGs
+dag-processor | [2026-04-26T18:30:54.065+0000] {dag.py:2236} INFO - Setting next_dagrun for environmental_ingestion_v2 to 2026-04-26 18:30:00+00:00, run_after=2026-04-26 18:30:00+00:00
+api-server | INFO:     127.0.0.1:54168 - "GET /ui/grid/latest_run/environmental_ingestion_v2 HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:39510 - "GET /api/v2/dags/environmental_ingestion_v2/dagRuns?limit=50&offset=0&order_by=-run_after HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:54210 - "GET /api/v2/assets/events?limit=10&order_by=-timestamp&source_dag_id=environmental_ingestion_v2&timestamp_gte=2026-04-25T18%3A30%3A55.051Z&timestamp_lte=2026-04-26T18%3A30%3A55.051Z HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:39510 - "GET /api/v2/dags/environmental_ingestion_v2/dagRuns?limit=10&run_after_gte=2026-04-25T18%3A30%3A55.051Z&run_after_lte=2026-04-26T18%3A30%3A55.051Z&state=failed HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:54168 - "GET /api/v2/dags/environmental_ingestion_v2/dagRuns/~/taskInstances?run_after_gte=2026-04-25T18%3A30%3A55.051Z&run_after_lte=2026-04-26T18%3A30%3A55.051Z&state=failed&order_by=-run_after HTTP/1.1" 200 OK
+dag-processor | [2026-04-26T18:30:57.133+0000] {manager.py:756} INFO -
+dag-processor | ================================================================================
+dag-processor | DAG File Processing Stats
+dag-processor | Bundle       File Path                      PID    Current Duration      # DAGs    # Errors  Last Duration    Last Run At
+dag-processor | -----------  -----------------------------  -----  ------------------  --------  ----------  ---------------  -------------------
+dag-processor | dags-folder  environmental_ingestion_v2.py                                    1           0  0.41s            2026-04-26T18:30:54
+dag-processor | dags-folder  dag.py                                                           1           0  0.19s            2026-04-26T18:30:48
+dag-processor | ================================================================================
+dag-processor | [2026-04-26T18:30:59.330+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+dag-processor | [2026-04-26T18:31:04.629+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+dag-processor | [2026-04-26T18:31:09.857+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+api-server | INFO:     127.0.0.1:39510 - "GET /ui/grid/latest_run/environmental_ingestion_v2 HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:39510 - "GET /dags/environmental_ingestion_v2 HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:39510 - "GET /static/assets/index-1D_PLaVH.js HTTP/1.1" 304 Not Modified
+api-server | INFO:     127.0.0.1:39510 - "GET /static/assets/index-1D_PLaVH.js HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:39510 - "GET /ui/config HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:54210 - "GET /ui/auth/menus HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:40472 - "GET /api/v2/plugins HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:40480 - "GET /api/v2/version HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:39510 - "GET /static/assets/FailedLogs-DTYriU1j.js HTTP/1.1" 304 Not Modified
+api-server | INFO:     127.0.0.1:40496 - "GET /ui/backfills?dag_id=environmental_ingestion_v2 HTTP/1.1" 200 OK
+api-server | [2026-04-26T18:31:14.043+0000] {manager.py:122} INFO - DAG bundles loaded: dags-folder
+api-server | INFO:     127.0.0.1:39510 - "GET /api/v2/assets/events?limit=10&order_by=-timestamp&source_dag_id=environmental_ingestion_v2&timestamp_gte=2026-04-25T18%3A31%3A13.930Z&timestamp_lte=2026-04-26T18%3A31%3A13.930Z HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:40484 - "GET /api/v2/dags/environmental_ingestion_v2/details HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:54210 - "GET /ui/grid/structure/environmental_ingestion_v2?limit=10&order_by=-run_after HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:40496 - "GET /ui/grid/runs/environmental_ingestion_v2?limit=10&order_by=-run_after HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:40480 - "GET /api/v2/dags/environmental_ingestion_v2/dagRuns?limit=10&run_after_gte=2026-04-25T18%3A31%3A13.930Z&run_after_lte=2026-04-26T18%3A31%3A13.930Z&state=failed HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:40480 - "GET /static/pin_32.png HTTP/1.1" 304 Not Modified
+api-server | INFO:     127.0.0.1:40512 - "GET /ui/grid/latest_run/environmental_ingestion_v2 HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:40472 - "GET /api/v2/dags/environmental_ingestion_v2/dagRuns/~/taskInstances?run_after_gte=2026-04-25T18%3A31%3A13.930Z&run_after_lte=2026-04-26T18%3A31%3A13.930Z&state=failed&order_by=-run_after HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:39510 - "GET /api/v2/dagWarnings?dag_id=environmental_ingestion_v2 HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:40484 - "GET /api/v2/dags/environmental_ingestion_v2 HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:40500 - "GET /ui/dags/recent_dag_runs?dag_runs_limit=1&dag_ids=environmental_ingestion_v2 HTTP/1.1" 200 OK
+api-server | INFO:     127.0.0.1:40512 - "GET /static/assets/FailedLogs-DTYriU1j.js HTTP/1.1" 304 Not Modified
+dag-processor | [2026-04-26T18:31:15.250+0000] {manager.py:531} INFO - Not time to refresh bundle dags-folder
+api-server | INFO:     127.0.0.1:40512 - "GET /api/v2/importErrors HTTP/1.1" 200 OK

@@ -31,7 +31,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import http from "http";
 import crypto from "crypto";
-import pinoHttp from "pino-http";
+import { pinoHttp } from "pino-http";
 
 // Route Modules
 import authRouter from "./routes/auth.routes.js";

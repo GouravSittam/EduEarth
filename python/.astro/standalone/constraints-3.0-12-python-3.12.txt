@@ -1,0 +1,2 @@
+apache-airflow==3.0.6+astro.3
+apache-airflow-task-sdk==1.0.6+astro.1
