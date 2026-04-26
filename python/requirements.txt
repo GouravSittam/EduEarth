@@ -1,3 +1,5 @@
 # Astro Runtime includes the following pre-installed providers packages: https://www.astronomer.io/docs/astro/runtime-image-architecture#provider-packages
 apache-airflow-providers-postgres>=4.0.0
 apache-airflow-providers-http>=4.0.0
+feedparser>=6.0.11
+astro-run-dag # This package is needed for the astro run command. It will be removed before a deploy

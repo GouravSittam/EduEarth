@@ -48,6 +48,7 @@ import { FlowController } from "./utils/flowController.js";
 import GameServer from "./game/gameServer.js";
 import logger from "./observability/logger.js";
 import { httpRequestDurationMs } from "./observability/metrics.js";
+import OutboxPublisherService from "./services/outboxPublisher.service.js";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ⚙️ CONFIGURATION
@@ -100,7 +101,9 @@ app.use((req, res, next) => {
   const start = process.hrtime.bigint();
   res.on("finish", () => {
     const elapsedMs = Number(process.hrtime.bigint() - start) / 1_000_000;
-    const route = req.route?.path ? `${req.baseUrl}${req.route.path}` : req.path;
+    const route = req.route?.path
+      ? `${req.baseUrl}${req.route.path}`
+      : req.path;
     httpRequestDurationMs.observe(
       {
         method: req.method,
@@ -174,10 +177,16 @@ app.use("/lessons", lessonsRouter); // 📖 Lesson Management
 // ═══════════════════════════════════════════════════════════════════════════
 
 const gameServer = new GameServer(server);
+const outboxPublisher = new OutboxPublisherService(gameServer, {
+  pollIntervalMs: Number(process.env.OUTBOX_POLL_INTERVAL_MS || 3000),
+  batchSize: Number(process.env.OUTBOX_BATCH_SIZE || 50),
+});
 app.use(
   "/game",
   createGameRouter(() => gameServer),
 );
+
+outboxPublisher.start();
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 🚀 SERVER INITIALIZATION
@@ -215,3 +224,21 @@ server.listen(PORT, () => {
 ╚═══════════════════════════════════════════════════════════════════════════╝
   `);
 });
+
+const gracefulShutdown = (signal: string) => {
+  logger.info({ signal }, "Shutting down server");
+  outboxPublisher.stop();
+
+  server.close((error?: Error) => {
+    if (error) {
+      logger.error({ err: error }, "Server shutdown failed");
+      process.exit(1);
+      return;
+    }
+
+    process.exit(0);
+  });
+};
+
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));

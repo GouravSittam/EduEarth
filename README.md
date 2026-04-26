@@ -14,7 +14,7 @@ EduEarth is a gamified environmental education platform for students, teachers, 
 - REST APIs for users, institutions, classes, lessons, quizzes, articles, and game health/stats.
 - Prisma schema for users, institutions, classes, lessons, quizzes, challenges, badges, achievements, leaderboards, notifications, and articles.
 - Server Docker and production Docker Compose files.
-- Python/Airflow project scaffold for ETL workflows.
+- Python/Airflow ingestion pipeline with external providers (Open-Meteo climate API and environmental RSS sources).
 
 ## Tech Stack
 
@@ -196,7 +196,20 @@ The article UI reads from the server `/articles` API and displays environmental 
 - image URL
 - optional AI summary
 
-The `python/` folder contains an Airflow/Astronomer scaffold that can be used for ingestion and ETL workflows.
+The `python/` folder contains an Airflow/Astronomer ingestion pipeline that can decouple external data fetching from the server.
+
+- Architecture document: `docs/architecture/environmental-ingestion-v2.md`
+- Airflow DAG: `python/dags/environmental_ingestion_v2.py`
+- SQL contract: `python/include/sql/environmental_ingestion_contract.sql`
+
+In the V2 model, external providers are fetched by Python scrapers scheduled by Airflow, while the Express server serves historical data and pushes realtime updates from database-backed events.
+
+Configured external providers:
+
+- Climate API: Open-Meteo (`https://api.open-meteo.com`)
+- RSS feeds: Guardian Environment, UNEP RSS, NASA Earth RSS
+
+Curriculum enrichment is applied in the Airflow DAG before persistence (`curriculum_topic`, `grade_band`, `learning_objective`, tags, relevance score).
 
 ## Docker
 
@@ -252,6 +265,25 @@ The `python/` folder is an Astronomer project. To start Airflow locally:
 cd python
 astro dev start
 ```
+
+Import project connections and variables:
+
+```bash
+cd python
+astro dev object import
+```
+
+In Airflow UI (`http://localhost:8080`):
+
+1. Open DAGs.
+2. Enable `environmental_ingestion_v2`.
+3. Trigger a run.
+
+What to verify after a run:
+
+- `climate_observations` has climate records.
+- `news_articles_ingested` has enriched RSS records.
+- `websocket_outbox` has realtime events for server fan-out.
 
 Airflow UI defaults to http://localhost:8080.
 

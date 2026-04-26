@@ -4,34 +4,12 @@ import { prisma } from "../prisma/client.js";
 import { parseBoundedPagination } from "../utils/pagination.js";
 import { articlesService } from "../services/articles.service.js";
 
-type GuardianSearchResult = {
-  webPublicationDate?: string;
-  webTitle?: string;
-  webUrl?: string;
-  sectionName?: string;
-  fields?: {
-    headline?: string;
-    trailText?: string;
-    bodyText?: string;
-    thumbnail?: string;
-  };
-};
-
-type GuardianSearchResponse = {
-  response?: {
-    results?: GuardianSearchResult[];
-  };
-};
-
-const GUARDIAN_CONTENT_API_URL = "https://content.guardianapis.com/search";
-const DEFAULT_GUARDIAN_FETCH_LIMIT = 12;
-
 // Helper functions for consistent responses
 const sendSuccessResponse = (
   res: Response,
   statusCode: number,
   message: string,
-  data?: any
+  data?: any,
 ) => {
   return sendResponse({ res, success: true, message, data, statusCode });
 };
@@ -40,110 +18,9 @@ const sendErrorResponse = (
   res: Response,
   statusCode: number,
   message: string,
-  error?: any
+  error?: any,
 ) => {
   return sendResponse({ res, success: false, message, error, statusCode });
-};
-
-const sanitizeGuardianText = (value?: string | null) => {
-  if (!value) {
-    return null;
-  }
-
-  return value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-};
-
-const fetchGuardianEnvironmentArticles = async (
-  limit: number = DEFAULT_GUARDIAN_FETCH_LIMIT
-) => {
-  const apiKey = process.env.GUARDIAN_API_KEY || "test";
-  const requestUrl = new URL(GUARDIAN_CONTENT_API_URL);
-
-  requestUrl.searchParams.set("section", "environment");
-  requestUrl.searchParams.set("order-by", "newest");
-  requestUrl.searchParams.set("page-size", String(limit));
-  requestUrl.searchParams.set(
-    "show-fields",
-    "headline,trailText,bodyText,thumbnail"
-  );
-  requestUrl.searchParams.set("api-key", apiKey);
-
-  const response = await fetch(requestUrl.toString(), {
-    headers: {
-      Accept: "application/json",
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Guardian API request failed with status ${response.status}`);
-  }
-
-  const payload = (await response.json()) as GuardianSearchResponse;
-  const results = payload.response?.results ?? [];
-  const extractedDate = new Date();
-
-  return results
-    .map((article) => {
-      const url = article.webUrl?.trim();
-      const headline =
-        sanitizeGuardianText(article.fields?.headline) ||
-        sanitizeGuardianText(article.webTitle) ||
-        "Untitled environmental article";
-      const body =
-        sanitizeGuardianText(article.fields?.bodyText) ||
-        sanitizeGuardianText(article.fields?.trailText) ||
-        "Open the original article to read the full environmental update.";
-
-      if (!url) {
-        return null;
-      }
-
-      return {
-        publishDate: article.webPublicationDate
-          ? new Date(article.webPublicationDate)
-          : extractedDate,
-        extractedDate,
-        url,
-        headline,
-        body,
-        section: article.sectionName?.trim() || "Environment",
-        source: "The Guardian",
-        image_url: article.fields?.thumbnail?.trim() || null,
-        ai_summary: sanitizeGuardianText(article.fields?.trailText),
-      };
-    })
-    .filter((article): article is NonNullable<typeof article> => Boolean(article));
-};
-
-const syncGuardianArticlesToDatabase = async (
-  limit: number = DEFAULT_GUARDIAN_FETCH_LIMIT
-) => {
-  const fetchedArticles = await fetchGuardianEnvironmentArticles(limit);
-
-  if (!fetchedArticles.length) {
-    return 0;
-  }
-
-  await Promise.all(
-    fetchedArticles.map((article) =>
-      prisma.article.upsert({
-        where: { url: article.url },
-        update: {
-          publishDate: article.publishDate,
-          extractedDate: article.extractedDate,
-          headline: article.headline,
-          body: article.body,
-          section: article.section,
-          source: article.source,
-          image_url: article.image_url,
-          ai_summary: article.ai_summary,
-        },
-        create: article,
-      })
-    )
-  );
-
-  return fetchedArticles.length;
 };
 
 /**
@@ -153,7 +30,7 @@ const syncGuardianArticlesToDatabase = async (
  */
 export const createArticle = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     // Check if user is admin
@@ -178,7 +55,7 @@ export const createArticle = async (
       sendErrorResponse(
         res,
         400,
-        "All fields (publishDate, extractedDate, url, headline, body, section, source) are required"
+        "All fields (publishDate, extractedDate, url, headline, body, section, source) are required",
       );
       return;
     }
@@ -228,7 +105,7 @@ export const createArticle = async (
  */
 export const getAllArticles = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { page, limit, skip } = parseBoundedPagination(
@@ -278,7 +155,15 @@ export const getAllArticles = async (
     }
 
     const cacheKey = articlesService.getListCacheKey(
-      JSON.stringify({ page, limit, section, source, search, sortBy, sortOrder }),
+      JSON.stringify({
+        page,
+        limit,
+        section,
+        source,
+        search,
+        sortBy,
+        sortOrder,
+      }),
     );
     const cached = await articlesService.getCachedList<{
       articles: Awaited<ReturnType<typeof prisma.article.findMany>>;
@@ -309,20 +194,6 @@ export const getAllArticles = async (
       prisma.article.count({ where }),
     ]);
 
-    if (
-      totalCount === 0 &&
-      page === 1 &&
-      !section &&
-      !source &&
-      !search
-    ) {
-      try {
-        void syncGuardianArticlesToDatabase(limit);
-      } catch (guardianSyncError) {
-        console.error("Guardian article sync failed:", guardianSyncError);
-      }
-    }
-
     const totalPages = Math.ceil(totalCount / limit);
     await articlesService.setCachedList(cacheKey, { articles, totalCount }, 45);
 
@@ -348,7 +219,7 @@ export const getAllArticles = async (
  */
 export const getArticleById = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { id } = req.params;
@@ -381,7 +252,7 @@ export const getArticleById = async (
  */
 export const updateArticle = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     // Check if user is admin
@@ -449,7 +320,7 @@ export const updateArticle = async (
       res,
       200,
       "Article updated successfully",
-      updatedArticle
+      updatedArticle,
     );
     await articlesService.invalidateListCache();
   } catch (error) {
@@ -465,7 +336,7 @@ export const updateArticle = async (
  */
 export const deleteArticle = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     // Check if user is admin
@@ -510,7 +381,7 @@ export const deleteArticle = async (
  */
 export const getArticlesBySection = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { section } = req.params;
@@ -555,7 +426,7 @@ export const getArticlesBySection = async (
           hasNext: page < totalPages,
           hasPrev: page > 1,
         },
-      }
+      },
     );
   } catch (error) {
     console.error("Get articles by section error:", error);
@@ -569,7 +440,7 @@ export const getArticlesBySection = async (
  */
 export const getArticlesBySource = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { source } = req.params;
@@ -614,7 +485,7 @@ export const getArticlesBySource = async (
           hasNext: page < totalPages,
           hasPrev: page > 1,
         },
-      }
+      },
     );
   } catch (error) {
     console.error("Get articles by source error:", error);
@@ -628,7 +499,7 @@ export const getArticlesBySource = async (
  */
 export const getArticleStatistics = async (
   _req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const cacheKey = "articles:stats";
@@ -638,7 +509,7 @@ export const getArticleStatistics = async (
         res,
         200,
         "Article statistics retrieved successfully",
-        cached
+        cached,
       );
       return;
     }
@@ -695,7 +566,7 @@ export const getArticleStatistics = async (
       res,
       200,
       "Article statistics retrieved successfully",
-      statistics
+      statistics,
     );
     await articlesService.setCachedList(cacheKey, statistics, 120);
   } catch (error) {

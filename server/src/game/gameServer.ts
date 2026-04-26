@@ -208,9 +208,44 @@ export default class GameServer {
     };
   }
 
+  public emitOutboxEvent(channel: string, eventName: string, payload: unknown) {
+    const room = channel?.trim();
+    if (room) {
+      this.io.to(room).emit(eventName, payload);
+    }
+
+    this.io.emit(eventName, payload);
+  }
+
   private setupSocketHandlers() {
     this.io.on("connection", (socket: Socket) => {
       console.log(`Player connected: ${socket.id}`);
+
+      socket.on("subscribe-channel", (channel: string) => {
+        if (typeof channel !== "string") {
+          return;
+        }
+
+        const room = channel.trim();
+        if (!room) {
+          return;
+        }
+
+        socket.join(room);
+      });
+
+      socket.on("unsubscribe-channel", (channel: string) => {
+        if (typeof channel !== "string") {
+          return;
+        }
+
+        const room = channel.trim();
+        if (!room) {
+          return;
+        }
+
+        socket.leave(room);
+      });
 
       socket.on("join-queue", (playerName?: string) => {
         this.handleJoinQueue(socket, playerName);
@@ -220,7 +255,7 @@ export default class GameServer {
         "answer-question",
         (data: { gameId: string; answer: number; timeTaken?: number }) => {
           this.handleAnswer(socket, data);
-        }
+        },
       );
 
       socket.on("question-timeout", (data: { gameId: string }) => {
@@ -311,7 +346,7 @@ export default class GameServer {
       game.players.map((p) => [
         p.socketId,
         { answered: false, isCorrect: null, answerIndex: null },
-      ])
+      ]),
     );
 
     const q = game.questions[game.currentQuestion];
@@ -332,13 +367,13 @@ export default class GameServer {
     };
 
     game.players.forEach((p) =>
-      this.io.to(p.socketId).emit("question-start", payload)
+      this.io.to(p.socketId).emit("question-start", payload),
     );
   }
 
   private handleAnswer(
     socket: Socket,
-    data: { gameId: string; answer: number; timeTaken?: number }
+    data: { gameId: string; answer: number; timeTaken?: number },
   ) {
     const game = this.activeGames.get(data.gameId);
     if (!game || game.gameState !== "playing") return;
@@ -363,7 +398,7 @@ export default class GameServer {
     const isCorrect = data.answer === currentQ.correctAnswer;
     const timeTaken = Math.max(
       0,
-      Math.min(60000, Math.floor(data.timeTaken ?? 0))
+      Math.min(60000, Math.floor(data.timeTaken ?? 0)),
     );
 
     game.answered[socket.id] = {
@@ -385,7 +420,7 @@ export default class GameServer {
         scores: game.players.map((p) => ({ name: p.name, score: p.score })),
       };
       game.players.forEach((p) =>
-        this.io.to(p.socketId).emit("answer-result", resultPayload)
+        this.io.to(p.socketId).emit("answer-result", resultPayload),
       );
 
       setTimeout(() => {
@@ -406,7 +441,7 @@ export default class GameServer {
     this.io.to(socket.id).emit("answer-result", partialPayload);
 
     const bothAnswered = game.players.every(
-      (p) => game.answered[p.socketId]?.answered
+      (p) => game.answered[p.socketId]?.answered,
     );
     if (bothAnswered && !game.correctFound) {
       this.revealAndNext(game);
@@ -428,7 +463,7 @@ export default class GameServer {
       scores: game.players.map((p) => ({ name: p.name, score: p.score })),
     };
     game.players.forEach((p) =>
-      this.io.to(p.socketId).emit("question-reveal", payload)
+      this.io.to(p.socketId).emit("question-reveal", payload),
     );
 
     setTimeout(() => {
@@ -444,7 +479,7 @@ export default class GameServer {
     game.gameState = "finished";
 
     const winner = game.players.reduce((prev, curr) =>
-      prev.score >= curr.score ? prev : curr
+      prev.score >= curr.score ? prev : curr,
     );
     const finalScores = game.players.map((p) => ({
       name: p.name,
@@ -456,7 +491,7 @@ export default class GameServer {
         finalScores,
         winner: winner.name,
         isWinner: winner.socketId === p.socketId,
-      })
+      }),
     );
 
     this.activeGames.delete(gameId);
@@ -464,7 +499,7 @@ export default class GameServer {
 
   private handleDisconnect(socket: Socket) {
     this.waitingQueue = this.waitingQueue.filter(
-      (p) => p.socketId !== socket.id
+      (p) => p.socketId !== socket.id,
     );
 
     for (const [gameId, game] of this.activeGames.entries()) {
