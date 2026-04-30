@@ -66,13 +66,13 @@ EduEarth/
 | ----------------------------------------- | --------------------------------------------- |
 | ![Games](project_screenshots/5_Games.png) | ![Modules](project_screenshots/6_Modules.png) |
 
-| Course Detail                                                 | Eco Sprint                                                   |
-| ------------------------------------------------------------- | ------------------------------------------------------------ |
-| ![Course detail](project_screenshots/12_CourseDetail.png)     | ![Eco Sprint](project_screenshots/8_Game_EcoSprint.png)      |
+| Course Detail                                             | Eco Sprint                                              |
+| --------------------------------------------------------- | ------------------------------------------------------- |
+| ![Course detail](project_screenshots/12_CourseDetail.png) | ![Eco Sprint](project_screenshots/8_Game_EcoSprint.png) |
 
-| Eco Strike                                                    | Recycle Rush                                                |
-| ------------------------------------------------------------- | ----------------------------------------------------------- |
-| ![Eco Strike](project_screenshots/9_Game_EcoStrike.png)       | ![Recycle Rush](project_screenshots/11_Game_RecycleRush.png) |
+| Eco Strike                                              | Recycle Rush                                                 |
+| ------------------------------------------------------- | ------------------------------------------------------------ |
+| ![Eco Strike](project_screenshots/9_Game_EcoStrike.png) | ![Recycle Rush](project_screenshots/11_Game_RecycleRush.png) |
 
 ## Prerequisites
 
