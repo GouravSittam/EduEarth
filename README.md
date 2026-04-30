@@ -1,19 +1,20 @@
 # EduEarth
 
-EduEarth is a gamified environmental education platform for students, teachers, and institutions. The project combines a Next.js learning experience, an Express/Prisma API, real-time Socket.io game services, Supabase authentication, and a Python/Airflow workspace for environmental article/data workflows.
+EduEarth is a gamified environmental education platform for students, teachers, and institutions. The project combines a Next.js learning experience, a role-aware auth flow, an Express/Prisma API, real-time Socket.io game services, Supabase authentication, and a Python/Airflow workspace for environmental article and data ingestion workflows.
 
 ![EduEarth home](project_screenshots/1_home.png)
 
 ## Current Highlights
 
-- Student and teacher dashboards with role-aware routing.
-- Supabase-backed authentication and profile sync through the server API.
+- Role-aware auth at `/auth-model` with callback handling at `/auth/callback`.
+- Student and teacher dashboards with automatic routing from the homepage and auth state.
 - Environmental articles page with auto-refresh, image support, and optional AI summaries.
 - Interactive game hub with Recycle Rush, Eco Strike, and Eco Sprint.
 - Learning modules, course detail pages, assignments, missions, leaderboards, and certificates UI.
-- REST APIs for users, institutions, classes, lessons, quizzes, articles, and game health/stats.
-- Prisma schema for users, institutions, classes, lessons, quizzes, challenges, badges, achievements, leaderboards, notifications, and articles.
-- Server Docker and production Docker Compose files.
+- REST APIs for auth, institutions, classes, lessons, quizzes, articles, game health/stats, flow views, and Prometheus metrics.
+- Prisma schema for users, institutions, classes, lessons, quizzes, challenges, badges, achievements, leaderboards, notifications, articles, and ingestion/outbox support.
+- Server outbox publisher for realtime game and ingestion event fan-out.
+- Docker support at the repository root and inside `server/` for development and production workflows.
 - Python/Airflow ingestion pipeline with external providers (Open-Meteo climate API and environmental RSS sources).
 
 ## Tech Stack
@@ -22,9 +23,10 @@ EduEarth is a gamified environmental education platform for students, teachers, 
 | ---------- | --------------------------------------------------------------- |
 | Client     | Next.js 15, React 19, TypeScript, Tailwind CSS 4, Framer Motion |
 | Server     | Node.js, Express 5, TypeScript, Socket.io                       |
-| Data       | PostgreSQL, Prisma, Supabase                                    |
+| Data       | PostgreSQL, Prisma, Supabase, optional Redis cache              |
 | Auth       | Supabase Auth with server-side token validation                 |
 | ETL        | Python, Apache Airflow/Astronomer scaffold                      |
+| Ops        | Pino logging, Prometheus metrics, Docker                        |
 | Deployment | Docker, Docker Compose, Vercel-compatible client                |
 
 ## Repository Structure
@@ -32,14 +34,18 @@ EduEarth is a gamified environmental education platform for students, teachers, 
 ```text
 EduEarth/
   client/                 Next.js application
-    app/                  App Router pages
-    components/           Shared UI and game components
+    app/                  App Router pages and route groups
+    app/auth-model/       Auth UI and role selection
+    app/games/            Game hub and game routes
+    components/           Shared UI, auth, and game components
     lib/                  API, auth, module, and type helpers
     public/               Images and game assets
   server/                 Express API and Socket.io server
     src/controllers/      Route handlers
     src/routes/           API route definitions
     src/game/             Real-time game server
+    src/services/         Outbox, cache, and domain services
+    src/observability/    Metrics and logging helpers
     src/prisma/           Prisma schema and migrations
     src/utils/            Supabase, mail, env, and response helpers
   python/                 Airflow/Astronomer project scaffold
@@ -59,6 +65,14 @@ EduEarth/
 | Games                                     | Modules                                       |
 | ----------------------------------------- | --------------------------------------------- |
 | ![Games](project_screenshots/5_Games.png) | ![Modules](project_screenshots/6_Modules.png) |
+
+| Course Detail                                                 | Eco Sprint                                                   |
+| ------------------------------------------------------------- | ------------------------------------------------------------ |
+| ![Course detail](project_screenshots/12_CourseDetail.png)     | ![Eco Sprint](project_screenshots/8_Game_EcoSprint.png)      |
+
+| Eco Strike                                                    | Recycle Rush                                                |
+| ------------------------------------------------------------- | ----------------------------------------------------------- |
+| ![Eco Strike](project_screenshots/9_Game_EcoStrike.png)       | ![Recycle Rush](project_screenshots/11_Game_RecycleRush.png) |
 
 ## Prerequisites
 
@@ -82,6 +96,12 @@ NODE_ENV="development"
 DATABASE_URL="postgresql://postgres.<project-ref>:[YOUR-PASSWORD]@aws-<region>.pooler.supabase.com:5432/postgres?sslmode=require"
 SUPABASE_URL="https://<project-ref>.supabase.co"
 SUPABASE_PUBLISHABLE_KEY=""
+AWS_REGION="<aws-region>"
+AWS_ACCESS_KEY_ID=""
+AWS_SECRET_ACCESS_KEY=""
+S3_BUCKET=""
+GMAIL_USER=""
+GMAIL_PASS=""
 ```
 
 Create `client/.env.local` from `client/.env.example`:
@@ -92,7 +112,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 ```
 
-Optional server integrations currently referenced in the codebase include `GUARDIAN_API_KEY`, `GMAIL_USER`, and `GMAIL_PASS`.
+Optional runtime overrides include `OUTBOX_POLL_INTERVAL_MS` and `OUTBOX_BATCH_SIZE` for the server outbox publisher.
 
 ## Local Development
 
@@ -145,6 +165,8 @@ npm run dev      # Start Next.js development server
 npm run build    # Build production client
 npm run start    # Serve production build
 npm run lint     # Run ESLint
+npm run build:analyze  # Build with bundle analysis enabled
+npm run perf:lighthouse # Run Lighthouse CI against the app routes
 ```
 
 Server:
@@ -155,6 +177,8 @@ npm run build    # Generate Prisma client and compile TypeScript
 npm run start    # Run compiled server
 npm run lint     # Type-check without emitting files
 npm run clean    # Remove build output
+npm run perf:smoke # Run the smoke performance check
+npm run perf:load  # Run the load performance check
 ```
 
 ## API Overview
@@ -164,6 +188,7 @@ Base URL: `http://localhost:6969`
 | Resource     | Endpoints                                                                                             |
 | ------------ | ----------------------------------------------------------------------------------------------------- |
 | Health       | `GET /health`                                                                                         |
+| Metrics      | `GET /metrics`                                                                                        |
 | Flow         | `GET /flow`, `GET /flow/data`                                                                         |
 | Auth         | `GET /auth/user`, `POST /auth/user`, `PATCH /auth/user`                                               |
 | Institutions | `GET/POST /institutions`, `GET/PUT/DELETE /institutions/:id`, statistics, students, teachers, classes |
@@ -196,13 +221,13 @@ The article UI reads from the server `/articles` API and displays environmental 
 - image URL
 - optional AI summary
 
-The `python/` folder contains an Airflow/Astronomer ingestion pipeline that can decouple external data fetching from the server.
+The `python/` folder contains an Airflow/Astronomer ingestion pipeline that decouples external data fetching from the server.
 
 - Architecture document: `docs/architecture/environmental-ingestion-v2.md`
 - Airflow DAG: `python/dags/environmental_ingestion_v2.py`
 - SQL contract: `python/include/sql/environmental_ingestion_contract.sql`
 
-In the V2 model, external providers are fetched by Python scrapers scheduled by Airflow, while the Express server serves historical data and pushes realtime updates from database-backed events.
+In the V2 model, external providers are fetched by Python scrapers scheduled by Airflow, while the Express server serves historical data and pushes realtime updates from the outbox publisher.
 
 Configured external providers:
 
@@ -213,7 +238,7 @@ Curriculum enrichment is applied in the Airflow DAG before persistence (`curricu
 
 ## Docker
 
-The repository now includes Docker support for the full stack and service-level deployment.
+The repository includes Docker support for the full stack and service-level deployment.
 
 ### Full stack from repository root
 
@@ -233,13 +258,11 @@ Open:
 - Client: http://localhost:3000
 - API: http://localhost:6969
 
-Optional local Postgres profile:
+### Optional local Postgres profile
 
 ```bash
 docker compose --profile local-db up -d
 ```
-
-### Server-only (development)
 
 From `server/`:
 
@@ -248,8 +271,6 @@ docker compose up --build
 ```
 
 This uses hot-reload (`npm run dev`) inside the container.
-
-### Server-only (production)
 
 From `server/`, with `server/.env.production` configured:
 
