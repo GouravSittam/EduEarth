@@ -7,6 +7,7 @@ services:
     env_file:
       - ./server/.env
     environment:
+      SERVER_BASE_URL: http://localhost:6969
       NODE_ENV: production
       PORT: 6969
       CLIENT_BASE_URL: http://localhost:3000
