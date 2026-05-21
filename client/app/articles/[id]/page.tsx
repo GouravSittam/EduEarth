@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import UserButton from "@/components/UserButton";
 import BrandMark from "@/components/BrandMark";
+import { SERVER_URL } from "@/lib/serverUrl";
 
 type Article = {
   section: string;
@@ -34,9 +35,7 @@ export default function ArticleDetailPage() {
     const fetchArticle = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_SERVER_URL}/articles/${id}`,
-        );
+        const response = await fetch(`${SERVER_URL}/articles/${id}`);
 
         if (!response.ok) {
           if (response.status === 404) {

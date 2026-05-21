@@ -1,7 +1,8 @@
 import type { ApiResponse, User } from "./types";
 import { getSupabaseBrowserClient } from "./supabase";
+import { SERVER_URL } from "./serverUrl";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:6969";
+const BASE_URL = SERVER_URL;
 
 type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -33,7 +34,7 @@ const getAuthHeaders = async () => {
 async function api<T>(
   path: string,
   method: Method = "GET",
-  body?: Record<string, unknown>
+  body?: Record<string, unknown>,
 ): Promise<ApiResponse<T>> {
   const url = `${BASE_URL}${path}`;
 
@@ -48,7 +49,7 @@ async function api<T>(
 
   if (!res.ok || !result.success) {
     throw new Error(
-      result?.error?.message || result?.message || `API error ${res.status}`
+      result?.error?.message || result?.message || `API error ${res.status}`,
     );
   }
 

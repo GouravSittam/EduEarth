@@ -4,6 +4,7 @@ import { ArrowLeft, HomeIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
+import { SERVER_URL } from "@/lib/serverUrl";
 
 type Question = {
   id: number;
@@ -28,8 +29,7 @@ type AnswerResult = {
   scores: { name: string; score: number }[];
 };
 
-const SOCKET_URL =
-  process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:6969";
+const SOCKET_URL = SERVER_URL;
 
 export default function GamePage() {
   const [stage, setStage] = useState<
@@ -141,7 +141,7 @@ export default function GamePage() {
       const elapsed = Date.now() - questionStartRef.current;
       const remaining = Math.max(
         0,
-        Math.floor((currentQ.timeLimit - elapsed) / 1000)
+        Math.floor((currentQ.timeLimit - elapsed) / 1000),
       );
       setTimeLeft(remaining);
       if (remaining <= 0) {

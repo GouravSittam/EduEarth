@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import createBundleAnalyzer from "@next/bundle-analyzer";
+import { getServerUrl } from "./lib/serverUrl";
 
 const withBundleAnalyzer = createBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
@@ -18,10 +19,11 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
+    const serverUrl = getServerUrl();
     return [
       {
         source: "/api/:path*",
-        destination: `${process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:6969"}/:path*`,
+        destination: `${serverUrl}/:path*`,
       },
     ];
   },

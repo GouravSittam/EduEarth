@@ -13,6 +13,7 @@ const pressStart = Press_Start_2P({
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
+    metadataBase: new URL("https://edu-earth.vercel.app"),
     title: {
       default: "EduEarth - Gamified Environmental Education",
       template: "%s | EduEarth",
@@ -56,7 +57,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       type: "website",
       locale: "en_US",
-      url: "https://eduearth-sih.vercel.app",
+      url: "https://edu-earth.vercel.app",
       title: "EduEarth - Gamified Environmental Education",
       description:
         "Join the environmental revolution through interactive games! Learn about sustainability, climate action, and eco-friendly practices.",
@@ -85,7 +86,7 @@ export async function generateMetadata(): Promise<Metadata> {
     category: "education",
     classification: "Educational Games",
     alternates: {
-      canonical: "https://eduearth-sih.vercel.app",
+      canonical: "https://edu-earth.vercel.app",
     },
   };
 }
