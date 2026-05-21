@@ -1,4 +1,4 @@
-import Redis from "ioredis";
+import { Redis } from "ioredis";
 import { cacheEventsTotal } from "../observability/metrics.js";
 
 type CacheableValue = unknown;

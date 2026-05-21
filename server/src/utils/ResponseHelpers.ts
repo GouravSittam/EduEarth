@@ -1,4 +1,5 @@
 import { Response } from "express";
+import type { ApiResponse } from "../types/api.js";
 export function sendResponse({
   res,
   success,
