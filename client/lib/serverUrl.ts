@@ -9,7 +9,11 @@ export const getServerUrl = () => {
     normalizedEnvUrl?.includes("localhost") ||
     normalizedEnvUrl?.includes("127.0.0.1");
 
-  if (normalizedEnvUrl && (!isProduction || !isLocalEnvUrl)) {
+  // Docker/local production builds opt in to keep a localhost API URL;
+  // otherwise a stale localhost value falls back to the deployed backend.
+  const allowLocal = process.env.NEXT_PUBLIC_ALLOW_LOCAL_SERVER === "true";
+
+  if (normalizedEnvUrl && (!isProduction || !isLocalEnvUrl || allowLocal)) {
     return normalizedEnvUrl;
   }
 

@@ -1,15 +1,31 @@
+# EduEarth full stack.
+#
+#   docker compose --env-file client/.env.local up --build
+#
+# `--env-file` feeds the client's NEXT_PUBLIC_* values into the build args below.
+# Next.js inlines them into the browser bundle at build time, so they must be
+# present when the image is built, not just when the container starts.
+#
+# Optional profiles:
+#   --profile local-db   local Postgres  (DATABASE_URL=postgresql://eduearth:eduearth@postgres:5432/eduearth)
+#   --profile cache      local Redis     (REDIS_URL=redis://redis:6379)
+# Set those URLs in server/.env when you enable a profile.
+
+name: eduearth
+
 services:
   server:
     build:
       context: ./server
       dockerfile: Dockerfile
+      target: runner
     container_name: eduearth-server
     env_file:
       - ./server/.env
     environment:
-      SERVER_BASE_URL: http://localhost:6969
       NODE_ENV: production
       PORT: 6969
+      SERVER_BASE_URL: http://localhost:6969
       CLIENT_BASE_URL: http://localhost:3000
     ports:
       - "6969:6969"
@@ -31,11 +47,15 @@ services:
     build:
       context: ./client
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL:-http://localhost:6969}
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:-}
+        # Production builds normally swap a localhost API URL for the deployed
+        # backend; this keeps the container pointed at the local server.
+        NEXT_PUBLIC_ALLOW_LOCAL_SERVER: "true"
     container_name: eduearth-client
-    env_file:
-      - ./client/.env.local
     environment:
-      NEXT_PUBLIC_SERVER_URL: http://localhost:6969
       PORT: 3000
     ports:
       - "3000:3000"
@@ -44,8 +64,6 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # Optional local postgres for development. Enable with:
-  # docker compose --profile local-db up -d
   postgres:
     image: postgres:16-alpine
     profiles: ["local-db"]
@@ -58,6 +76,25 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eduearth -d eduearth"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    profiles: ["cache"]
+    container_name: eduearth-redis
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
 volumes:
