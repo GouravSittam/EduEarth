@@ -52,6 +52,20 @@ export default function UserButton({
     authUser?.email ??
     "User";
   const displayEmail = user?.email ?? authUser?.email ?? "";
+  const avatarSrc =
+    user?.avatar ||
+    (typeof authUser?.user_metadata?.avatar_url === "string"
+      ? authUser.user_metadata.avatar_url
+      : null) ||
+    "/avatar.png";
+  const role = (
+    user?.role ??
+    (typeof authUser?.user_metadata?.role === "string"
+      ? authUser.user_metadata.role
+      : "")
+  ).toUpperCase();
+  const dashboardHref =
+    role === "TEACHER" ? "/teacher-dashboard" : "/student-dashboard";
 
   if (!user && !authUser && !isLoading) {
     return (
@@ -87,8 +101,9 @@ export default function UserButton({
         <div className="flex items-center gap-3 w-full">
           <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-yellow-400 shrink-0">
             <img
-              src={user?.avatar || "/avatar.png"}
+              src={avatarSrc}
               alt="Profile"
+              referrerPolicy="no-referrer"
               className="h-full w-full object-cover"
             />
           </div>
@@ -104,6 +119,13 @@ export default function UserButton({
             </span>
           </div>
         </div>
+        <Link
+          href={dashboardHref}
+          className="flex min-h-[44px] w-full items-center justify-center rounded-xl border-2 border-black bg-yellow-400 px-4 py-2 text-sm font-semibold text-black shadow-[0_3px_0_#000]"
+          style={{ fontFamily: "system-ui, sans-serif" }}
+        >
+          My Dashboard
+        </Link>
         <button
           type="button"
           onClick={() => void handleLogout()}
@@ -129,8 +151,9 @@ export default function UserButton({
       >
         <motion.img
           whileHover={{ scale: 1.1 }}
-          src={user?.avatar || "/avatar.png"}
+          src={avatarSrc}
           alt="Profile"
+          referrerPolicy="no-referrer"
           className="h-full w-full object-cover"
         />
       </motion.button>
@@ -157,8 +180,9 @@ export default function UserButton({
             <div className="flex items-start gap-3 px-4 py-4">
               <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-yellow-400 bg-black shadow-[0_4px_0_#000]">
                 <img
-                  src={user?.avatar || "/avatar.png"}
+                  src={avatarSrc}
                   alt="Profile"
+                  referrerPolicy="no-referrer"
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -186,7 +210,14 @@ export default function UserButton({
               </div>
             </div>
 
-            <div className="p-4">
+            <div className="space-y-3 p-4">
+              <Link
+                href={dashboardHref}
+                onClick={() => setDropdownOpen(false)}
+                className="flex min-h-[44px] w-full items-center justify-center rounded-xl border-[3px] border-black bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-400 px-4 py-3 text-[0.72rem] text-black shadow-[0_4px_0_#000] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[0_6px_0_#000]"
+              >
+                My Dashboard
+              </Link>
               <motion.button
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}

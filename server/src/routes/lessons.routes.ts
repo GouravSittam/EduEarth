@@ -17,27 +17,28 @@ import {
   getLessonCompletions,
 } from "../controllers/lessons.controllers.js";
 import validToken from "../middlewares/validToken.js";
+import { requireEducator } from "../middlewares/requireRole.js";
 
 const router = Router();
 
 /**
  * Lesson Routes
- * All endpoints for managing lessons and lesson modules
+ * Reads are public; authoring is restricted to educators.
  */
 
 // Lesson Modules CRUD
-router.post("/modules", validToken, createLessonModule);
+router.post("/modules", validToken, requireEducator, createLessonModule);
 router.get("/modules", getAllLessonModules);
 router.get("/modules/:id", getLessonModuleById);
-router.put("/modules/:id", validToken, updateLessonModule);
-router.delete("/modules/:id", validToken, deleteLessonModule);
+router.put("/modules/:id", validToken, requireEducator, updateLessonModule);
+router.delete("/modules/:id", validToken, requireEducator, deleteLessonModule);
 
 // Lessons CRUD
-router.post("/", validToken, createLesson);
+router.post("/", validToken, requireEducator, createLesson);
 router.get("/", getAllLessons);
 router.get("/:id", getLessonById);
-router.put("/:id", validToken, updateLesson);
-router.delete("/:id", validToken, deleteLesson);
+router.put("/:id", validToken, requireEducator, updateLesson);
+router.delete("/:id", validToken, requireEducator, deleteLesson);
 
 // Lesson completion
 router.post("/:id/complete", validToken, completeLesson);

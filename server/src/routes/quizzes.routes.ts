@@ -11,26 +11,28 @@ import {
   submitQuizAttempt,
   getQuizAttempts,
 } from "../controllers/quizzes.controllers.js";
-import validToken from "../middlewares/validToken.js";
+import validToken, { optionalAuth } from "../middlewares/validToken.js";
+import { requireEducator } from "../middlewares/requireRole.js";
 
 const router = Router();
 
 /**
  * Quiz Routes
- * All endpoints for managing quizzes
+ * Authoring is restricted to educators. Quiz reads are public, but answer
+ * keys are only returned to educators (see getQuizById).
  */
 
 // Basic CRUD operations
-router.post("/", validToken, createQuiz);
+router.post("/", validToken, requireEducator, createQuiz);
 router.get("/", getAllQuizzes);
-router.get("/:id", getQuizById);
-router.put("/:id", validToken, updateQuiz);
-router.delete("/:id", validToken, deleteQuiz);
+router.get("/:id", optionalAuth, getQuizById);
+router.put("/:id", validToken, requireEducator, updateQuiz);
+router.delete("/:id", validToken, requireEducator, deleteQuiz);
 
 // Question management
-router.post("/:id/questions", validToken, addQuestionToQuiz);
-router.put("/:quizId/questions/:questionId", validToken, updateQuestionInQuiz);
-router.delete("/:quizId/questions/:questionId", validToken, deleteQuestionFromQuiz);
+router.post("/:id/questions", validToken, requireEducator, addQuestionToQuiz);
+router.put("/:quizId/questions/:questionId", validToken, requireEducator, updateQuestionInQuiz);
+router.delete("/:quizId/questions/:questionId", validToken, requireEducator, deleteQuestionFromQuiz);
 
 // Quiz attempts
 router.post("/:id/attempt", validToken, submitQuizAttempt);

@@ -24,10 +24,17 @@
 // 📦 IMPORTS
 // ═══════════════════════════════════════════════════════════════════════════
 
+// Load .env before any other module reads process.env at import time.
+import "dotenv/config";
+
 // Core Dependencies
-import express from "express";
+import express, {
+  type NextFunction,
+  type Request,
+  type Response,
+} from "express";
 import cors from "cors";
-import dotenv from "dotenv";
+import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import http from "http";
 import crypto from "crypto";
@@ -40,6 +47,8 @@ import articlesRouter from "./routes/articles.routes.js";
 import classesRouter from "./routes/classes.routes.js";
 import quizzesRouter from "./routes/quizzes.routes.js";
 import lessonsRouter from "./routes/lessons.routes.js";
+import leaderboardRouter from "./routes/leaderboard.routes.js";
+import assistantRouter from "./routes/assistant.routes.js";
 import { createGameRouter } from "./routes/game.routes.js";
 import metricsRouter from "./routes/metrics.routes.js";
 
@@ -54,8 +63,6 @@ import OutboxPublisherService from "./services/outboxPublisher.service.js";
 // ⚙️ CONFIGURATION
 // ═══════════════════════════════════════════════════════════════════════════
 
-dotenv.config();
-
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 6969;
@@ -64,23 +71,48 @@ const PORT = process.env.PORT || 6969;
 // 🛡️ MIDDLEWARE SETUP
 // ═══════════════════════════════════════════════════════════════════════════
 
-// CORS Configuration - Allow credentials from any origin
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://localhost:3001",
-  process.env.CLIENT_BASE_URL,
-].filter(Boolean);
+// Behind Vercel/NGINX: trust the first proxy so req.ip is the real client IP
+// (used by the assistant's rate limiter).
+app.set("trust proxy", 1);
 
 app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-      callback(null, origin); // allow all in dev
-    },
-    credentials: true,
+  helmet({
+    // The /flow page renders an inline diagram; the rest is a JSON API.
+    contentSecurityPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
   }),
 );
+
+// CORS: only known front-ends may make credentialed requests.
+// Extra origins can be supplied as a comma-separated CORS_ORIGINS list.
+const allowedOrigins = new Set(
+  [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://edu-earth.vercel.app",
+    process.env.CLIENT_BASE_URL,
+    ...(process.env.CORS_ORIGINS ?? "").split(","),
+  ]
+    .map((origin) => origin?.trim().replace(/\/$/, ""))
+    .filter((origin): origin is string => Boolean(origin)),
+);
+
+const isDevelopment = process.env.NODE_ENV !== "production";
+
+const corsOrigin = (
+  origin: string | undefined,
+  callback: (error: Error | null, allow?: boolean) => void,
+) => {
+  // Same-origin requests, curl and server-to-server calls send no Origin.
+  if (!origin) return callback(null, true);
+  if (allowedOrigins.has(origin)) return callback(null, true);
+  if (isDevelopment && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+    return callback(null, true);
+  }
+  return callback(null, false);
+};
+
+app.use(cors({ origin: corsOrigin, credentials: true }));
 
 app.use(
   pinoHttp({
@@ -101,9 +133,11 @@ app.use((req, res, next) => {
   const start = process.hrtime.bigint();
   res.on("finish", () => {
     const elapsedMs = Number(process.hrtime.bigint() - start) / 1_000_000;
+    // Use the route pattern, never the raw path: raw paths (ids, 404 probes)
+    // would create unbounded Prometheus label cardinality.
     const route = req.route?.path
       ? `${req.baseUrl}${req.route.path}`
-      : req.path;
+      : "unmatched";
     httpRequestDurationMs.observe(
       {
         method: req.method,
@@ -171,12 +205,14 @@ app.use("/articles", articlesRouter); // 📰 Educational Articles
 app.use("/classes", classesRouter); // 📚 Class Management
 app.use("/quizzes", quizzesRouter); // ❓ Quiz System
 app.use("/lessons", lessonsRouter); // 📖 Lesson Management
+app.use("/leaderboard", leaderboardRouter); // 🏆 Eco-points Leaderboard
+app.use("/assistant", assistantRouter); // 🤖 Eco AI Assistant
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 🎮 REAL-TIME GAME SERVER
 // ═══════════════════════════════════════════════════════════════════════════
 
-const gameServer = new GameServer(server);
+const gameServer = new GameServer(server, { corsOrigin });
 const outboxPublisher = new OutboxPublisherService(gameServer, {
   pollIntervalMs: Number(process.env.OUTBOX_POLL_INTERVAL_MS || 3000),
   batchSize: Number(process.env.OUTBOX_BATCH_SIZE || 50),
@@ -187,6 +223,36 @@ app.use(
 );
 
 outboxPublisher.start();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🧯 FALLBACK HANDLERS
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Unknown routes → JSON 404 (the client always expects JSON).
+app.use((req: Request, res: Response) => {
+  const message = `Route not found: ${req.method} ${req.path}`;
+  res.status(404).json({ success: false, message, error: { message } });
+});
+
+// Malformed JSON bodies, oversized payloads and uncaught errors → JSON.
+app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
+  const status =
+    typeof (err as { status?: unknown })?.status === "number"
+      ? (err as { status: number }).status
+      : 500;
+  const message =
+    status === 400
+      ? "Malformed request body"
+      : status === 413
+        ? "Request body is too large"
+        : "Internal server error";
+
+  if (status >= 500) {
+    req.log?.error({ err }, "Unhandled request error");
+  }
+
+  res.status(status).json({ success: false, message, error: { message } });
+});
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 🚀 SERVER INITIALIZATION

@@ -1,387 +1,454 @@
 "use client";
 
-import React, { useState } from "react";
-import { Bell, Settings } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  BookOpen,
+  Gamepad2,
+  GraduationCap,
+  Leaf,
+  Loader2,
+  Plus,
+  School,
+  Star,
+  Trophy,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
+import { useAuth } from "@/components/auth/AuthProvider";
+import JoinSchoolCard from "@/components/JoinSchoolCard";
+import { classesApi, institutionsApi } from "@/lib/api";
+import type { ClassSummary, InstitutionStatistics } from "@/lib/types";
 
-// Types for sidebar links
-type NavLink = {
-  label: string;
-  key: string;
+const pixelFont = { fontFamily: '"Press Start 2P", system-ui, sans-serif' };
+const readableFont = {
+  fontFamily: '"Trebuchet MS", "Segoe UI", system-ui, sans-serif',
 };
+const numberFormat = new Intl.NumberFormat("en-US");
 
-const navLinks: NavLink[] = [
-  { label: "Dashboard", key: "dashboard" },
-  { label: "Modules", key: "modules" },
-  { label: "Chat", key: "chat" },
+const QUOTES = [
+  "Every lesson plants the seed of change.",
+  "The greatest threat to our planet is the belief that someone else will save it.",
+  "We don't inherit the earth from our ancestors; we borrow it from our children.",
+  "Small acts, multiplied by millions of people, can transform the world.",
 ];
 
 export default function TeacherDashboard() {
-  const [activeSection, setActiveSection] = useState<string>("dashboard");
+  const router = useRouter();
+  const { user, authUser, isLoading, refreshUser } = useAuth();
+
+  const role =
+    user?.role?.toUpperCase() ??
+    (typeof authUser?.user_metadata?.role === "string"
+      ? authUser.user_metadata.role.toUpperCase()
+      : null);
+  const isSignedIn = Boolean(user || authUser);
+  const isTeacher = role === "TEACHER" || Boolean(user?.isAdmin);
+  const teacher = user?.teacher ?? null;
+  const institution = teacher?.institution ?? null;
+
+  const displayName =
+    user?.name ??
+    (typeof authUser?.user_metadata?.full_name === "string"
+      ? authUser.user_metadata.full_name
+      : null) ??
+    "Teacher";
+  const avatar =
+    user?.avatar ??
+    (typeof authUser?.user_metadata?.avatar_url === "string"
+      ? authUser.user_metadata.avatar_url
+      : null) ??
+    "/avatar.png";
+
+  // Teachers only: everyone else goes to sign-in or the student dashboard.
+  useEffect(() => {
+    if (isLoading) return;
+    if (!isSignedIn) {
+      router.replace("/auth-model");
+      return;
+    }
+    if (!isTeacher) {
+      router.replace("/student-dashboard");
+    }
+  }, [isLoading, isSignedIn, isTeacher, router]);
+
+  const [stats, setStats] = useState<InstitutionStatistics | null>(null);
+  const [classes, setClasses] = useState<ClassSummary[]>([]);
+  const [dataState, setDataState] = useState<"idle" | "loading" | "ready" | "error">("idle");
+
+  const loadSchoolData = useCallback(async (institutionId: string) => {
+    setDataState("loading");
+    try {
+      const [statsResponse, classesResponse] = await Promise.all([
+        institutionsApi.statistics(institutionId),
+        institutionsApi.classes(institutionId),
+      ]);
+      setStats(statsResponse.data ?? null);
+      setClasses(classesResponse.data?.classes ?? []);
+      setDataState("ready");
+    } catch {
+      setDataState("error");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (institution?.id) {
+      void loadSchoolData(institution.id);
+    }
+  }, [institution?.id, loadSchoolData]);
+
+  if (isLoading || !isSignedIn || !isTeacher) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#0b2f1d] px-4">
+        <div
+          className="flex items-center gap-3 rounded-3xl border-4 border-black bg-yellow-300 p-6 text-sm text-black shadow-[0_10px_0_#000]"
+          style={pixelFont}
+        >
+          <Loader2 className="h-5 w-5 animate-spin" />
+          Loading dashboard...
+        </div>
+      </div>
+    );
+  }
+
+  const quote = QUOTES[new Date().getDate() % QUOTES.length];
 
   return (
-    <div className="flex h-screen">
-      {/* Sidebar */}
-      <aside className="w-64 bg-blue-900 text-white flex flex-col justify-between fixed h-screen p-4">
-        <div>
-          <h1 className="text-xl font-bold mb-8">Teacher Dashboard</h1>
-          <nav className="flex flex-col gap-4">
-            {navLinks.map((link) => (
-              <button
-                key={link.key}
-                className={`flex items-center p-2 rounded hover:bg-blue-700 transition ${
-                  activeSection === link.key ? "bg-blue-700 font-semibold" : ""
-                }`}
-                onClick={() => setActiveSection(link.key)}
-              >
-                {link.label}
-              </button>
-            ))}
-          </nav>
-        </div>
-        <div className="flex items-center gap-2 p-2 hover:bg-blue-700 rounded cursor-pointer">
-          <Settings size={18} /> Settings
-        </div>
-      </aside>
-
-      {/* Main content container */}
-      <div className="flex-1 flex flex-col ml-64">
-        {/* Header */}
-        <header className="flex justify-between text-black items-center bg-white shadow px-6 py-4 fixed top-0 left-64 right-0 z-10">
-          <div className="font-bold text-lg">Teacher Dashboard</div>
-          <input
-            type="text"
-            placeholder="Search Across Modules, Assignments, Missions"
-            className="border rounded px-4 py-2 w-1/2"
-          />
-          <div className="flex items-center gap-4">
-            <Bell size={24} />
-            <div className="flex items-center gap-2">
-              <img
-                src="/avatar.jpg"
-                alt="Ajay"
-                className="w-8 h-8 rounded-full"
-              />
-              <span>Ajay (Teacher)</span>
-            </div>
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(250,204,21,0.18),transparent_35%),linear-gradient(180deg,#0b2f1d,#052e16)] text-black">
+      <header className="sticky top-0 z-30 border-b-4 border-black bg-gradient-to-r from-sky-400 via-cyan-400 to-emerald-400">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
+          <Link
+            href="/home"
+            className="inline-flex items-center gap-2 rounded-full border-[3px] border-black bg-yellow-300 px-3 py-2 text-[0.6rem] shadow-[0_3px_0_#000] transition hover:-translate-y-0.5"
+            style={pixelFont}
+          >
+            <Leaf className="h-4 w-4" />
+            <span className="hidden sm:inline">EduEarth</span>
+          </Link>
+          <h1 className="truncate text-[0.7rem] sm:text-sm" style={pixelFont}>
+            Teacher HQ
+          </h1>
+          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-[3px] border-black bg-white">
+            <img
+              src={avatar}
+              alt={`${displayName}'s avatar`}
+              referrerPolicy="no-referrer"
+              className="h-full w-full object-cover"
+            />
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* Scrollable main content */}
-        <main className="flex-1 bg-gray-50 p-6 pt-24 overflow-auto">
-          {activeSection === "dashboard" && <DashboardView />}
-          {activeSection === "modules" && <ModulesView />}
-          {activeSection === "assignments" && <div>Assignments Content</div>}
-          {activeSection === "missions" && <div>Missions Content</div>}
-          {activeSection === "reports" && <div>Student Reports Content</div>}
-          {activeSection === "certificates" && <div>Certificates & Rewards Content</div>}
-          {activeSection === "chat" && <div>Chat Content</div>}
-        </main>
-      </div>
+      <main className="mx-auto max-w-7xl space-y-6 px-4 py-6">
+        {/* Welcome */}
+        <section className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+          <div className="rounded-[1.75rem] border-4 border-black bg-gradient-to-br from-yellow-300 via-amber-300 to-orange-300 p-6 shadow-[0_10px_0_#000]">
+            <p className="text-[0.6rem] uppercase text-black/70" style={pixelFont}>
+              Welcome back
+            </p>
+            <h2 className="mt-2 text-lg leading-8 sm:text-2xl" style={pixelFont}>
+              {displayName}
+            </h2>
+            <p className="mt-3 text-sm text-black/75" style={readableFont}>
+              {institution
+                ? `Guiding eco-learners at ${institution.name}`
+                : "Join your school to set up classes and track your students."}
+            </p>
+          </div>
+          <div className="flex items-center rounded-[1.75rem] border-4 border-black bg-black p-6 text-yellow-200 shadow-[0_10px_0_#000]">
+            <p className="text-sm italic leading-7" style={readableFont}>
+              “{quote}”
+            </p>
+          </div>
+        </section>
+
+        {!institution && (
+          <JoinSchoolCard audience="teacher" onJoined={() => void refreshUser()} />
+        )}
+
+        {institution && (
+          <>
+            {dataState === "loading" && (
+              <p className="flex items-center gap-2 text-sm text-white/80" style={readableFont}>
+                <Loader2 className="h-4 w-4 animate-spin" /> Loading school data…
+              </p>
+            )}
+            {dataState === "error" && (
+              <p className="text-sm text-red-300" style={readableFont}>
+                Couldn&apos;t load your school data. Please refresh to try again.
+              </p>
+            )}
+
+            {stats && (
+              <section className="grid grid-cols-2 gap-4 lg:grid-cols-4" style={readableFont}>
+                <KpiCard icon={Users} label="Students" value={stats.overview.totalStudents} />
+                <KpiCard icon={School} label="Classes" value={stats.overview.totalClasses} />
+                <KpiCard icon={Star} label="Eco-points earned" value={stats.overview.totalEcoPoints} />
+                <KpiCard
+                  icon={GraduationCap}
+                  label="Avg points / student"
+                  value={stats.engagement.avgEcoPointsPerStudent}
+                />
+              </section>
+            )}
+
+            <section className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+              <ClassesPanel
+                institutionId={institution.id}
+                classes={classes}
+                onCreated={() => void loadSchoolData(institution.id)}
+              />
+              <TopPerformersPanel performers={stats?.topPerformers ?? []} />
+            </section>
+          </>
+        )}
+
+        <section className="rounded-[1.5rem] border-4 border-black bg-[#fffbea] p-5 shadow-[0_8px_0_#000]">
+          <h2 className="mb-4 text-[0.75rem] sm:text-sm" style={pixelFont}>
+            Teaching Toolkit
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-3" style={readableFont}>
+            <ToolkitLink
+              href="/home#modules"
+              icon={BookOpen}
+              title="Browse modules"
+              text="Video lessons with assignments and missions to set for your class."
+            />
+            <ToolkitLink
+              href="/games/eco-sprint"
+              icon={Gamepad2}
+              title="Run an Eco Sprint"
+              text="Live 1v1 quiz duels — great as a class warm-up."
+            />
+            <ToolkitLink
+              href="/articles"
+              icon={Leaf}
+              title="Today's eco news"
+              text="Fresh environmental stories with quick summaries for discussion."
+            />
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
 
-// Dashboard View Component
-const DashboardView = () => {
+function KpiCard({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: number;
+}) {
   return (
-    <div className="flex flex-col gap-6 text-black">
-      {/* Row 1: Key Cards */}
-      <div className="grid grid-cols-3 gap-6">
-        {/* Welcome Card */}
-        <div className="bg-gradient-to-r from-blue-400 to-blue-600 text-white p-6 rounded-xl shadow">
-          <h2 className="text-xl font-bold mb-4">Welcome back, Ajay</h2>
-          <p>42 students learning</p>
-          <button className="mt-4 bg-white text-blue-600 px-4 py-2 rounded shadow">
-            View Profile
-          </button>
-        </div>
-
-        {/* Today's Schedule */}
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h2 className="font-semibold text-lg mb-4">Today's Schedule</h2>
-          <ul className="flex flex-col gap-2">
-            <li className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-green-500"></span>
-              Assign 2 new modules (Climate & Pollution)
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-red-500"></span>
-              Review progress of Mission 'Save Water Challenge'
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-green-500"></span>
-              Update weekly leaderboard
-            </li>
-          </ul>
-        </div>
-
-        {/* Calendar & Upcoming Events */}
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h2 className="font-semibold text-lg mb-4">Calendar & Upcoming Events</h2>
-          <div className="mb-4">
-            <div className="text-center text-lg font-bold">July 2, 2025</div>
-            <div className="grid grid-cols-7 gap-1 text-sm mt-2">
-              {/* Minimal calendar example */}
-              {Array.from({ length: 30 }, (_, i) => (
-                <div
-                  key={i}
-                  className={`p-1 text-center ${
-                    i + 1 === 2 ? "bg-blue-500 text-white rounded" : ""
-                  }`}
-                >
-                  {i + 1}
-                </div>
-              ))}
-            </div>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-2">Upcoming:</h3>
-            <ul className="text-sm flex flex-col gap-1">
-              <li>25 Sep - Quiz Deadline A</li>
-              <li>25 Sep - Quiz Deadline B</li>
-              <li>25 Sep - Quiz Deadline C</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* Row 2: Quote & Explore */}
-      <div className="grid grid-cols-4 gap-6">
-        {/* Quote of the Day */}
-        <div className="col-span-1 bg-white p-6 rounded-xl shadow flex items-center justify-center text-center">
-          <h2 className="font-semibold text-lg">
-            "Every lesson plants the seed of change"
-          </h2>
-        </div>
-
-        {/* Explore Section */}
-        <div className="col-span-3 flex flex-col gap-4">
-          <h2 className="text-lg font-semibold">Explore</h2>
-          <div className="flex gap-4 overflow-x-auto">
-            <ActionCard
-              title="Upload Module"
-              description="Add new learning content instantly."
-              buttonText="Upload Now"
-            />
-            <ActionCard
-              title="Set Assignment"
-              description="Assign tasks and track submissions."
-              buttonText="Create Assignment"
-            />
-            <ActionCard
-              title="Set Mission"
-              description="Gamify tasks like tree planting."
-              buttonText="Launch Mission"
-            />
-            <ActionCard
-              title="Check Student Progress"
-              description="View progress, scores, and attendance."
-              buttonText="View Dashboard"
-            />
-          </div>
-        </div>
-      </div>
+    <div className="rounded-2xl border-4 border-black bg-white p-4 shadow-[0_6px_0_#000]">
+      <Icon className="h-5 w-5 text-emerald-700" />
+      <div className="mt-2 text-2xl font-black sm:text-3xl">{numberFormat.format(value)}</div>
+      <div className="text-xs uppercase tracking-wide text-black/60">{label}</div>
     </div>
   );
-};
+}
 
-// Modules View Component
-const ModulesView = () => {
-  // stub state for form inputs (could be wired to API later)
-  const [moduleName, setModuleName] = useState("");
+function ClassesPanel({
+  institutionId,
+  classes,
+  onCreated,
+}: {
+  institutionId: string;
+  classes: ClassSummary[];
+  onCreated: () => void;
+}) {
+  const [showForm, setShowForm] = useState(false);
+  const [name, setName] = useState("");
+  const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
-  const [grade, setGrade] = useState("");
-  const [duration, setDuration] = useState("");
-  const [category, setCategory] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-  const recentModules = Array.from({ length: 4 }).map((_, i) => ({
-    id: i + 1,
-    title: "Floods & Droughts Explained",
-    grade: "Grade 7",
-    duration: "30 mins",
-    chapters: 5,
-    status: i === 1 ? "Draft" : "Uploaded (Sep 25, 2025)",
-    image: "/study12.png",
-  }));
+  const createClass = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!name.trim() || !subject.trim()) {
+      setError("Class name and subject are required.");
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+    try {
+      await classesApi.create({
+        name: name.trim(),
+        subject: subject.trim(),
+        institutionId,
+        ...(description.trim() ? { description: description.trim() } : {}),
+      });
+      setName("");
+      setSubject("");
+      setDescription("");
+      setShowForm(false);
+      onCreated();
+    } catch (createError) {
+      setError(createError instanceof Error ? createError.message : "Could not create class");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const inputClass =
+    "w-full rounded-xl border-[3px] border-black bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-green-500/50";
 
   return (
-    <section id="modules-view" className="text-black flex flex-col gap-6">
-      {/* Header + Progress */}
-      <div className="bg-white p-6 rounded-xl shadow flex items-start justify-between">
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold mb-2">Modules</h1>
-          <p className="text-sm text-gray-600 mb-4">Manage learning modules and monitor student progress.</p>
-
-          <div className="bg-gray-100 p-4 rounded-lg">
-            <div className="flex items-center justify-between mb-2">
-              <div className="font-semibold">Students' Progress Bar</div>
-              <div className="text-sm font-semibold text-gray-700">40% Completed</div>
-            </div>
-            <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full"
-                style={{
-                  width: "40%",
-                  background: "linear-gradient(90deg, #00C853 0%, #40C4FF 100%)",
-                }}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="w-56 ml-6 flex-shrink-0 flex flex-col items-end">
-          <div className="text-sm text-gray-500">Overview</div>
-          <div className="mt-2 text-lg font-semibold">42 Students</div>
-        </div>
+    <div className="rounded-[1.5rem] border-4 border-black bg-[#fffbea] p-5 shadow-[0_8px_0_#000]">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="text-[0.75rem] sm:text-sm" style={pixelFont}>
+          Classes
+        </h2>
+        <button
+          type="button"
+          onClick={() => setShowForm((open) => !open)}
+          className="inline-flex items-center gap-1 rounded-full border-2 border-black bg-yellow-300 px-3 py-1.5 text-xs font-bold shadow-[0_2px_0_#000]"
+          style={readableFont}
+        >
+          <Plus className="h-4 w-4" />
+          {showForm ? "Cancel" : "New class"}
+        </button>
       </div>
 
-      {/* Recent Modules */}
-      <div className="bg-white p-6 rounded-xl shadow">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Recent Modules</h2>
-          <button className="text-sm text-blue-600">View All</button>
-        </div>
+      {showForm && (
+        <form
+          onSubmit={(event) => void createClass(event)}
+          className="mb-5 grid gap-3 rounded-2xl border-[3px] border-black bg-white/70 p-4 sm:grid-cols-2"
+          style={readableFont}
+        >
+          <label className="text-sm font-semibold">
+            Name
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Grade 7 – Section B"
+              className={`${inputClass} mt-1`}
+              required
+            />
+          </label>
+          <label className="text-sm font-semibold">
+            Subject
+            <input
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              placeholder="e.g. Environmental Science"
+              className={`${inputClass} mt-1`}
+              required
+            />
+          </label>
+          <label className="text-sm font-semibold sm:col-span-2">
+            Description (optional)
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={2}
+              className={`${inputClass} mt-1`}
+            />
+          </label>
+          {error && <p className="text-sm font-semibold text-red-700 sm:col-span-2">{error}</p>}
+          <button
+            type="submit"
+            disabled={saving}
+            className="rounded-xl border-[3px] border-black bg-green-400 px-4 py-2 text-sm font-bold shadow-[0_3px_0_#000] disabled:opacity-60 sm:col-span-2"
+          >
+            {saving ? "Creating…" : "Create class"}
+          </button>
+        </form>
+      )}
 
-        <div className="flex gap-4 overflow-x-auto py-2">
-          {recentModules.map((m) => (
-            <ModuleCard key={m.id} module={m} />
+      {classes.length === 0 ? (
+        <p className="py-6 text-center text-sm text-black/60" style={readableFont}>
+          No classes yet. Create your first one to start organising students.
+        </p>
+      ) : (
+        <ul className="grid gap-3 sm:grid-cols-2" style={readableFont}>
+          {classes.map((item) => (
+            <li
+              key={item.id}
+              className="rounded-2xl border-[3px] border-black bg-white p-4 shadow-[0_3px_0_#000]"
+            >
+              <p className="font-bold">{item.name}</p>
+              <p className="text-sm text-black/65">{item.subject}</p>
+              <p className="mt-2 text-xs text-black/55">
+                {item._count?.students ?? 0} students · {item._count?.teachers ?? 0} teachers
+              </p>
+            </li>
           ))}
-        </div>
-      </div>
-
-      {/* Upload New Module Form */}
-      <div className="bg-white p-6 rounded-xl shadow">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <h2 className="text-lg font-semibold mb-2">Upload New Module</h2>
-            <p className="text-sm text-gray-600 mb-4">Add a new learning module so your students can access it.</p>
-
-            <form className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1">Module Name</label>
-                <input
-                  value={moduleName}
-                  onChange={(e) => setModuleName(e.target.value)}
-                  placeholder="eg: Floods & Droughts Explained"
-                  className="w-full border rounded px-3 py-2"
-                />
-              </div>
-
-              <div className="">
-                <label className="block text-sm font-medium mb-1">Grade</label>
-                <input
-                  value={grade}
-                  onChange={(e) => setGrade(e.target.value)}
-                  placeholder="eg: 8"
-                  className="w-full border rounded px-3 py-2"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1">Short Description</label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="eg: Lorem ipsum is placeholder text..."
-                  className="w-full border rounded px-3 py-2 h-28"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Duration</label>
-                <input
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  placeholder="eg: 150 mins"
-                  className="w-full border rounded px-3 py-2"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Category</label>
-                <input
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  placeholder="eg: Water and Floods"
-                  className="w-full border rounded px-3 py-2"
-                />
-              </div>
-
-              <div className="md:col-span-3">
-                <label className="block text-sm font-medium mb-2">Export to Sheets</label>
-                <div className="flex items-center gap-4">
-                  <button type="button" className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded flex items-center gap-2">
-                    {/* upload icon (inline svg) */}
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12v9M8 8l4-4 4 4" />
-                    </svg>
-                    Upload Now
-                  </button>
-                  <div className="text-sm text-gray-600">Upload Video / PPT / PDF</div>
-                </div>
-              </div>
-            </form>
-          </div>
-
-          {/* Right-side actions: stacked */}
-          <div className="w-44 ml-6 flex flex-col items-stretch gap-3">
-            <button className="flex items-center gap-2 justify-center bg-green-100 text-green-800 px-4 py-3 rounded shadow">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" />
-                <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.5l4 4L7 21H3v-4L16.5 3.5z" />
-              </svg>
-              Save as Draft
-            </button>
-
-            <button className="flex items-center gap-2 justify-center bg-green-600 text-white px-4 py-3 rounded shadow">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
-                <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M7 9l5-5 5 5" />
-                <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M12 4v13" />
-              </svg>
-              Publish Module
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-// Module Card Component
-const ModuleCard = ({ module }: { module: any }) => {
-  return (
-    <div className="bg-white rounded-xl shadow min-w-[260px] overflow-hidden">
-      <img src={module.image} alt={module.title} className="w-full h-36 object-cover" />
-      <div className="p-4">
-        <h3 className="font-semibold mb-2">{module.title}</h3>
-        <div className="text-sm text-gray-600 mb-2">
-          <div>Grade: {module.grade}</div>
-          <div>Duration: {module.duration}</div>
-          <div>Chapters: {module.chapters}</div>
-        </div>
-        <div className={`text-sm font-medium ${module.status === 'Draft' ? 'text-yellow-600' : 'text-green-600'}`}>
-          {module.status}
-        </div>
-      </div>
+        </ul>
+      )}
     </div>
   );
-};
+}
 
-// Action Card Component
-type ActionCardProps = {
+function TopPerformersPanel({
+  performers,
+}: {
+  performers: InstitutionStatistics["topPerformers"];
+}) {
+  return (
+    <div className="rounded-[1.5rem] border-4 border-black bg-[#fffbea] p-5 shadow-[0_8px_0_#000]">
+      <h2 className="mb-4 flex items-center gap-2 text-[0.75rem] sm:text-sm" style={pixelFont}>
+        <Trophy className="h-4 w-4" /> Top Eco Rangers
+      </h2>
+      {performers.length === 0 ? (
+        <p className="py-6 text-center text-sm text-black/60" style={readableFont}>
+          Once students start completing lessons, your stars will show up here.
+        </p>
+      ) : (
+        <ol className="space-y-2" style={readableFont}>
+          {performers.map((student, index) => (
+            <li
+              key={student.id}
+              className="flex items-center gap-3 rounded-xl border-2 border-black bg-white px-3 py-2"
+            >
+              <span className="w-8 text-center font-black">
+                {["🥇", "🥈", "🥉"][index] ?? `#${index + 1}`}
+              </span>
+              <img
+                src={student.user.avatar || "/avatar.png"}
+                alt=""
+                referrerPolicy="no-referrer"
+                className="h-8 w-8 rounded-full border-2 border-black object-cover"
+              />
+              <span className="min-w-0 flex-1 truncate font-semibold">
+                {student.user.name ?? "Eco Explorer"}
+              </span>
+              <span className="font-black">{numberFormat.format(student.ecoPoints)}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  );
+}
+
+function ToolkitLink({
+  href,
+  icon: Icon,
+  title,
+  text,
+}: {
+  href: string;
+  icon: LucideIcon;
   title: string;
-  description: string;
-  buttonText: string;
-};
-const ActionCard = ({ title, description, buttonText }: ActionCardProps) => {
+  text: string;
+}) {
   return (
-    <div className="bg-white p-4 rounded-xl shadow min-w-[200px] flex flex-col justify-between">
-      <h3 className="font-semibold mb-2">{title}</h3>
-      <p className="text-sm mb-4">{description}</p>
-      <button className="mt-auto bg-blue-600 text-white px-3 py-2 rounded">
-        {buttonText}
-      </button>
-    </div>
+    <Link
+      href={href}
+      className="flex gap-3 rounded-2xl border-[3px] border-black bg-white p-4 shadow-[0_4px_0_#000] transition hover:-translate-y-0.5"
+    >
+      <Icon className="h-6 w-6 shrink-0 text-emerald-700" />
+      <span>
+        <span className="block font-bold">{title}</span>
+        <span className="block text-sm text-black/65">{text}</span>
+      </span>
+    </Link>
   );
-};
+}

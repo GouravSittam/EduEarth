@@ -9,8 +9,10 @@ import {
   getInstitutionStudents,
   getInstitutionTeachers,
   getInstitutionClasses,
+  joinInstitution,
 } from "../controllers/institutions.controllers.js";
 import validToken from "../middlewares/validToken.js";
+import { requireEducator } from "../middlewares/requireRole.js";
 
 const router = Router();
 
@@ -26,10 +28,13 @@ router.get("/:id", getInstitutionById);
 router.put("/:id", validToken, updateInstitution);
 router.delete("/:id", validToken, deleteInstitution);
 
-// Institution-specific data
+// Membership
+router.post("/:id/join", validToken, joinInstitution);
+
+// Institution-specific data (rosters expose emails → educators only)
 router.get("/:id/statistics", getInstitutionStatistics);
-router.get("/:id/students", getInstitutionStudents);
-router.get("/:id/teachers", getInstitutionTeachers);
+router.get("/:id/students", validToken, requireEducator, getInstitutionStudents);
+router.get("/:id/teachers", validToken, requireEducator, getInstitutionTeachers);
 router.get("/:id/classes", getInstitutionClasses);
 
 export default router;

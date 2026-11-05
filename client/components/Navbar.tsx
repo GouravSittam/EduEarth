@@ -17,9 +17,10 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { href: "/home", label: "Home", emoji: "🏠" },
-  { href: "#missions", label: "Missions", emoji: "🚀", sectionId: "missions" },
+  // Absolute hrefs so these also work from other pages (e.g. /articles).
+  { href: "/home#missions", label: "Missions", emoji: "🚀", sectionId: "missions" },
   { href: "/games", label: "Games", emoji: "🎮" },
-  { href: "#modules", label: "Modules", emoji: "📚", sectionId: "modules" },
+  { href: "/home#modules", label: "Modules", emoji: "📚", sectionId: "modules" },
   { href: "/articles", label: "Articles", emoji: "📰" },
 ];
 

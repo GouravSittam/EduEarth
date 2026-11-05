@@ -1,35 +1,47 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
+import type { User } from "@/lib/types";
+
+/** Send people straight to the dashboard that matches their role. */
+const destinationFor = (user: User | null) => {
+  const role = user?.role?.toUpperCase();
+  if (role === "TEACHER") return "/teacher-dashboard";
+  if (role === "STUDENT" || user?.student) return "/student-dashboard";
+  return "/home";
+};
 
 function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isLoading, session, user, refreshUser } = useAuth();
+  const redirected = useRef(false);
 
   const errorMessage =
     searchParams.get("error_description") ?? searchParams.get("error");
 
   useEffect(() => {
-    if (errorMessage) {
+    if (errorMessage || isLoading || redirected.current) {
       return;
     }
 
-    if (isLoading) {
-      return;
-    }
+    redirected.current = true;
 
     if (session || user) {
-      void refreshUser().finally(() => {
-        router.replace("/home");
-      });
+      void refreshUser()
+        .catch(() => user)
+        .then((freshUser) => {
+          router.replace(destinationFor(freshUser ?? user));
+        });
       return;
     }
 
-    router.replace("/auth-model?error=Unable to complete sign in. Please try again.");
+    router.replace(
+      `/auth-model?error=${encodeURIComponent("Unable to complete sign in. Please try again.")}`,
+    );
   }, [errorMessage, isLoading, refreshUser, router, session, user]);
 
   return (
@@ -54,7 +66,7 @@ function AuthCallbackContent() {
               Completing Sign In
             </h1>
             <p className="text-sm text-zinc-300">
-              Hold on while we finish your Supabase sign-in and take you home.
+              Hold on while we finish signing you in and open your dashboard.
             </p>
           </>
         )}
@@ -73,7 +85,7 @@ export default function AuthCallbackPage() {
               Completing Sign In
             </h1>
             <p className="text-sm text-zinc-300">
-              Hold on while we finish your Supabase sign-in.
+              Hold on while we finish your sign-in.
             </p>
           </div>
         </div>

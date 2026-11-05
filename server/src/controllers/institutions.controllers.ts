@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
-import { InstitutionType } from "@prisma/client";
+import { InstitutionType, UserRole } from "@prisma/client";
 import { sendResponse } from "../utils/ResponseHelpers.js";
 import { prisma } from "../prisma/client.js";
 import { parseBoundedPagination } from "../utils/pagination.js";
 import { cacheService } from "../services/cache.service.js";
+import { invalidateAuthCacheForUser } from "../middlewares/validToken.js";
+import { isUniqueViolation } from "../utils/prismaErrors.js";
 
 // Helper functions for consistent responses
 const sendSuccessResponse = (
@@ -19,9 +21,102 @@ const sendErrorResponse = (
   res: Response,
   statusCode: number,
   message: string,
-  error?: any
 ) => {
-  return sendResponse({ res, success: false, message, error, statusCode });
+  return sendResponse({
+    res,
+    success: false,
+    message,
+    error: { message },
+    statusCode,
+  });
+};
+
+/**
+ * Join an institution as the current user
+ * POST /institutions/:id/join
+ * Creates the Student (or Teacher) profile that lessons, quizzes and
+ * leaderboards hang off. Plain USER accounts become STUDENT.
+ */
+export const joinInstitution = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const user = req.user;
+    const { id } = req.params;
+
+    if (!user) {
+      sendErrorResponse(res, 401, "Unauthorized request");
+      return;
+    }
+
+    if (!id) {
+      sendErrorResponse(res, 400, "Institution ID is required");
+      return;
+    }
+
+    if (user.role === UserRole.PARENT) {
+      sendErrorResponse(res, 400, "Parent accounts don't join an institution");
+      return;
+    }
+
+    const institution = await prisma.institution.findUnique({
+      where: { id },
+      select: { id: true, name: true },
+    });
+
+    if (!institution) {
+      sendErrorResponse(res, 404, "Institution not found");
+      return;
+    }
+
+    const asTeacher = user.role === UserRole.TEACHER;
+
+    const profile = await prisma.$transaction(async (tx) => {
+      if (asTeacher) {
+        const existing = await tx.teacher.findUnique({ where: { userId: user.id } });
+        if (existing) throw new Error("ALREADY_JOINED");
+        return tx.teacher.create({
+          data: { userId: user.id, institutionId: institution.id },
+          select: { id: true, institutionId: true },
+        });
+      }
+
+      const existing = await tx.student.findUnique({ where: { userId: user.id } });
+      if (existing) throw new Error("ALREADY_JOINED");
+
+      if (user.role === UserRole.USER) {
+        await tx.user.update({
+          where: { id: user.id },
+          data: { role: UserRole.STUDENT },
+        });
+      }
+
+      return tx.student.create({
+        data: { userId: user.id, institutionId: institution.id },
+        select: { id: true, institutionId: true },
+      });
+    });
+
+    invalidateAuthCacheForUser(user.id);
+    await cacheService.delByPrefix(`institutions:stats:${institution.id}`);
+
+    sendSuccessResponse(res, 201, `Welcome to ${institution.name}!`, {
+      institution,
+      profile,
+      as: asTeacher ? "TEACHER" : "STUDENT",
+    });
+  } catch (error) {
+    if (
+      (error instanceof Error && error.message === "ALREADY_JOINED") ||
+      isUniqueViolation(error)
+    ) {
+      sendErrorResponse(res, 409, "You have already joined an institution");
+      return;
+    }
+    console.error("Join institution error:", error);
+    sendErrorResponse(res, 500, "Failed to join institution");
+  }
 };
 
 /**
@@ -78,7 +173,7 @@ export const createInstitution = async (
       },
       include: {
         admin: {
-          select: { id: true, name: true, email: true },
+          select: { id: true, name: true },
         },
       },
     });
@@ -128,7 +223,7 @@ export const getAllInstitutions = async (
         take: limit,
         include: {
           admin: {
-            select: { id: true, name: true, email: true },
+            select: { id: true, name: true },
           },
           _count: {
             select: {
@@ -181,7 +276,7 @@ export const getInstitutionById = async (
       where: { id },
       include: {
         admin: {
-          select: { id: true, name: true, email: true },
+          select: { id: true, name: true },
         },
         _count: {
           select: {
@@ -263,7 +358,7 @@ export const updateInstitution = async (
       },
       include: {
         admin: {
-          select: { id: true, name: true, email: true },
+          select: { id: true, name: true },
         },
         _count: {
           select: {

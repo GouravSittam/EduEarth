@@ -18,10 +18,30 @@ const sendErrorResponse = (
   res: Response,
   statusCode: number,
   message: string,
-  error?: any,
 ) => {
-  return sendResponse({ res, success: false, message, error, statusCode });
+  return sendResponse({
+    res,
+    success: false,
+    message,
+    error: { message },
+    statusCode,
+  });
 };
+
+/** Only http(s) links are allowed — `javascript:` URLs would be an XSS vector. */
+const isHttpUrl = (value: unknown) => {
+  if (typeof value !== "string") return false;
+  try {
+    const { protocol } = new URL(value);
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
+const isValidDate = (value: unknown) =>
+  (typeof value === "string" || typeof value === "number") &&
+  !Number.isNaN(new Date(value).getTime());
 
 /**
  * Create a new article
@@ -60,11 +80,13 @@ export const createArticle = async (
       return;
     }
 
-    // Validate URL format
-    try {
-      new URL(url);
-    } catch {
+    if (!isHttpUrl(url)) {
       sendErrorResponse(res, 400, "Invalid URL format");
+      return;
+    }
+
+    if (!isValidDate(publishDate) || !isValidDate(extractedDate)) {
+      sendErrorResponse(res, 400, "publishDate and extractedDate must be valid dates");
       return;
     }
 
@@ -281,10 +303,16 @@ export const updateArticle = async (
     }
 
     // If URL is being updated, check for duplicates
+    if (
+      (publishDate !== undefined && !isValidDate(publishDate)) ||
+      (extractedDate !== undefined && !isValidDate(extractedDate))
+    ) {
+      sendErrorResponse(res, 400, "publishDate and extractedDate must be valid dates");
+      return;
+    }
+
     if (url && url !== existingArticle.url) {
-      try {
-        new URL(url);
-      } catch {
+      if (!isHttpUrl(url)) {
         sendErrorResponse(res, 400, "Invalid URL format");
         return;
       }
@@ -385,9 +413,12 @@ export const getArticlesBySection = async (
 ): Promise<void> => {
   try {
     const { section } = req.params;
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const skip = (page - 1) * limit;
+    const { page, limit, skip } = parseBoundedPagination(
+      req.query.page,
+      req.query.limit,
+      10,
+      50,
+    );
 
     if (!section) {
       sendErrorResponse(res, 400, "Section is required");
@@ -444,9 +475,12 @@ export const getArticlesBySource = async (
 ): Promise<void> => {
   try {
     const { source } = req.params;
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const skip = (page - 1) * limit;
+    const { page, limit, skip } = parseBoundedPagination(
+      req.query.page,
+      req.query.limit,
+      10,
+      50,
+    );
 
     if (!source) {
       sendErrorResponse(res, 400, "Source is required");

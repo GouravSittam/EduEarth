@@ -9,3 +9,6 @@ airflow-webserver.pid
 webserver_config.py
 airflow.cfg
 airflow.db
+
+# Astro standalone runtime state (logs, pid, generated constraints)
+.astro/standalone/

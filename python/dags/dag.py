@@ -4,11 +4,24 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.decorators import task
 from airflow.models import Variable
 from datetime import datetime, timedelta
+import html
 import logging
 import json
+import re
 
 API_CONN_ID = 'guardian_default'
 POSTGRES_CONN_ID = 'postgres_default'
+
+_TAG_RE = re.compile(r"<[^>]+>")
+
+
+def _strip_html(value):
+    """Guardian trailText contains inline HTML; store plain text only."""
+    if not value:
+        return None
+    text = html.unescape(_TAG_RE.sub("", value)).strip()
+    return text or None
+
 
 default_args = {
     'owner': 'airflow',
@@ -88,7 +101,7 @@ with DAG(
                 'section': 'environment',
                 'from-date': yesterday,
                 'to-date': today,
-                'show-fields': 'headline,bodyText',
+                'show-fields': 'headline,bodyText,thumbnail,trailText',
                 'api-key': api_key,
                 'page-size': '20'
             }
@@ -153,19 +166,28 @@ with DAG(
                     logger.warning(f"Could not parse date: {pub_date_str}")
                     pub_date = None
                 
+                url = (article.get('webUrl') or '')[:2000]
+                if not url:
+                    # url is the unique key; an empty one would collide.
+                    logger.warning("Skipping article without a URL")
+                    continue
+
                 # clean and truncate text fields- no errors
-                headline = fields.get('headline', 'No headline available')[:1000]  # Truncate if too long
-                body = fields.get('bodyText', 'No content available')
-                
+                headline = (fields.get('headline') or 'No headline available')[:1000]  # Truncate if too long
+                body = fields.get('bodyText') or 'No content available'
+
                 # article dictionary
                 article_dict = {
-                    'publishDate': pub_date,
+                    # "publishDate" is NOT NULL; fall back to the extraction time.
+                    'publishDate': pub_date or extraction_date,
                     'extractedDate': extraction_date,
-                    'url': article.get('webUrl', '')[:2000],
+                    'url': url,
                     'headline': headline,
                     'body': body,
-                    'section': article.get('sectionName', 'environment')[:100],
-                    'source': 'guardian_api'
+                    'section': (article.get('sectionName') or 'environment')[:100],
+                    'source': 'guardian_api',
+                    'image_url': (fields.get('thumbnail') or None),
+                    'ai_summary': _strip_html(fields.get('trailText')),
                 }
                 
                 transformed_articles.append(article_dict)
@@ -195,7 +217,7 @@ with DAG(
             CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
             
             -- Setup defaults and constraints
-            DO $
+            DO $$
             BEGIN
                 -- Try to set default UUID generation for id column
                 ALTER TABLE articles ALTER COLUMN id SET DEFAULT uuid_generate_v4();
@@ -209,19 +231,19 @@ with DAG(
                             RAISE NOTICE 'Could not set UUID default, will generate manually';
                     END;
             END
-            $;
+            $$;
             
             -- Fix updatedAt column to have proper default and trigger
             ALTER TABLE articles ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
             
             -- Create or replace the trigger function for updatedAt
             CREATE OR REPLACE FUNCTION update_updated_at_column()
-            RETURNS TRIGGER AS $
+            RETURNS TRIGGER AS $$
             BEGIN
                 NEW."updatedAt" = CURRENT_TIMESTAMP;
                 RETURN NEW;
             END;
-            $ language 'plpgsql';
+            $$ language 'plpgsql';
             
             -- Drop trigger if it exists and recreate
             DROP TRIGGER IF EXISTS update_articles_updated_at ON articles;
@@ -240,18 +262,22 @@ with DAG(
             # insert SQL
             insert_sql = """
             INSERT INTO articles (
-                "publishDate", "extractedDate", url, headline, 
-                body, section, source, "updatedAt"
+                "publishDate", "extractedDate", url, headline,
+                body, section, source, image_url, ai_summary, "updatedAt"
             ) VALUES (
-                %(publishDate)s, %(extractedDate)s, %(url)s, 
-                %(headline)s, %(body)s, %(section)s, %(source)s, CURRENT_TIMESTAMP
+                %(publishDate)s, %(extractedDate)s, %(url)s,
+                %(headline)s, %(body)s, %(section)s, %(source)s,
+                %(image_url)s, %(ai_summary)s, CURRENT_TIMESTAMP
             )
-            ON CONFLICT (url) 
-            DO UPDATE SET 
+            ON CONFLICT (url)
+            DO UPDATE SET
                 "extractedDate" = EXCLUDED."extractedDate",
                 headline = EXCLUDED.headline,
                 body = EXCLUDED.body,
                 section = EXCLUDED.section,
+                image_url = COALESCE(EXCLUDED.image_url, articles.image_url),
+                -- never overwrite a summary that was written separately
+                ai_summary = COALESCE(articles.ai_summary, EXCLUDED.ai_summary),
                 "updatedAt" = CURRENT_TIMESTAMP
             RETURNING id, url;
             """

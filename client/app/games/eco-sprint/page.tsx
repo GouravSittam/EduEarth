@@ -45,6 +45,8 @@ export default function GamePage() {
     finalScores: { name: string; score: number }[];
     winner: string;
     isWinner: boolean;
+    isDraw?: boolean;
+    opponentLeft?: boolean;
   } | null>(null);
 
   const [timeLeft, setTimeLeft] = useState(0);
@@ -126,7 +128,12 @@ export default function GamePage() {
     });
 
     socket.on("opponent-disconnected", () => {
-      setFinal({ finalScores: [], winner: "Opponent left", isWinner: true });
+      setFinal({
+        finalScores: [],
+        winner: "Opponent left",
+        isWinner: true,
+        opponentLeft: true,
+      });
       setStage("ended");
     });
 
@@ -164,11 +171,10 @@ export default function GamePage() {
     if (!socketRef.current || !gameId || !currentQ) return;
     if (answerIdx !== null) return;
     setAnswerIdx(idx);
-    const timeTaken = Date.now() - questionStartRef.current;
+    // Answer speed is timed by the server, so nothing else needs sending.
     socketRef.current.emit("answer-question", {
       gameId,
       answer: idx,
-      timeTaken,
     });
   }
 
@@ -201,6 +207,7 @@ export default function GamePage() {
             <input
               className="w-full rounded-xl border border-emerald-300 px-3 py-2 mb-4 bg-white/80"
               placeholder={defaultName}
+              maxLength={24}
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
             />
@@ -305,7 +312,15 @@ export default function GamePage() {
 
         {stage === "ended" && final && (
           <div className="bg-white/90 rounded-2xl p-6 shadow text-center">
-            <div className="text-2xl mb-2">🏆 {final.winner}</div>
+            <div className="text-2xl mb-2">
+              {final.opponentLeft
+                ? "👋 Your opponent left — you win!"
+                : final.isDraw
+                  ? "🤝 It's a draw!"
+                  : final.isWinner
+                    ? `🏆 You win, ${final.winner}!`
+                    : `🏆 ${final.winner} wins!`}
+            </div>
             {final.finalScores?.length > 0 && (
               <div className="text-sm mb-4">
                 {final.finalScores.map((s, i) => (

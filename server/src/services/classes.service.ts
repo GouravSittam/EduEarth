@@ -1,12 +1,14 @@
+import { TeacherRole } from "@prisma/client";
+
 export const classesService = {
-  normalizeRole(role: unknown) {
+  normalizeRole(role: unknown): TeacherRole {
     if (typeof role !== "string") {
-      return "PRIMARY";
+      return TeacherRole.PRIMARY;
     }
     const upper = role.toUpperCase();
-    if (upper === "PRIMARY" || upper === "ASSISTANT" || upper === "SUBSTITUTE") {
-      return upper;
+    if (upper in TeacherRole) {
+      return TeacherRole[upper as keyof typeof TeacherRole];
     }
-    return "PRIMARY";
+    return TeacherRole.PRIMARY;
   },
 };

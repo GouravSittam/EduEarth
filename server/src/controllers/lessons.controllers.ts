@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { sendResponse } from "../utils/ResponseHelpers.js";
 import { prisma } from "../prisma/client.js";
 import { parseBoundedPagination } from "../utils/pagination.js";
+import { recordActivity } from "../services/progress.service.js";
+import { isUniqueViolation } from "../utils/prismaErrors.js";
 
 // Helper functions for consistent responses
 const sendSuccessResponse = (
@@ -17,9 +19,14 @@ const sendErrorResponse = (
   res: Response,
   statusCode: number,
   message: string,
-  error?: any
 ) => {
-  return sendResponse({ res, success: false, message, error, statusCode });
+  return sendResponse({
+    res,
+    success: false,
+    message,
+    error: { message },
+    statusCode,
+  });
 };
 
 // ==================== LESSON MODULES ====================
@@ -342,9 +349,7 @@ export const getAllLessons = async (
   res: Response
 ): Promise<void> => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const skip = (page - 1) * limit;
+    const { page, limit, skip } = parseBoundedPagination(req.query.page, req.query.limit, 10, 50);
     const moduleId = req.query.moduleId as string;
     const search = req.query.search as string;
 
@@ -570,34 +575,38 @@ export const completeLesson = async (
       return;
     }
 
+    const parsedTimeSpent = Number(timeSpent);
+    const safeTimeSpent =
+      Number.isInteger(parsedTimeSpent) && parsedTimeSpent >= 0 && parsedTimeSpent <= 86_400
+        ? parsedTimeSpent
+        : null;
+
     const result = await prisma.$transaction(async (tx) => {
       const lesson = await tx.lesson.findUnique({ where: { id } });
-      if (!lesson) throw new Error("LESSON_NOT_FOUND");
+      if (!lesson || !lesson.isActive) throw new Error("LESSON_NOT_FOUND");
       const student = await tx.student.findUnique({ where: { userId: studentId } });
       if (!student) throw new Error("STUDENT_NOT_FOUND");
-      const existingCompletion = await (tx as any).lessonCompletion.findUnique({
+      const existingCompletion = await tx.lessonCompletion.findUnique({
         where: { studentId_lessonId: { studentId: student.id, lessonId: id } },
       });
       if (existingCompletion) throw new Error("LESSON_ALREADY_COMPLETED");
 
-      const completion = await (tx as any).lessonCompletion.create({
-        data: { studentId: student.id, lessonId: id, timeSpent },
+      const completion = await tx.lessonCompletion.create({
+        data: { studentId: student.id, lessonId: id, timeSpent: safeTimeSpent },
         include: {
           lesson: { select: { id: true, title: true, ecoPoints: true } },
         },
       });
 
-      await tx.student.update({
-        where: { id: student.id },
-        data: { ecoPoints: { increment: lesson.ecoPoints } },
-      });
+      const progress = await recordActivity(tx, student.id, lesson.ecoPoints);
 
-      return { completion, ecoPoints: lesson.ecoPoints };
+      return { completion, ecoPoints: lesson.ecoPoints, progress };
     });
 
     sendSuccessResponse(res, 201, "Lesson completed successfully", {
       completion: result.completion,
       ecoPointsAwarded: result.ecoPoints,
+      progress: result.progress,
     });
   } catch (error) {
     if (error instanceof Error && error.message === "LESSON_NOT_FOUND") {
@@ -605,10 +614,14 @@ export const completeLesson = async (
       return;
     }
     if (error instanceof Error && error.message === "STUDENT_NOT_FOUND") {
-      sendErrorResponse(res, 404, "Student not found");
+      sendErrorResponse(res, 403, "Join your school first to track lessons and earn eco-points");
       return;
     }
-    if (error instanceof Error && error.message === "LESSON_ALREADY_COMPLETED") {
+    // A concurrent duplicate submit trips the unique constraint instead.
+    if (
+      (error instanceof Error && error.message === "LESSON_ALREADY_COMPLETED") ||
+      isUniqueViolation(error)
+    ) {
       sendErrorResponse(res, 409, "Lesson already completed");
       return;
     }
@@ -651,7 +664,7 @@ export const getLessonCompletions = async (
       return;
     }
 
-    const completions = await (prisma as any).lessonCompletion.findMany({
+    const completions = await prisma.lessonCompletion.findMany({
       where: {
         lessonId: id,
         studentId: student.id,

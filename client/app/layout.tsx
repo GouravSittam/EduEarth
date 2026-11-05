@@ -54,6 +54,8 @@ export async function generateMetadata(): Promise<Metadata> {
       shortcut: [{ url: "/earth.png" }],
     },
     manifest: "/site.webmanifest",
+    // Social preview images come from app/opengraph-image.tsx and
+    // app/twitter-image.tsx (generated at build time).
     openGraph: {
       type: "website",
       locale: "en_US",
@@ -62,32 +64,18 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         "Join the environmental revolution through interactive games! Learn about sustainability, climate action, and eco-friendly practices.",
       siteName: "EduEarth",
-      images: [
-        {
-          url: "/eduearth-og-image.png",
-          width: 1200,
-          height: 630,
-          alt: "EduEarth - Environmental Education Games",
-        },
-      ],
     },
     twitter: {
       card: "summary_large_image",
       title: "EduEarth - Gamified Environmental Education",
       description:
         "Learn about sustainability through interactive games and join the environmental revolution!",
-      images: ["/eduearth-twitter-image.png"],
       creator: "@eduearth",
-    },
-    verification: {
-      google: "your-google-verification-code",
-      yandex: "your-yandex-verification-code",
     },
     category: "education",
     classification: "Educational Games",
-    alternates: {
-      canonical: "https://edu-earth.vercel.app",
-    },
+    // No site-wide canonical: a root-level canonical would tell search
+    // engines every page is a duplicate of the home page.
   };
 }
 

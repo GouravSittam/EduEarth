@@ -238,16 +238,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setIsLoading(true);
-      void syncFromSession(nextSession).catch((error) => {
-        console.error("Failed to sync authenticated user", error);
+    } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      // initializeAuth() already handles the initial session.
+      if (event === "INITIAL_SESSION") {
+        return;
+      }
 
-        if (isMounted) {
-          setUser(null);
-          setIsLoading(false);
-        }
-      });
+      // Hourly token refreshes don't change who is signed in: just swap the
+      // session instead of flashing every page back into a loading state.
+      if (event === "TOKEN_REFRESHED") {
+        setSession(nextSession);
+        return;
+      }
+
+      setIsLoading(true);
+      // Defer: calling Supabase APIs (getSession inside our API client) from
+      // within this callback can deadlock on the auth lock.
+      setTimeout(() => {
+        void syncFromSession(nextSession).catch((error) => {
+          console.error("Failed to sync authenticated user", error);
+
+          if (isMounted) {
+            setUser(null);
+            setIsLoading(false);
+          }
+        });
+      }, 0);
     });
 
     return () => {
@@ -256,21 +272,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  /**
+   * Re-fetch the server profile (e.g. after earning points or joining a
+   * school). Runs in the background — it doesn't toggle `isLoading`, so pages
+   * don't flash back into their loading state.
+   */
   const refreshUser = useCallback(async () => {
     if (!session) {
       setUser(null);
       return null;
     }
 
-    setIsLoading(true);
-
-    try {
-      const serverUser = await loadServerUser();
-      setUser(serverUser);
-      return serverUser;
-    } finally {
-      setIsLoading(false);
-    }
+    const serverUser = await loadServerUser();
+    setUser(serverUser);
+    return serverUser;
   }, [session]);
 
   const signIn = useCallback(async ({ email, password }: SignInInput) => {

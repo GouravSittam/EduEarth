@@ -3,6 +3,8 @@ import type GameServer from "../game/gameServer.js";
 import logger from "../observability/logger.js";
 import { prisma } from "../prisma/client.js";
 
+const OUTBOX_MISSING_TABLE_BACKOFF_MS = 5 * 60 * 1000;
+
 type OutboxRow = {
   id: bigint;
   channel: string;
@@ -21,6 +23,8 @@ export class OutboxPublisherService {
   private readonly pollIntervalMs: number;
   private timer: NodeJS.Timeout | null = null;
   private isFlushing = false;
+  /** Set while the outbox table is missing, so we don't log every poll. */
+  private pausedUntil = 0;
 
   constructor(gameServer: GameServer, options: OutboxPublisherOptions = {}) {
     this.gameServer = gameServer;
@@ -59,7 +63,7 @@ export class OutboxPublisherService {
   }
 
   public async flushOnce(): Promise<number> {
-    if (this.isFlushing) {
+    if (this.isFlushing || Date.now() < this.pausedUntil) {
       return 0;
     }
 
@@ -124,6 +128,19 @@ export class OutboxPublisherService {
 
       return sentCount;
     } catch (error) {
+      // The outbox table is created by the Airflow ingestion DAG. Until it
+      // exists, back off quietly instead of erroring every few seconds.
+      const message = error instanceof Error ? error.message : String(error);
+      if (/websocket_outbox/.test(message) && /does not exist/.test(message)) {
+        if (this.pausedUntil === 0) {
+          logger.warn(
+            "websocket_outbox table not found; outbox publishing paused (it is created by the ingestion DAG)",
+          );
+        }
+        this.pausedUntil = Date.now() + OUTBOX_MISSING_TABLE_BACKOFF_MS;
+        return 0;
+      }
+
       logger.error({ err: error }, "Outbox publisher cycle failed");
       return 0;
     } finally {

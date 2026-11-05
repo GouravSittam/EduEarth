@@ -71,6 +71,40 @@ export default function ArticleDetailPage() {
     });
   };
 
+  // Scraped links are untrusted: only allow http(s) so a `javascript:` URL
+  // can never end up in an href.
+  const safeSourceUrl = (() => {
+    try {
+      const parsed = new URL(article?.url ?? "");
+      return parsed.protocol === "http:" || parsed.protocol === "https:"
+        ? parsed.toString()
+        : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const shareArticle = async () => {
+    if (!article) return;
+    const shareUrl = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: article.headline,
+          text: article.ai_summary || article.headline,
+          url: shareUrl,
+        });
+        return;
+      }
+      await navigator.clipboard.writeText(shareUrl);
+      alert("Article link copied to clipboard!");
+    } catch (shareError) {
+      // The user closing the share sheet is not an error.
+      if (shareError instanceof DOMException && shareError.name === "AbortError") return;
+      console.warn("Unable to share article", shareError);
+    }
+  };
+
   const formatDateShort = (date: Date | string) => {
     return new Date(date).toLocaleDateString("en-US", {
       year: "numeric",
@@ -261,8 +295,9 @@ export default function ArticleDetailPage() {
 
                   {/* Action Buttons */}
                   <div className="flex gap-3">
+                    {safeSourceUrl && (
                     <a
-                      href={article.url}
+                      href={safeSourceUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center px-4 py-2 bg-gradient-to-b from-orange-600 to-yellow-300 hover:from-yellow-300 hover:to-orange-600 text-black font-bold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
@@ -282,20 +317,10 @@ export default function ArticleDetailPage() {
                       </svg>
                       Original Source
                     </a>
+                    )}
 
                     <button
-                      onClick={() => {
-                        if (navigator.share) {
-                          navigator.share({
-                            title: article.headline,
-                            text: article.ai_summary || article.headline,
-                            url: window.location.href,
-                          });
-                        } else {
-                          navigator.clipboard.writeText(window.location.href);
-                          alert("Article link copied to clipboard!");
-                        }
-                      }}
+                      onClick={() => void shareArticle()}
                       className="inline-flex items-center px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-all duration-300 border border-slate-600"
                     >
                       <svg

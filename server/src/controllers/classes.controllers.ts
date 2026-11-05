@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import type { User } from "@prisma/client";
 import { sendResponse } from "../utils/ResponseHelpers.js";
 import { prisma } from "../prisma/client.js";
 import { parseBoundedPagination } from "../utils/pagination.js";
@@ -19,9 +20,67 @@ const sendErrorResponse = (
   res: Response,
   statusCode: number,
   message: string,
-  error?: any
 ) => {
-  return sendResponse({ res, success: false, message, error, statusCode });
+  return sendResponse({
+    res,
+    success: false,
+    message,
+    error: { message },
+    statusCode,
+  });
+};
+
+const STUDENT_USER_SELECT = {
+  select: { id: true, name: true, email: true, avatar: true },
+} as const;
+
+/**
+ * Teachers may only manage classes of the institution they belong to.
+ * Admins may manage everything.
+ */
+const getTeacherInstitutionId = async (user: User | undefined) => {
+  if (!user) return null;
+  const teacher = await prisma.teacher.findUnique({
+    where: { userId: user.id },
+    select: { institutionId: true },
+  });
+  return teacher?.institutionId ?? null;
+};
+
+const canManageInstitution = async (
+  user: User | undefined,
+  institutionId: string,
+) => {
+  if (!user) return false;
+  if (user.isAdmin) return true;
+  return (await getTeacherInstitutionId(user)) === institutionId;
+};
+
+/**
+ * Load a class and verify the caller may manage it.
+ * Sends the error response itself and returns null when access is denied.
+ */
+const loadManageableClass = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  if (!id) {
+    sendErrorResponse(res, 400, "Class ID is required");
+    return null;
+  }
+
+  const classData = await prisma.class.findUnique({ where: { id } });
+
+  if (!classData) {
+    sendErrorResponse(res, 404, "Class not found");
+    return null;
+  }
+
+  if (!(await canManageInstitution(req.user, classData.institutionId))) {
+    sendErrorResponse(res, 403, "You can only manage classes in your own institution");
+    return null;
+  }
+
+  return classData;
 };
 
 /**
@@ -34,7 +93,7 @@ export const createClass = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { name, institutionId, subject, description } = req.body;
+    const { name, institutionId, subject, description } = req.body ?? {};
 
     // Validate required fields
     if (!name || !institutionId || !subject) {
@@ -44,7 +103,7 @@ export const createClass = async (
 
     // Check if institution exists
     const institution = await prisma.institution.findUnique({
-      where: { id: institutionId },
+      where: { id: String(institutionId) },
     });
 
     if (!institution) {
@@ -52,14 +111,28 @@ export const createClass = async (
       return;
     }
 
-    // Create class
+    if (!(await canManageInstitution(req.user, institution.id))) {
+      sendErrorResponse(res, 403, "You can only create classes in your own institution");
+      return;
+    }
+
+    const creatorTeacher = req.user
+      ? await prisma.teacher.findUnique({ where: { userId: req.user.id } })
+      : null;
+
+    // Create class, and make the creating teacher its primary teacher.
     const newClass = await prisma.class.create({
       data: {
         name: String(name),
-        institutionId: String(institutionId),
+        institutionId: institution.id,
         subject: String(subject),
         description: description ? String(description) : null,
-      } as any,
+        ...(creatorTeacher && {
+          teachers: {
+            create: { teacherId: creatorTeacher.id, role: "PRIMARY" },
+          },
+        }),
+      },
       include: {
         institution: {
           select: { id: true, name: true, type: true },
@@ -69,6 +142,7 @@ export const createClass = async (
 
     sendSuccessResponse(res, 201, "Class created successfully", newClass);
     await cacheService.delByPrefix("classes:stats:");
+    await cacheService.delByPrefix(`institutions:stats:${institution.id}`);
   } catch (error) {
     console.error("Create class error:", error);
     sendErrorResponse(res, 500, "Failed to create class");
@@ -185,30 +259,19 @@ export const updateClass = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { id } = req.params;
-    const { name, subject, description } = req.body;
+    const existingClass = await loadManageableClass(req, res);
+    if (!existingClass) return;
 
-    if (!id) {
-      sendErrorResponse(res, 400, "Class ID is required");
-      return;
-    }
-
-    // Check if class exists
-    const existingClass = await prisma.class.findUnique({
-      where: { id },
-    });
-
-    if (!existingClass) {
-      sendErrorResponse(res, 404, "Class not found");
-      return;
-    }
+    const { name, subject, description } = req.body ?? {};
 
     const updatedClass = await prisma.class.update({
-      where: { id },
+      where: { id: existingClass.id },
       data: {
-        ...(name && { name }),
-        ...(subject && { subject }),
-        ...(description !== undefined && { description }),
+        ...(name && { name: String(name) }),
+        ...(subject && { subject: String(subject) }),
+        ...(description !== undefined && {
+          description: description === null ? null : String(description),
+        }),
       },
       include: {
         institution: {
@@ -218,7 +281,7 @@ export const updateClass = async (
     });
 
     sendSuccessResponse(res, 200, "Class updated successfully", updatedClass);
-    await cacheService.delByPrefix("classes:stats:");
+    await cacheService.delByPrefix(`classes:stats:${existingClass.id}`);
   } catch (error) {
     console.error("Update class error:", error);
     sendErrorResponse(res, 500, "Failed to update class");
@@ -235,30 +298,18 @@ export const deleteClass = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { id } = req.params;
+    const existingClass = await loadManageableClass(req, res);
+    if (!existingClass) return;
 
-    if (!id) {
-      sendErrorResponse(res, 400, "Class ID is required");
-      return;
-    }
-
-    // Check if class exists
-    const existingClass = await prisma.class.findUnique({
-      where: { id },
-    });
-
-    if (!existingClass) {
-      sendErrorResponse(res, 404, "Class not found");
-      return;
-    }
-
-    // Delete the class
-    await prisma.class.delete({
-      where: { id },
-    });
+    // Enrollments and teacher assignments cascade; leaderboards do not.
+    await prisma.$transaction([
+      prisma.leaderboard.deleteMany({ where: { classId: existingClass.id } }),
+      prisma.class.delete({ where: { id: existingClass.id } }),
+    ]);
 
     sendSuccessResponse(res, 200, "Class deleted successfully");
-    await cacheService.delByPrefix("classes:stats:");
+    await cacheService.delByPrefix(`classes:stats:${existingClass.id}`);
+    await cacheService.delByPrefix(`institutions:stats:${existingClass.institutionId}`);
   } catch (error) {
     console.error("Delete class error:", error);
     sendErrorResponse(res, 500, "Failed to delete class");
@@ -275,61 +326,52 @@ export const addStudentToClass = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { id } = req.params;
-    const { studentId } = req.body;
+    const classData = await loadManageableClass(req, res);
+    if (!classData) return;
 
-    if (!id || !studentId) {
-      sendErrorResponse(res, 400, "Class ID and student ID are required");
+    const studentId = req.body?.studentId;
+
+    if (!studentId || typeof studentId !== "string") {
+      sendErrorResponse(res, 400, "Student ID is required");
       return;
     }
 
-    const enrollment = await prisma.$transaction(async (tx) => {
-      const [classData, student] = await Promise.all([
-        tx.class.findUnique({ where: { id } }),
-        tx.student.findUnique({ where: { id: studentId } }),
-      ]);
-      if (!classData) {
-        throw new Error("CLASS_NOT_FOUND");
-      }
-      if (!student) {
-        throw new Error("STUDENT_NOT_FOUND");
-      }
-      const existingEnrollment = await (tx as any).studentClass.findFirst({
-        where: { studentId, classId: id, isActive: true },
-      });
-      if (existingEnrollment) {
-        throw new Error("STUDENT_ALREADY_ENROLLED");
-      }
-      return (tx as any).studentClass.create({
-        data: { studentId, classId: id, isActive: true },
-        include: {
-          student: {
-            include: {
-              user: { select: { id: true, name: true, email: true, avatar: true } },
-            },
-          },
-          class: {
-            select: { id: true, name: true, subject: true },
-          },
-        },
-      });
-    });
+    const student = await prisma.student.findUnique({ where: { id: studentId } });
 
-    sendSuccessResponse(res, 201, "Student added to class successfully", enrollment);
-    await cacheService.delByPrefix(`classes:stats:${id}`);
-  } catch (error) {
-    if (error instanceof Error && error.message === "CLASS_NOT_FOUND") {
-      sendErrorResponse(res, 404, "Class not found");
-      return;
-    }
-    if (error instanceof Error && error.message === "STUDENT_NOT_FOUND") {
+    if (!student) {
       sendErrorResponse(res, 404, "Student not found");
       return;
     }
-    if (error instanceof Error && error.message === "STUDENT_ALREADY_ENROLLED") {
+
+    if (student.institutionId !== classData.institutionId) {
+      sendErrorResponse(res, 400, "Student belongs to a different institution");
+      return;
+    }
+
+    const existingEnrollment = await prisma.studentClass.findUnique({
+      where: { studentId_classId: { studentId, classId: classData.id } },
+    });
+
+    if (existingEnrollment?.isActive) {
       sendErrorResponse(res, 409, "Student is already enrolled in this class");
       return;
     }
+
+    // Re-activate a previous (soft-deleted) enrollment instead of violating
+    // the unique (studentId, classId) constraint.
+    const enrollment = await prisma.studentClass.upsert({
+      where: { studentId_classId: { studentId, classId: classData.id } },
+      update: { isActive: true, enrolledAt: new Date() },
+      create: { studentId, classId: classData.id, isActive: true },
+      include: {
+        student: { include: { user: STUDENT_USER_SELECT } },
+        class: { select: { id: true, name: true, subject: true } },
+      },
+    });
+
+    sendSuccessResponse(res, 201, "Student added to class successfully", enrollment);
+    await cacheService.delByPrefix(`classes:stats:${classData.id}`);
+  } catch (error) {
     console.error("Add student to class error:", error);
     sendErrorResponse(res, 500, "Failed to add student to class");
   }
@@ -345,35 +387,28 @@ export const removeStudentFromClass = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { id, studentId } = req.params;
+    const classData = await loadManageableClass(req, res);
+    if (!classData) return;
 
-    if (!id || !studentId) {
-      sendErrorResponse(res, 400, "Class ID and student ID are required");
+    const { studentId } = req.params;
+
+    if (!studentId) {
+      sendErrorResponse(res, 400, "Student ID is required");
       return;
     }
 
-    // Check if enrollment exists
-    const enrollment = await (prisma as any).studentClass.findFirst({
-      where: {
-        studentId,
-        classId: id,
-        isActive: true,
-      },
+    const result = await prisma.studentClass.updateMany({
+      where: { studentId, classId: classData.id, isActive: true },
+      data: { isActive: false },
     });
 
-    if (!enrollment) {
+    if (result.count === 0) {
       sendErrorResponse(res, 404, "Student is not enrolled in this class");
       return;
     }
 
-    // Soft delete - set isActive to false instead of hard delete
-    await (prisma as any).studentClass.update({
-      where: { id: enrollment.id },
-      data: { isActive: false },
-    });
-
     sendSuccessResponse(res, 200, "Student removed from class successfully");
-    await cacheService.delByPrefix(`classes:stats:${id}`);
+    await cacheService.delByPrefix(`classes:stats:${classData.id}`);
   } catch (error) {
     console.error("Remove student from class error:", error);
     sendErrorResponse(res, 500, "Failed to remove student from class");
@@ -383,6 +418,7 @@ export const removeStudentFromClass = async (
 /**
  * Get class students
  * GET /classes/:id/students
+ * Educators only (exposes student emails)
  */
 export const getClassStudents = async (
   req: Request,
@@ -408,31 +444,19 @@ export const getClassStudents = async (
       return;
     }
 
+    const where = { classId: id, isActive: true };
+
     const [students, totalCount] = await Promise.all([
-      (prisma as any).studentClass.findMany({
-        where: { 
-          classId: id,
-          isActive: true,
-        },
+      prisma.studentClass.findMany({
+        where,
         skip,
         take: limit,
         include: {
-          student: {
-            include: {
-              user: {
-                select: { id: true, name: true, email: true, avatar: true },
-              },
-            },
-          },
+          student: { include: { user: STUDENT_USER_SELECT } },
         },
         orderBy: { enrolledAt: "desc" },
       }),
-      (prisma as any).studentClass.count({ 
-        where: { 
-          classId: id,
-          isActive: true,
-        } 
-      }),
+      prisma.studentClass.count({ where }),
     ]);
 
     const totalPages = Math.ceil(totalCount / limit);
@@ -464,16 +488,16 @@ export const getClassStatistics = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
+
+    if (!id) {
+      sendErrorResponse(res, 400, "Class ID is required");
+      return;
+    }
+
     const cacheKey = `classes:stats:${id}`;
     const cached = await cacheService.get(cacheKey);
     if (cached) {
       sendSuccessResponse(res, 200, "Class statistics retrieved successfully", cached);
-      return;
-    }
-
-
-    if (!id) {
-      sendErrorResponse(res, 400, "Class ID is required");
       return;
     }
 
@@ -488,62 +512,45 @@ export const getClassStatistics = async (
       return;
     }
 
-    // Get comprehensive statistics
-    const [
-      totalStudents,
-      totalTeachers,
-      totalEcoPoints,
-      recentEnrollments,
-    ] = await Promise.all([
-      // Total active students
-      (prisma as any).studentClass.count({
-        where: { classId: id, isActive: true },
-      }),
+    const activeInClass = { classes: { some: { classId: id, isActive: true } } };
 
-      // Total active teachers
-      (prisma as any).teacherClass.count({
-        where: { classId: id, isActive: true },
-      }),
-
-      // Total eco points from students in this class
-      (prisma as any).studentClass.aggregate({
-        where: { classId: id, isActive: true },
-        _sum: {
-          student: {
-            ecoPoints: true,
+    const [totalStudents, totalTeachers, ecoPointsAggregate, recentEnrollments] =
+      await Promise.all([
+        prisma.studentClass.count({ where: { classId: id, isActive: true } }),
+        prisma.teacherClass.count({ where: { classId: id, isActive: true } }),
+        // Prisma cannot sum across a relation, so aggregate students directly.
+        prisma.student.aggregate({
+          where: activeInClass,
+          _sum: { ecoPoints: true },
+          _avg: { ecoPoints: true },
+        }),
+        prisma.studentClass.findMany({
+          where: {
+            classId: id,
+            isActive: true,
+            enrolledAt: {
+              gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+            },
           },
-        },
-      }),
-
-      // Recent enrollments (last 7 days)
-      (prisma as any).studentClass.findMany({
-        where: {
-          classId: id,
-          isActive: true,
-          enrolledAt: {
-            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-          },
-        },
-        include: {
-          student: {
-            include: {
-              user: {
-                select: { name: true, avatar: true },
+          include: {
+            student: {
+              include: {
+                user: { select: { name: true, avatar: true } },
               },
             },
           },
-        },
-        orderBy: { enrolledAt: "desc" },
-        take: 5,
-      }),
-    ]);
+          orderBy: { enrolledAt: "desc" },
+          take: 5,
+        }),
+      ]);
 
     const statistics = {
       class: classData,
       overview: {
         totalStudents,
         totalTeachers,
-        totalEcoPoints: totalEcoPoints._sum?.student?.ecoPoints || 0,
+        totalEcoPoints: ecoPointsAggregate._sum.ecoPoints ?? 0,
+        avgEcoPoints: Math.round(ecoPointsAggregate._avg.ecoPoints ?? 0),
       },
       recentActivity: {
         recentEnrollments,
@@ -568,60 +575,51 @@ export const addTeacherToClass = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { id } = req.params;
-    const { teacherId, role = "PRIMARY" } = req.body;
+    const classData = await loadManageableClass(req, res);
+    if (!classData) return;
+
+    const { teacherId, role = "PRIMARY" } = req.body ?? {};
     const normalizedRole = classesService.normalizeRole(role);
 
-    if (!id || !teacherId) {
-      sendErrorResponse(res, 400, "Class ID and teacher ID are required");
+    if (!teacherId || typeof teacherId !== "string") {
+      sendErrorResponse(res, 400, "Teacher ID is required");
       return;
     }
 
-    const assignment = await prisma.$transaction(async (tx) => {
-      const [classData, teacher] = await Promise.all([
-        tx.class.findUnique({ where: { id } }),
-        tx.teacher.findUnique({ where: { id: teacherId } }),
-      ]);
-      if (!classData) {
-        throw new Error("CLASS_NOT_FOUND");
-      }
-      if (!teacher) {
-        throw new Error("TEACHER_NOT_FOUND");
-      }
-      const existingAssignment = await (tx as any).teacherClass.findFirst({
-        where: { teacherId, classId: id, isActive: true },
-      });
-      if (existingAssignment) {
-        throw new Error("TEACHER_ALREADY_ASSIGNED");
-      }
-      return (tx as any).teacherClass.create({
-        data: { teacherId, classId: id, role: normalizedRole, isActive: true },
-        include: {
-          teacher: {
-            include: {
-              user: { select: { id: true, name: true, email: true, avatar: true } },
-            },
-          },
-          class: { select: { id: true, name: true, subject: true } },
-        },
-      });
-    });
+    const teacher = await prisma.teacher.findUnique({ where: { id: teacherId } });
 
-    sendSuccessResponse(res, 201, "Teacher added to class successfully", assignment);
-    await cacheService.delByPrefix(`classes:stats:${id}`);
-  } catch (error) {
-    if (error instanceof Error && error.message === "CLASS_NOT_FOUND") {
-      sendErrorResponse(res, 404, "Class not found");
-      return;
-    }
-    if (error instanceof Error && error.message === "TEACHER_NOT_FOUND") {
+    if (!teacher) {
       sendErrorResponse(res, 404, "Teacher not found");
       return;
     }
-    if (error instanceof Error && error.message === "TEACHER_ALREADY_ASSIGNED") {
+
+    if (teacher.institutionId !== classData.institutionId) {
+      sendErrorResponse(res, 400, "Teacher belongs to a different institution");
+      return;
+    }
+
+    const existingAssignment = await prisma.teacherClass.findUnique({
+      where: { teacherId_classId: { teacherId, classId: classData.id } },
+    });
+
+    if (existingAssignment?.isActive) {
       sendErrorResponse(res, 409, "Teacher is already assigned to this class");
       return;
     }
+
+    const assignment = await prisma.teacherClass.upsert({
+      where: { teacherId_classId: { teacherId, classId: classData.id } },
+      update: { isActive: true, role: normalizedRole, assignedAt: new Date() },
+      create: { teacherId, classId: classData.id, role: normalizedRole, isActive: true },
+      include: {
+        teacher: { include: { user: STUDENT_USER_SELECT } },
+        class: { select: { id: true, name: true, subject: true } },
+      },
+    });
+
+    sendSuccessResponse(res, 201, "Teacher added to class successfully", assignment);
+    await cacheService.delByPrefix(`classes:stats:${classData.id}`);
+  } catch (error) {
     console.error("Add teacher to class error:", error);
     sendErrorResponse(res, 500, "Failed to add teacher to class");
   }
@@ -637,35 +635,28 @@ export const removeTeacherFromClass = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { id, teacherId } = req.params;
+    const classData = await loadManageableClass(req, res);
+    if (!classData) return;
 
-    if (!id || !teacherId) {
-      sendErrorResponse(res, 400, "Class ID and teacher ID are required");
+    const { teacherId } = req.params;
+
+    if (!teacherId) {
+      sendErrorResponse(res, 400, "Teacher ID is required");
       return;
     }
 
-    // Check if assignment exists
-    const assignment = await (prisma as any).teacherClass.findFirst({
-      where: {
-        teacherId,
-        classId: id,
-        isActive: true,
-      },
+    const result = await prisma.teacherClass.updateMany({
+      where: { teacherId, classId: classData.id, isActive: true },
+      data: { isActive: false },
     });
 
-    if (!assignment) {
+    if (result.count === 0) {
       sendErrorResponse(res, 404, "Teacher is not assigned to this class");
       return;
     }
 
-    // Soft delete - set isActive to false
-    await (prisma as any).teacherClass.update({
-      where: { id: assignment.id },
-      data: { isActive: false },
-    });
-
     sendSuccessResponse(res, 200, "Teacher removed from class successfully");
-    await cacheService.delByPrefix(`classes:stats:${id}`);
+    await cacheService.delByPrefix(`classes:stats:${classData.id}`);
   } catch (error) {
     console.error("Remove teacher from class error:", error);
     sendErrorResponse(res, 500, "Failed to remove teacher from class");
@@ -700,31 +691,23 @@ export const getClassTeachers = async (
       return;
     }
 
+    const where = { classId: id, isActive: true };
+
     const [teachers, totalCount] = await Promise.all([
-      (prisma as any).teacherClass.findMany({
-        where: { 
-          classId: id,
-          isActive: true,
-        },
+      prisma.teacherClass.findMany({
+        where,
         skip,
         take: limit,
         include: {
           teacher: {
             include: {
-              user: {
-                select: { id: true, name: true, email: true, avatar: true },
-              },
+              user: { select: { id: true, name: true, avatar: true } },
             },
           },
         },
         orderBy: { assignedAt: "desc" },
       }),
-      (prisma as any).teacherClass.count({ 
-        where: { 
-          classId: id,
-          isActive: true,
-        } 
-      }),
+      prisma.teacherClass.count({ where }),
     ]);
 
     const totalPages = Math.ceil(totalCount / limit);

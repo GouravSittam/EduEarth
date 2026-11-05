@@ -1,8 +1,16 @@
 import { Request, Response } from "express";
+import { Prisma, QuestionType } from "@prisma/client";
 import { sendResponse } from "../utils/ResponseHelpers.js";
 import { prisma } from "../prisma/client.js";
 import { parseBoundedPagination } from "../utils/pagination.js";
-import { quizzesService } from "../services/quizzes.service.js";
+import { quizzesService, sanitizeAnswers } from "../services/quizzes.service.js";
+import { recordActivity } from "../services/progress.service.js";
+import { isEducator } from "../middlewares/requireRole.js";
+import {
+  ValidationError,
+  parseOptionalBoolean,
+  parseOptionalInt,
+} from "../utils/parse.js";
 
 // Helper functions for consistent responses
 const sendSuccessResponse = (
@@ -18,9 +26,54 @@ const sendErrorResponse = (
   res: Response,
   statusCode: number,
   message: string,
-  error?: any
 ) => {
-  return sendResponse({ res, success: false, message, error, statusCode });
+  return sendResponse({
+    res,
+    success: false,
+    message,
+    error: { message },
+    statusCode,
+  });
+};
+
+const QUIZ_SUMMARY_INCLUDE = {
+  lesson: {
+    select: { id: true, title: true, module: { select: { title: true } } },
+  },
+  _count: {
+    select: {
+      questions: true,
+      attempts: true,
+    },
+  },
+} as const;
+
+const parseQuestionType = (value: unknown): QuestionType | undefined => {
+  if (value === undefined || value === null || value === "") return undefined;
+  const upper = String(value).toUpperCase();
+  if (upper in QuestionType) {
+    return QuestionType[upper as keyof typeof QuestionType];
+  }
+  throw new ValidationError(
+    `type must be one of ${Object.values(QuestionType).join(", ")}`,
+  );
+};
+
+const parseOptions = (value: unknown) => {
+  if (value === undefined) return undefined;
+  if (value === null) return Prisma.DbNull;
+  if (!Array.isArray(value) || value.some((option) => typeof option !== "string")) {
+    throw new ValidationError("options must be an array of strings");
+  }
+  return value as string[];
+};
+
+const handleValidationError = (res: Response, error: unknown) => {
+  if (error instanceof ValidationError) {
+    sendErrorResponse(res, 400, error.message);
+    return true;
+  }
+  return false;
 };
 
 /**
@@ -33,7 +86,10 @@ export const createQuiz = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { title, description, timeLimit, passingScore, ecoPoints, lessonId } = req.body;
+    const { title, description, lessonId } = req.body ?? {};
+    const timeLimit = parseOptionalInt(req.body?.timeLimit, "timeLimit", { min: 1, max: 7200 });
+    const passingScore = parseOptionalInt(req.body?.passingScore, "passingScore", { min: 0, max: 100 });
+    const ecoPoints = parseOptionalInt(req.body?.ecoPoints, "ecoPoints", { min: 0, max: 1000 });
 
     // Validate required fields
     if (!title) {
@@ -44,7 +100,7 @@ export const createQuiz = async (
     // If lessonId is provided, check if lesson exists
     if (lessonId) {
       const lesson = await prisma.lesson.findUnique({
-        where: { id: lessonId },
+        where: { id: String(lessonId) },
       });
 
       if (!lesson) {
@@ -56,28 +112,19 @@ export const createQuiz = async (
     // Create quiz
     const quiz = await prisma.quiz.create({
       data: {
-        title,
-        description,
-        timeLimit,
-        passingScore: passingScore || 70,
-        ecoPoints: ecoPoints || 20,
-        lessonId,
+        title: String(title),
+        description: description ? String(description) : null,
+        timeLimit: timeLimit ?? null,
+        passingScore: passingScore ?? 70,
+        ecoPoints: ecoPoints ?? 20,
+        lessonId: lessonId ? String(lessonId) : null,
       },
-      include: {
-        lesson: {
-          select: { id: true, title: true, module: { select: { title: true } } },
-        },
-        _count: {
-          select: {
-            questions: true,
-            attempts: true,
-          },
-        },
-      },
+      include: QUIZ_SUMMARY_INCLUDE,
     });
 
     sendSuccessResponse(res, 201, "Quiz created successfully", quiz);
   } catch (error) {
+    if (handleValidationError(res, error)) return;
     console.error("Create quiz error:", error);
     sendErrorResponse(res, 500, "Failed to create quiz");
   }
@@ -97,7 +144,7 @@ export const getAllQuizzes = async (
     const search = req.query.search as string;
 
     // Build where clause
-    const where: any = { isActive: true };
+    const where: Prisma.QuizWhereInput = { isActive: true };
     if (lessonId) {
       where.lessonId = lessonId;
     }
@@ -113,17 +160,7 @@ export const getAllQuizzes = async (
         where,
         skip,
         take: limit,
-        include: {
-          lesson: {
-            select: { id: true, title: true, module: { select: { title: true } } },
-          },
-          _count: {
-            select: {
-              questions: true,
-              attempts: true,
-            },
-          },
-        },
+        include: QUIZ_SUMMARY_INCLUDE,
         orderBy: { createdAt: "desc" },
       }),
       prisma.quiz.count({ where }),
@@ -150,6 +187,7 @@ export const getAllQuizzes = async (
 /**
  * Get a single quiz by ID
  * GET /quizzes/:id
+ * Public; answer keys are only included for educators.
  */
 export const getQuizById = async (
   req: Request,
@@ -163,25 +201,29 @@ export const getQuizById = async (
       return;
     }
 
+    const includeAnswers = isEducator(req.user);
+
     const quiz = await prisma.quiz.findUnique({
       where: { id },
       include: {
-        lesson: {
-          select: { id: true, title: true, module: { select: { title: true } } },
-        },
+        ...QUIZ_SUMMARY_INCLUDE,
         questions: {
           orderBy: { order: "asc" },
-        },
-        _count: {
           select: {
-            questions: true,
-            attempts: true,
+            id: true,
+            question: true,
+            type: true,
+            options: true,
+            points: true,
+            order: true,
+            correctAnswer: includeAnswers,
+            explanation: includeAnswers,
           },
         },
       },
     });
 
-    if (!quiz) {
+    if (!quiz || (!quiz.isActive && !includeAnswers)) {
       sendErrorResponse(res, 404, "Quiz not found");
       return;
     }
@@ -204,7 +246,11 @@ export const updateQuiz = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const { title, description, timeLimit, passingScore, ecoPoints, isActive } = req.body;
+    const { title, description } = req.body ?? {};
+    const timeLimit = parseOptionalInt(req.body?.timeLimit, "timeLimit", { min: 1, max: 7200 });
+    const passingScore = parseOptionalInt(req.body?.passingScore, "passingScore", { min: 0, max: 100 });
+    const ecoPoints = parseOptionalInt(req.body?.ecoPoints, "ecoPoints", { min: 0, max: 1000 });
+    const isActive = parseOptionalBoolean(req.body?.isActive, "isActive");
 
     if (!id) {
       sendErrorResponse(res, 400, "Quiz ID is required");
@@ -224,28 +270,21 @@ export const updateQuiz = async (
     const updatedQuiz = await prisma.quiz.update({
       where: { id },
       data: {
-        ...(title && { title }),
-        ...(description !== undefined && { description }),
+        ...(title && { title: String(title) }),
+        ...(description !== undefined && {
+          description: description === null ? null : String(description),
+        }),
         ...(timeLimit !== undefined && { timeLimit }),
-        ...(passingScore !== undefined && { passingScore }),
-        ...(ecoPoints !== undefined && { ecoPoints }),
+        ...(passingScore != null && { passingScore }),
+        ...(ecoPoints != null && { ecoPoints }),
         ...(isActive !== undefined && { isActive }),
       },
-      include: {
-        lesson: {
-          select: { id: true, title: true, module: { select: { title: true } } },
-        },
-        _count: {
-          select: {
-            questions: true,
-            attempts: true,
-          },
-        },
-      },
+      include: QUIZ_SUMMARY_INCLUDE,
     });
 
     sendSuccessResponse(res, 200, "Quiz updated successfully", updatedQuiz);
   } catch (error) {
+    if (handleValidationError(res, error)) return;
     console.error("Update quiz error:", error);
     sendErrorResponse(res, 500, "Failed to update quiz");
   }
@@ -286,20 +325,21 @@ export const deleteQuiz = async (
       return;
     }
 
-    // Check if quiz has attempts
+    // Attempts are student history; keep them and deactivate instead.
     if (existingQuiz._count.attempts > 0) {
       sendErrorResponse(
         res,
-        400,
+        409,
         "Cannot delete quiz with existing attempts. Deactivate instead."
       );
       return;
     }
 
-    // Delete the quiz (this will cascade delete questions and answers)
-    await prisma.quiz.delete({
-      where: { id },
-    });
+    // The schema has no ON DELETE CASCADE for questions, so remove them first.
+    await prisma.$transaction([
+      prisma.quizQuestion.deleteMany({ where: { quizId: id } }),
+      prisma.quiz.delete({ where: { id } }),
+    ]);
 
     sendSuccessResponse(res, 200, "Quiz deleted successfully");
   } catch (error) {
@@ -319,9 +359,13 @@ export const addQuestionToQuiz = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const { question, type, options, correctAnswer, explanation, points, order } = req.body;
+    const { question, correctAnswer, explanation } = req.body ?? {};
+    const type = parseQuestionType(req.body?.type);
+    const options = parseOptions(req.body?.options);
+    const points = parseOptionalInt(req.body?.points, "points", { min: 1, max: 100 });
+    const order = parseOptionalInt(req.body?.order, "order", { min: 0 });
 
-    if (!id || !question || !correctAnswer) {
+    if (!id || !question || correctAnswer === undefined || correctAnswer === "") {
       sendErrorResponse(res, 400, "Quiz ID, question, and correct answer are required");
       return;
     }
@@ -337,8 +381,8 @@ export const addQuestionToQuiz = async (
     }
 
     // Get the next order number if not provided
-    let questionOrder = order;
-    if (!questionOrder) {
+    let questionOrder = order ?? null;
+    if (questionOrder === null) {
       const lastQuestion = await prisma.quizQuestion.findFirst({
         where: { quizId: id },
         orderBy: { order: "desc" },
@@ -350,18 +394,19 @@ export const addQuestionToQuiz = async (
     const newQuestion = await prisma.quizQuestion.create({
       data: {
         quizId: id,
-        question,
-        type: type || "MULTIPLE_CHOICE",
-        options: options ? JSON.parse(JSON.stringify(options)) : null,
-        correctAnswer,
-        explanation,
-        points: points || 1,
+        question: String(question),
+        type: type ?? QuestionType.MULTIPLE_CHOICE,
+        ...(options !== undefined && { options }),
+        correctAnswer: String(correctAnswer),
+        explanation: explanation ? String(explanation) : null,
+        points: points ?? 1,
         order: questionOrder,
       },
     });
 
     sendSuccessResponse(res, 201, "Question added to quiz successfully", newQuestion);
   } catch (error) {
+    if (handleValidationError(res, error)) return;
     console.error("Add question to quiz error:", error);
     sendErrorResponse(res, 500, "Failed to add question to quiz");
   }
@@ -378,19 +423,23 @@ export const updateQuestionInQuiz = async (
 ): Promise<void> => {
   try {
     const { quizId, questionId } = req.params;
-    const { question, type, options, correctAnswer, explanation, points, order } = req.body;
+    const { question, correctAnswer, explanation } = req.body ?? {};
+    const type = parseQuestionType(req.body?.type);
+    const options = parseOptions(req.body?.options);
+    const points = parseOptionalInt(req.body?.points, "points", { min: 1, max: 100 });
+    const order = parseOptionalInt(req.body?.order, "order", { min: 0 });
 
     if (!quizId || !questionId) {
       sendErrorResponse(res, 400, "Quiz ID and question ID are required");
       return;
     }
 
-    // Check if question exists
+    // Check the question exists *and* belongs to this quiz
     const existingQuestion = await prisma.quizQuestion.findUnique({
       where: { id: questionId },
     });
 
-    if (!existingQuestion) {
+    if (!existingQuestion || existingQuestion.quizId !== quizId) {
       sendErrorResponse(res, 404, "Question not found");
       return;
     }
@@ -399,18 +448,22 @@ export const updateQuestionInQuiz = async (
     const updatedQuestion = await prisma.quizQuestion.update({
       where: { id: questionId },
       data: {
-        ...(question && { question }),
+        ...(question && { question: String(question) }),
         ...(type && { type }),
-        ...(options !== undefined && { options: options ? JSON.parse(JSON.stringify(options)) : null }),
-        ...(correctAnswer && { correctAnswer }),
-        ...(explanation !== undefined && { explanation }),
-        ...(points !== undefined && { points }),
-        ...(order !== undefined && { order }),
+        ...(options !== undefined && { options }),
+        ...(correctAnswer !== undefined &&
+          correctAnswer !== "" && { correctAnswer: String(correctAnswer) }),
+        ...(explanation !== undefined && {
+          explanation: explanation === null ? null : String(explanation),
+        }),
+        ...(points != null && { points }),
+        ...(order != null && { order }),
       },
     });
 
     sendSuccessResponse(res, 200, "Question updated successfully", updatedQuestion);
   } catch (error) {
+    if (handleValidationError(res, error)) return;
     console.error("Update question error:", error);
     sendErrorResponse(res, 500, "Failed to update question");
   }
@@ -433,17 +486,25 @@ export const deleteQuestionFromQuiz = async (
       return;
     }
 
-    // Check if question exists
     const existingQuestion = await prisma.quizQuestion.findUnique({
       where: { id: questionId },
+      include: { _count: { select: { answers: true } } },
     });
 
-    if (!existingQuestion) {
+    if (!existingQuestion || existingQuestion.quizId !== quizId) {
       sendErrorResponse(res, 404, "Question not found");
       return;
     }
 
-    // Delete question (this will cascade delete answers)
+    if (existingQuestion._count.answers > 0) {
+      sendErrorResponse(
+        res,
+        409,
+        "This question has already been answered by students and cannot be deleted. Deactivate the quiz instead."
+      );
+      return;
+    }
+
     await prisma.quizQuestion.delete({
       where: { id: questionId },
     });
@@ -466,21 +527,20 @@ export const submitQuizAttempt = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const { answers } = req.body;
 
     if (!req.user) {
       sendErrorResponse(res, 401, "Unauthorized request");
       return;
     }
 
-    const studentId = req.user.id;
-
-    if (!id || !answers || !Array.isArray(answers)) {
+    if (!id || !Array.isArray(req.body?.answers)) {
       sendErrorResponse(res, 400, "Quiz ID and answers array are required");
       return;
     }
 
-    // Check if quiz exists
+    const answers = sanitizeAnswers(req.body.answers);
+    const timeSpent = parseOptionalInt(req.body?.timeSpent, "timeSpent", { min: 0, max: 86_400 });
+
     const quiz = await prisma.quiz.findUnique({
       where: { id },
       include: {
@@ -488,25 +548,40 @@ export const submitQuizAttempt = async (
       },
     });
 
-    if (!quiz) {
+    if (!quiz || !quiz.isActive) {
       sendErrorResponse(res, 404, "Quiz not found");
       return;
     }
 
-    // Check if student exists
+    if (quiz.questions.length === 0) {
+      sendErrorResponse(res, 400, "This quiz has no questions yet");
+      return;
+    }
+
     const student = await prisma.student.findUnique({
-      where: { userId: studentId },
+      where: { userId: req.user.id },
     });
 
     if (!student) {
-      sendErrorResponse(res, 404, "Student not found");
+      sendErrorResponse(
+        res,
+        403,
+        "Join your school first to take quizzes and earn eco-points"
+      );
       return;
     }
 
     const { questionAnswers, totalPoints, score, isPassed } =
       quizzesService.evaluateAttempt(quiz.questions, answers, quiz.passingScore);
 
-    const attempt = await prisma.$transaction(async (tx) => {
+    const { attempt, ecoPointsAwarded, progress } = await prisma.$transaction(async (tx) => {
+      // Eco-points are awarded for the first pass only, so a quiz can't be
+      // farmed by resubmitting it.
+      const previousPass = await tx.quizAttempt.findFirst({
+        where: { quizId: id, studentId: student.id, isPassed: true },
+        select: { id: true },
+      });
+
       const createdAttempt = await tx.quizAttempt.create({
         data: {
           studentId: student.id,
@@ -514,6 +589,7 @@ export const submitQuizAttempt = async (
           score,
           totalPoints,
           isPassed,
+          timeSpent: timeSpent ?? null,
           answers: {
             create: questionAnswers,
           },
@@ -527,27 +603,25 @@ export const submitQuizAttempt = async (
         },
       });
 
-      if (isPassed) {
-        await tx.student.update({
-          where: { id: student.id },
-          data: {
-            ecoPoints: {
-              increment: quiz.ecoPoints,
-            },
-          },
-        });
-      }
+      const pointsToAward = isPassed && !previousPass ? quiz.ecoPoints : 0;
+      const updatedProgress = await recordActivity(tx, student.id, pointsToAward);
 
-      return createdAttempt;
+      return {
+        attempt: createdAttempt,
+        ecoPointsAwarded: pointsToAward,
+        progress: updatedProgress,
+      };
     });
 
     sendSuccessResponse(res, 201, "Quiz attempt submitted successfully", {
       attempt,
       score,
       isPassed,
-      ecoPointsAwarded: isPassed ? quiz.ecoPoints : 0,
+      ecoPointsAwarded,
+      progress,
     });
   } catch (error) {
+    if (handleValidationError(res, error)) return;
     console.error("Submit quiz attempt error:", error);
     sendErrorResponse(res, 500, "Failed to submit quiz attempt");
   }
@@ -570,20 +644,17 @@ export const getQuizAttempts = async (
       return;
     }
 
-    const studentId = req.user.id;
-
     if (!id) {
       sendErrorResponse(res, 400, "Quiz ID is required");
       return;
     }
 
-    // Check if student exists
     const student = await prisma.student.findUnique({
-      where: { userId: studentId },
+      where: { userId: req.user.id },
     });
 
     if (!student) {
-      sendErrorResponse(res, 404, "Student not found");
+      sendSuccessResponse(res, 200, "Quiz attempts retrieved successfully", []);
       return;
     }
 

@@ -11,6 +11,7 @@ from airflow import DAG
 from airflow.decorators import task
 from airflow.models import Variable
 from airflow.operators.python import get_current_context
+from airflow.providers.common.sql.hooks.sql import fetch_one_handler
 from airflow.providers.http.hooks.http import HttpHook
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
@@ -345,7 +346,7 @@ with DAG(
     def upsert_historical_data(
         climate_records: list[dict[str, Any]],
         enriched_news_records: list[dict[str, Any]],
-    ) -> dict[str, int]:
+    ) -> dict[str, Any]:
         postgres = PostgresHook(postgres_conn_id=POSTGRES_CONN_ID)
 
         inserted_climate = 0
@@ -385,9 +386,11 @@ with DAG(
             )
             inserted_climate += 1
 
+        new_news_urls: list[str] = []
+
         for row in enriched_news_records:
             enrichment = row.get("enrichment") or {}
-            postgres.run(
+            result = postgres.run(
                 """
                 INSERT INTO news_articles_ingested (
                     provider_record_id,
@@ -418,7 +421,11 @@ with DAG(
                     %(relevance_score)s,
                     %(payload)s::jsonb
                 )
-                ON CONFLICT (source, provider_record_id)
+                -- The same story is often syndicated across several feeds, so
+                -- the URL (also UNIQUE) is the real identity. Conflicting on
+                -- (source, provider_record_id) let a cross-feed duplicate raise
+                -- a unique violation and fail the whole run.
+                ON CONFLICT (url)
                 DO UPDATE SET
                     title = EXCLUDED.title,
                     summary = EXCLUDED.summary,
@@ -430,7 +437,9 @@ with DAG(
                     curriculum_tags = EXCLUDED.curriculum_tags,
                     relevance_score = EXCLUDED.relevance_score,
                     payload = EXCLUDED.payload,
-                    ingested_at = NOW();
+                    ingested_at = NOW()
+                -- xmax = 0 only for freshly inserted rows (not updates)
+                RETURNING (xmax = 0) AS inserted;
                 """,
                 parameters={
                     **row,
@@ -442,12 +451,17 @@ with DAG(
                     "relevance_score": enrichment.get("relevance_score"),
                     "payload": json.dumps(row["payload"]),
                 },
+                handler=fetch_one_handler,
             )
             inserted_news += 1
+            if result and result[0]:
+                new_news_urls.append(row["url"])
 
         return {
             "climate_records": inserted_climate,
             "news_records": inserted_news,
+            "new_news_records": len(new_news_urls),
+            "new_news_urls": new_news_urls,
             "total": inserted_climate + inserted_news,
         }
 
@@ -455,9 +469,17 @@ with DAG(
     def publish_realtime_outbox(
         climate_records: list[dict[str, Any]],
         enriched_news_records: list[dict[str, Any]],
+        upsert_stats: dict[str, Any],
     ) -> dict[str, int]:
         postgres = PostgresHook(postgres_conn_id=POSTGRES_CONN_ID)
         emitted = 0
+
+        # Only announce articles that are genuinely new. Re-publishing every
+        # feed entry every 10 minutes flooded connected clients.
+        new_urls = set(upsert_stats.get("new_news_urls") or [])
+        enriched_news_records = [
+            row for row in enriched_news_records if row.get("url") in new_urls
+        ]
 
         for row in climate_records:
             postgres.run(
@@ -491,7 +513,7 @@ with DAG(
 
     @task
     def track_run_stats(
-        upsert_stats: dict[str, int], outbox_stats: dict[str, int]
+        upsert_stats: dict[str, Any], outbox_stats: dict[str, int]
     ) -> None:
         postgres = PostgresHook(postgres_conn_id=POSTGRES_CONN_ID)
         context = get_current_context()
@@ -540,7 +562,7 @@ with DAG(
     news = scrape_news_rss()
     enriched_news = enrich_curriculum_content(news)
     upserted = upsert_historical_data(climate, enriched_news)
-    outbox = publish_realtime_outbox(climate, enriched_news)
+    outbox = publish_realtime_outbox(climate, enriched_news, upserted)
     run_stats = track_run_stats(upserted, outbox)
 
     ensure_contract >> [climate, news] >> enriched_news >> upserted >> outbox >> run_stats

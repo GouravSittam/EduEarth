@@ -61,18 +61,20 @@ export default function Hero() {
         className="absolute inset-0 pointer-events-none"
       />
 
-      {/* Floating particles effect */}
+      {/* Floating particles effect (deterministic values: Math.random()
+          during render differs between server and client and breaks
+          hydration) */}
       {[...Array(6)].map((_, i) => (
         <motion.div
           key={i}
           animate={{
             y: [0, -30, 0],
-            x: [0, Math.random() * 20 - 10, 0],
+            x: [0, ((i * 37) % 20) - 10, 0],
             opacity: [0.3, 0.6, 0.3],
             scale: [1, 1.2, 1],
           }}
           transition={{
-            duration: 4 + Math.random() * 2,
+            duration: 4 + (i % 3) * 0.7,
             repeat: Infinity,
             delay: i * 0.5,
             ease: "easeInOut",
@@ -271,8 +273,6 @@ export default function Hero() {
           </motion.button>
         </div>
       </motion.div>
-
-      {/* <BotComponent /> */}
     </motion.section>
   );
 }

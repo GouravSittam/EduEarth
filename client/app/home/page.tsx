@@ -9,6 +9,7 @@ const HowItWork = dynamic(() => import("@/components/HowItWork"));
 const SchoolAndFamily = dynamic(() => import("@/components/SchoolFamily"));
 const Join = dynamic(() => import("@/components/Join"));
 const FAQ = dynamic(() => import("@/components/FAQ"));
+const EcoAssistant = dynamic(() => import("@/components/bot"));
 
 export default function HomePage() {
   return (
@@ -22,6 +23,7 @@ export default function HomePage() {
       <Join />
       <FAQ />
       <Footer />
+      <EcoAssistant />
     </div>
   );
 }
