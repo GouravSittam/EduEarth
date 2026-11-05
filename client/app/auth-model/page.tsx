@@ -182,8 +182,24 @@ function AuthPageContent() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, isLoading, signIn, signUp, sendMagicLink, signInWithGoogle } =
-    useAuth();
+  const {
+    user,
+    isLoading,
+    authUnavailable,
+    signIn,
+    signUp,
+    sendMagicLink,
+    signInWithGoogle,
+  } = useAuth();
+
+  /** Turn low-level network failures into something a user can act on. */
+  const describeError = (err: unknown, fallback: string) => {
+    const message = err instanceof Error ? err.message : "";
+    if (/failed to fetch|networkerror|load failed/i.test(message)) {
+      return "Can't reach the sign-in service right now. Check your internet connection and try again in a moment.";
+    }
+    return message || fallback;
+  };
 
   const callbackError = useMemo(
     () => searchParams.get("error_description") ?? searchParams.get("error") ?? "",
@@ -222,7 +238,7 @@ function AuthPageContent() {
       await signIn({ email, password });
       router.push("/home");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Sign in failed");
+      setError(describeError(err, "Sign in failed"));
     } finally {
       setLoading(false);
     }
@@ -265,7 +281,7 @@ function AuthPageContent() {
 
       router.push("/home");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Sign up failed");
+      setError(describeError(err, "Sign up failed"));
     } finally {
       setLoading(false);
     }
@@ -294,7 +310,7 @@ function AuthPageContent() {
         "Magic link sent. Open your email and click the link to continue."
       );
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Magic link failed");
+      setError(describeError(err, "Magic link failed"));
     } finally {
       setLoading(false);
     }
@@ -310,7 +326,7 @@ function AuthPageContent() {
         activeTab === "signup" ? { fullName, role } : undefined
       );
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Google sign in failed");
+      setError(describeError(err, "Google sign in failed"));
       setLoading(false);
     }
   };
@@ -488,6 +504,12 @@ function AuthPageContent() {
               </div>
 
               <div className="mt-5 space-y-3">
+                {authUnavailable && !error ? (
+                  <StatusNotice
+                    tone="error"
+                    message="The sign-in service is unreachable right now, so you can't sign in. Please try again later."
+                  />
+                ) : null}
                 {error ? <StatusNotice tone="error" message={error} /> : null}
                 {successMessage ? (
                   <StatusNotice tone="success" message={successMessage} />

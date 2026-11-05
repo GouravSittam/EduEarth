@@ -9,7 +9,11 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import type { Session, User as SupabaseUser } from "@supabase/supabase-js";
+import {
+  isAuthRetryableFetchError,
+  type Session,
+  type User as SupabaseUser,
+} from "@supabase/supabase-js";
 import { authApi } from "@/lib/api";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
 import type { User } from "@/lib/types";
@@ -47,6 +51,8 @@ type AuthContextValue = {
   authUser: SupabaseUser | null;
   session: Session | null;
   isLoading: boolean;
+  /** True when the Supabase auth server can't be reached at all. */
+  authUnavailable: boolean;
   signIn: (input: SignInInput) => Promise<void>;
   signUp: (input: SignUpInput) => Promise<SignUpResult>;
   sendMagicLink: (input: MagicLinkInput) => Promise<void>;
@@ -131,6 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authUser, setAuthUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [authUnavailable, setAuthUnavailable] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -219,7 +226,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const {
           data: { session: initialSession },
+          error: sessionError,
         } = await supabase.auth.getSession();
+
+        // Supabase unreachable (offline, wrong URL, or project paused):
+        // stop the background token-refresh loop, which would otherwise
+        // retry forever and flood the console with "Failed to fetch".
+        if (sessionError && isAuthRetryableFetchError(sessionError)) {
+          await supabase.auth.stopAutoRefresh();
+          console.warn(
+            `EduEarth: can't reach Supabase auth at ${process.env.NEXT_PUBLIC_SUPABASE_URL}. ` +
+              "Check your connection, and that the Supabase project exists and isn't paused.",
+          );
+          if (isMounted) {
+            setAuthUnavailable(true);
+            setUser(null);
+            setAuthUser(null);
+            setSession(null);
+            setIsLoading(false);
+          }
+          return;
+        }
 
         await syncFromSession(initialSession);
       } catch (error) {
@@ -391,6 +418,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       authUser,
       session,
       isLoading,
+      authUnavailable,
       signIn,
       signUp,
       sendMagicLink,
@@ -403,6 +431,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       authUser,
       session,
       isLoading,
+      authUnavailable,
       signIn,
       signUp,
       sendMagicLink,
