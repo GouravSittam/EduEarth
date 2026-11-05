@@ -7,7 +7,7 @@ import type {
   LeaderboardEntry,
   User,
 } from "./types";
-import { getSupabaseBrowserClient } from "./supabase";
+import { checkSupabaseReachable, getSupabaseBrowserClient } from "./supabase";
 import { SERVER_URL } from "./serverUrl";
 
 const BASE_URL = SERVER_URL;
@@ -30,6 +30,12 @@ const getAuthHeaders = async () => {
   });
 
   if (typeof window === "undefined") {
+    return headers;
+  }
+
+  // If Supabase is down, call the API anonymously rather than creating a
+  // client that would spam "Failed to fetch" retrying token refreshes.
+  if (!(await checkSupabaseReachable())) {
     return headers;
   }
 

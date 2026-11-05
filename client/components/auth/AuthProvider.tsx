@@ -12,10 +12,15 @@ import {
 import {
   isAuthRetryableFetchError,
   type Session,
+  type SupabaseClient,
   type User as SupabaseUser,
 } from "@supabase/supabase-js";
 import { authApi } from "@/lib/api";
-import { getSupabaseBrowserClient } from "@/lib/supabase";
+import {
+  checkSupabaseReachable,
+  getReadySupabaseClient,
+  getSupabaseBrowserClient,
+} from "@/lib/supabase";
 import type { User } from "@/lib/types";
 
 type SignInInput = {
@@ -141,21 +146,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let isMounted = true;
-    let supabase;
+    let unsubscribe: (() => void) | null = null;
 
-    try {
-      supabase = getSupabaseBrowserClient();
-    } catch (error) {
-      console.error("Supabase auth is not configured in the client", error);
-
-      if (isMounted) {
-        setIsLoading(false);
-      }
-
-      return () => {
-        isMounted = false;
-      };
-    }
+    const markUnavailable = () => {
+      if (!isMounted) return;
+      setAuthUnavailable(true);
+      setUser(null);
+      setAuthUser(null);
+      setSession(null);
+      setIsLoading(false);
+    };
 
     const applyPendingProfileDraft = async (serverUser: User) => {
       const pendingProfileDraft = readPendingProfileDraft();
@@ -223,28 +223,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const initializeAuth = async () => {
+      // Probe first: creating the client while Supabase is unreachable makes
+      // supabase-js log "Failed to fetch" and retry token refreshes forever.
+      if (!(await checkSupabaseReachable())) {
+        markUnavailable();
+        return;
+      }
+
+      if (!isMounted) return;
+
+      let supabase: SupabaseClient;
+      try {
+        supabase = getSupabaseBrowserClient();
+      } catch (error) {
+        console.error("Supabase auth is not configured in the client", error);
+        if (isMounted) setIsLoading(false);
+        return;
+      }
+
+      subscribe(supabase);
+
       try {
         const {
           data: { session: initialSession },
           error: sessionError,
         } = await supabase.auth.getSession();
 
-        // Supabase unreachable (offline, wrong URL, or project paused):
-        // stop the background token-refresh loop, which would otherwise
-        // retry forever and flood the console with "Failed to fetch".
+        // Supabase went away after the probe: stop the background refresh
+        // loop instead of letting it retry forever.
         if (sessionError && isAuthRetryableFetchError(sessionError)) {
           await supabase.auth.stopAutoRefresh();
-          console.warn(
-            `EduEarth: can't reach Supabase auth at ${process.env.NEXT_PUBLIC_SUPABASE_URL}. ` +
-              "Check your connection, and that the Supabase project exists and isn't paused.",
-          );
-          if (isMounted) {
-            setAuthUnavailable(true);
-            setUser(null);
-            setAuthUser(null);
-            setSession(null);
-            setIsLoading(false);
-          }
+          markUnavailable();
           return;
         }
 
@@ -261,11 +270,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    void initializeAuth();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, nextSession) => {
+    const subscribe = (supabase: SupabaseClient) => {
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((event, nextSession) => {
       // initializeAuth() already handles the initial session.
       if (event === "INITIAL_SESSION") {
         return;
@@ -291,11 +299,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         });
       }, 0);
-    });
+      });
+
+      unsubscribe = () => subscription.unsubscribe();
+    };
+
+    void initializeAuth();
 
     return () => {
       isMounted = false;
-      subscription.unsubscribe();
+      unsubscribe?.();
     };
   }, []);
 
@@ -316,7 +329,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session]);
 
   const signIn = useCallback(async ({ email, password }: SignInInput) => {
-    const supabase = getSupabaseBrowserClient();
+    const supabase = await getReadySupabaseClient();
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -333,7 +346,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fullName,
     role,
   }: SignUpInput): Promise<SignUpResult> => {
-    const supabase = getSupabaseBrowserClient();
+    const supabase = await getReadySupabaseClient();
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -361,7 +374,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     role,
     shouldCreateUser,
   }: MagicLinkInput) => {
-    const supabase = getSupabaseBrowserClient();
+    const supabase = await getReadySupabaseClient();
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
@@ -382,7 +395,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signInWithGoogle = useCallback(async (input?: GoogleInput) => {
-    const supabase = getSupabaseBrowserClient();
+    const supabase = await getReadySupabaseClient();
     savePendingProfileDraft(input);
 
     const { error } = await supabase.auth.signInWithOAuth({
@@ -399,7 +412,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
-    const supabase = getSupabaseBrowserClient();
+    const supabase = await getReadySupabaseClient();
     const { error } = await supabase.auth.signOut();
 
     if (error) {
